@@ -1,0 +1,144 @@
+#########################
+## 게시판 등록방식
+#########################
+고려사항: 
+게시물을 작성할때 파일을 문서삽입한다
+최초로 올릴때 파일을 삽입/삭제를 반복할수 있다
+편집시에도 삽입/삭제가 반복된다.
+편집시 다른 편집물의 링크를 사용한다.
+삭제시 다른 편집물이 내가 최초 게시한 파일링크를 사용할 수도 있다
+편집작업중 로그아웃 또는 브라우저를 닫을수있다.
+여러 창 또는 브라우저로 편집작업을 할수있다.
+
+처리방안: 
+클랜징처리
+
+* 클랜징:
+ 미완료 컨텐츠의 파일을 지워야 한다.
+ -> 내가 등록한 fileInfo 중 status=N인데 updatedDtm이 1일 이상 소요한것은 삭제
+
+* 최초등록: 
+파일삽입시 내 계정으로 업로드 및 임시 등록 fileInfo.status=N
+콘텐츠 등록할때 
+최종 파일 목록 수집하고 서버에 등록 fileInfo.status=C
+fileReference.insert
+- 삭제파일 목록 삭제  delete fileInfo
+
+* 편집을 취소하는 경우:
+작업하며 등록했던 파일을 모두 삭제
+
+* 수정하는 경우: 
+기 등록된 파일중 삭제대상은 update.deleteYn=Y
+
+* 파일삭제
+이미 등록한 파일은 링크등으로 사용될수가 있고 update.deleteYn=‘Y’개념이라 삭제하지 않는다.
+운영자가 콘텐츠강제삭제
+등록완료전 임시업로드인 경우 삭제(fileInfo.status=N)
+
+게시물을 작성시 첨부파일을 등록한다.
+처리과정은 삽입파일과 동일하다.
+첨부물도 게시물에 링크가 가능
+
+ 게시물은 삭제시 delete=Y로 처리
+ 관련파일도 delete=Y로 처리
+
+게시물 등록시 embed파일은 우선 업로드
+첨부파일도 우선 업로드
+
+게시물 편집하는 동안 등록할 embed파일, 첨부파일목록
+취소할 embed/첨부파일목록을 관리한다.
+게시물 저장시 취소목록을 삭제, 등록파일을 등록확정한다.(상태값 완료)
+
+게시물 저장/삭제시 
+내가 업로드후 저장안한 파일중 일정기간 지난 파일들을 삭제한다.
+=> 콘텐츠작성중 취소한 경우
+   콘텐츠 삽입파일 추가후 내용변경한 경우
+
+** 삭제관련
+ 콘텐츠 삭제는 기본적으로 update.delete_yn='Y'이다.
+ 실제 콘텐츠 삭제 delete from은 운영자만 가능 --> 강제 삭제
+ 파일 삭제도 기본적으로 일반삭제(delete_yn='Y')인 경우 실제 삭제는 없다
+ 실제 삭제는 
+ 1. 운영자삭제 ==> 추후 고려
+ 2. 최초 업로드시 완료되지 않은 경우(status=N) 삭제
+
+저장폴더명:
+- 사용자 프로파일
+/files/upload/profile/yyyymmdd
+- 사용자 아바타
+/files/upload/avatar/yyyymmdd
+- 사용자 
+/files/upload/board_embed/yyyymmdd
+
+/files/upload/board_add/yyyymmdd
+
+
+파일생성명
+=> {file_type}_{userid | post id}_{file id}.xxx
+ file_type:
+ - prof 프로파일 사진
+ - avtr 아바타 이미지
+ - embd 콘텐츠 내부파일
+ - addf 첨부파일
+ 
+content cancel
+ registerId, fileList, contId=0
+content media cancel
+ 
+
+add file    
+upload file
+ => add fileInfo   status=N
+ => add fileRef refId=0, status=N
+ 
+ - 저장시 url추출-> fileIdListToAdd fileIdListToDelete
+save content
+  contentId, fileIdList
+  
+  for fId in fileIdListToAdd
+	  if fileRef.find(contId, fId, userId)
+		fileRef.setStatusDone
+		fileInfo.setStatusDone
+	  if fileRef.find(0, fId, userId)
+		fileRef.set(contId, status=C)
+		fileInfo.setStatusDone
+
+  for fId in fileIdListToDelete
+	  if fileRef.find(contId or 0, fId, userId)
+		fileRef.delete(contId or 0, fId, userId)
+		if fileRef.count == 0
+			fileInfo.delete(fId)
+			file remove
+
+  -- 내가 등록한 파일 클랜징 
+  fileRef.find(status=N, userId, expiredDate)
+	fileRef.delete(id)
+	if fileRef.find(fId).count==0
+		fileInfo.delete(fId)
+		file remove
+		
+		
+  fileInfo.find(status=N, userId, expiredDate)
+	fileInfo.delete(fId)
+	file remove
+	https://mail.naver.com/write/image/path/?attachID=R-YlKAgZKAUTKAErBqbm1405W4e57qEqKxtmFograAMdFg..&cid=8fa8d3b2d027467350d85301989de@cweb014.nm.nfra.io
+	https://mail.google.com/mail/u/0?ui=2&ik=386c761252&attid=0.1.1&permmsgid=msg-f:1677098939480102788&th=174640998ce55784&view=fimg&sz=s0-l75-ft&attbid=ANGjdJ90O6vlrvQQvXuZFmmL6nfAAIuHndcBOFqw2LZ2aN6_2VJXMVHC2Lr135lHRGCW9rg3tn-l6rJp-Pq9qXFP-kyDoNRF-25_dBZ_idAeuKW-6YarX8_HzzSAU2o&disp=emb
+delete content
+  
+  if fileRef.find(fileId) in fileIdList
+	fileRef.update(contId or 0, fId, userId) deleteYN=Y
+	if fileRef.count == 0
+		fileInfo.update(fId) deleteYN=Y
+		file remove
+  content.update deleteYN=Y
+  
+force delete content ==> 관리자 권한
+  if fileRef.find(fileId) in fileIdList
+	fileRef.delete(contId or 0, fId, userId)
+	if fileRef.count == 0
+		fileInfo.delete(fId)
+		file remove
+  content.delete
+  
+expired_date==>1day
+  fileRef.		

@@ -1,0 +1,119 @@
+package com.gencode.issuetool.ctrl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.gencode.issuetool.service.CommonInfoService;
+import com.gencode.issuetool.service.UserAccountService;
+import com.gencode.issuetool.service.UserProfileService;
+import com.gencode.issuetool.config.JwtTokenProvider;
+import com.gencode.issuetool.etc.ReturnCode;
+import com.gencode.issuetool.exception.ApplicationException;
+import com.gencode.issuetool.exception.TooManyRowException;
+import com.gencode.issuetool.io.BaseRequestObj;
+import com.gencode.issuetool.io.PageRequest;
+import com.gencode.issuetool.io.PageResultObj;
+import com.gencode.issuetool.io.ResultObj;
+import com.gencode.issuetool.obj.BizInfo;
+import com.gencode.issuetool.obj.CommonCode;
+import com.gencode.issuetool.obj.FileInfo;
+import com.gencode.issuetool.obj.NoticeBoardEx;
+import com.gencode.issuetool.obj.UserInfo;
+
+@RestController
+@RequestMapping("/common")
+@CrossOrigin(origins = "${cors_url}")
+public class CommonInfoController {
+
+	private final static Logger logger = LoggerFactory.getLogger(CommonInfoController.class);
+	
+	@Autowired
+	private CommonInfoService commonInfoService;
+
+	@RequestMapping("/list/{lang}") 
+	ResultObj<List<CommonCode>> getCommonCodeList(@PathVariable(name="lang") String lang) {
+		try {
+			Optional<List<CommonCode>> list = commonInfoService.loadAll(lang);
+			if (list.isPresent()) {
+				return new ResultObj<List<CommonCode>>(ReturnCode.SUCCESS, list.get());
+			} else {
+				return ResultObj.<List<CommonCode>>dataNotFound();
+			}
+
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		}
+	}
+	
+	@RequestMapping(method=RequestMethod.POST, value="/search/{lang}")
+	public ResultObj<List<CommonCode>> searchCommoncode(@PathVariable(name="lang") String lang,
+			@RequestBody Map<String, String> map) {
+		try {
+			Optional<List<CommonCode>> list = commonInfoService.search(lang, map);
+			if (list.get().size() == 0) {
+				return new ResultObj<List<CommonCode>>(ReturnCode.DATA_NOT_FOUND, null);
+			} else {
+				return new ResultObj<List<CommonCode>>(ReturnCode.SUCCESS, list.get());
+			}
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		}
+	}
+
+	@RequestMapping("/bizInfo/list/{lang}") 
+	ResultObj<List<BizInfo>> getBizInfoList(@PathVariable(name="lang") String lang) {
+		try {
+			Optional<List<BizInfo>> list = commonInfoService.loadAllBizInfo(lang);
+			if (list.isPresent()) {
+				return new ResultObj<List<BizInfo>>(ReturnCode.SUCCESS, list.get());
+			} else {
+				return ResultObj.<List<BizInfo>>dataNotFound();
+			}
+
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		}
+	}
+	
+	@RequestMapping(method=RequestMethod.POST, value="/bizInfo/search/{lang}")
+	public ResultObj<List<BizInfo>> searchBizInfo(@PathVariable(name="lang") String lang,
+			@RequestBody Map<String, String> map) {
+		try {
+			Optional<List<BizInfo>> list = commonInfoService.searchBizInfo(lang, map);
+			if (list.get().size() == 0) {
+				return new ResultObj<List<BizInfo>>(ReturnCode.DATA_NOT_FOUND, null);
+			} else {
+				return new ResultObj<List<BizInfo>>(ReturnCode.SUCCESS, list.get());
+			}
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		}
+	}
+}
