@@ -129,6 +129,12 @@ public enum Constant {
 	AUTH_FAIL_BUTTON_KO("One Planner 열기"),
 	AUTH_FAIL_BUTTON_EN("Open One Planner"),
 
+	/* 화재방호 대시보드*/
+	WP_DEFAULT_MAIN("default_main"),
+	WP_FACIL_MAIN_9("facil_main_9"),
+	WP_FACIL_MAIN_10("facil_main_10"),
+	WP_IOT_MAIN_9("iot_main_9"),
+	WP_IOT_MAIN_10("iot_main_10"),
 	;
 	private Constant(String str) {
 		value = str;

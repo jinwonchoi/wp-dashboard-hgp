@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,6 +41,12 @@ public class JwtTokenProvider {
 	@Value("${security.jwt.token.expire-length:3600000}")
 	private long validityInMilliseconds = 3600000; // 1h
 
+//	@Value("${security.jwt.token.expire-length:10000}")
+//	private long validityInMilliseconds = 10000; // 10초
+
+	@Value("${security.jwt.token.refresh.expire-length:3600000}")
+	private long validityForRefreshInMilliseconds = 3600000; // 1h
+
 	@Autowired
 	private MyUserDetailsService userDetailsService;
 	
@@ -60,6 +67,23 @@ public class JwtTokenProvider {
 	        .signWith(SignatureAlgorithm.HS256, secretKey)//
 	        .compact();
 	}
+
+	public String createRefreshToken(Claims claims, String role) {
+	    claims.put("roles", role);
+	    Date now = new Date();
+	    Date validity = new Date(now.getTime() + validityForRefreshInMilliseconds);
+	    return Jwts.builder()//
+	        .setClaims(claims)//
+	        .setIssuedAt(now)//
+	        .setExpiration(validity)//
+	        .signWith(SignatureAlgorithm.HS256, secretKey)//
+	        .compact();
+	}
+	public String createRefreshToken(String username, String role) {
+	    Claims claims = Jwts.claims().setSubject(username);
+	    return createRefreshToken(claims, role);
+	}
+
 	
 	public Authentication getAuthentication(String token) {
 	    UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token));
@@ -74,7 +98,7 @@ public class JwtTokenProvider {
 	public String getUsername(String token) {
 	    return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
 	}
-	
+		
 	public String resolveToken(HttpServletRequest req) {
 	    String bearerToken = req.getHeader("Authorization");
 	    String userAgent = req.getHeader("user-agent");
@@ -112,20 +136,24 @@ public class JwtTokenProvider {
 	         */
         } catch (SignatureException ex) {
             logger.error("Invalid JWT signature");
-        } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
+            throw new BadCredentialsException("INVALID_CREDENTIALS", ex);
+//        } catch (MalformedJwtException ex) {
+//            logger.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
             logger.error("Expired JWT token");
+            throw ex;
         } catch (UnsupportedJwtException ex) {
             logger.error("Unsupported JWT token");
+            throw new BadCredentialsException("INVALID_CREDENTIALS", ex);
             //res.setContentType(type);
         } catch (IllegalArgumentException ex) {
             logger.error("JWT claims string is empty.");
+            throw new BadCredentialsException("INVALID_CREDENTIALS", ex);
         }   
 //	        
 //	    } catch (JwtException | IllegalArgumentException e) {
 //	        throw new JwtException("Expired or invalid JWT token");
 //	    }
-	    return false;
+	    //return false;
 	}
 }

@@ -1,11 +1,14 @@
 package com.gencode.issuetool.ctrl;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -32,6 +35,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gencode.issuetool.service.LoginHistoryService;
 import com.gencode.issuetool.service.MyUserDetailsService;
+
+import io.jsonwebtoken.impl.DefaultClaims;
+
 import com.gencode.issuetool.config.JwtTokenProvider;
 import com.gencode.issuetool.dao.LoginHistoryDao;
 import com.gencode.issuetool.dao.LoginUserDao;
@@ -103,16 +109,15 @@ public class AuthController {
 	}
 
 	@RequestMapping(method=RequestMethod.POST, value="/refreshToken")
-	ResultObj<AuthUserInfo> refreshToken(@RequestBody UserInfo userInfo) {
+	ResultObj<String> refreshToken(HttpServletRequest req, @RequestBody UserInfo userInfo) {
 		try {
-			logger.info(userInfo.toString());
-			String loginId = userInfo.getLoginId();
-			Optional<UserInfo> returnUser = userService.load(loginId);
-			String token = jwtTokenProvider.createToken(loginId, "user");
-			AuthUserInfo authUserInfo = new AuthUserInfo(returnUser.get(), token);
-			loginHistoryService.register(returnUser.get());
-			ResultObj<AuthUserInfo> resultObj = ResultObj.success();
-			resultObj.setItem(authUserInfo);
+			DefaultClaims claims = (DefaultClaims)req.getAttribute("claims");
+			
+			
+			Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
+			String token = jwtTokenProvider.createRefreshToken(claims, expectedMap.get("sub").toString());
+			ResultObj<String> resultObj = ResultObj.success();
+			resultObj.setItem(token);
 			return resultObj;
 		} catch (AuthenticationException au) {
 			logger.error(String.format("refreshToken error: loginId[%s]", userInfo.getLoginId()));
@@ -121,6 +126,14 @@ public class AuthController {
 			logger.error("normal error", e);
 			return ResultObj.errorUnknown();
 		}
+	}
+	
+	public Map<String, Object> getMapFromIoJsonwebtokenClaims(DefaultClaims claims) {
+		Map<String, Object> expectedMap = new HashMap<String, Object>();
+		for (Entry<String, Object>entry: claims.entrySet()) {
+			expectedMap.put(entry.getKey(), entry.getValue());
+		}
+		return expectedMap;
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/logout")

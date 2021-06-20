@@ -1,7 +1,7 @@
 package com.gencode.issuetool.etc;
 
 public enum UserRole {
-    AGENT("O"), MANAGER("M"), ADMIN("A");
+    USER("U"), MANAGER("M"), ADMIN("A");
 	private UserRole(String str) {
 		value = str;
 	}

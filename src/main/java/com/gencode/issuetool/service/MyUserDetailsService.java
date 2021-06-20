@@ -55,7 +55,7 @@ public class MyUserDetailsService implements UserDetailsService {
 	private UserDetails toUserDetails(UserInfo userInfo) {
 		return org.springframework.security.core.userdetails.User.withUsername(userInfo.getLoginId())
 				.password(userInfo.getPasswd())
-				.authorities(userInfo.getRole()).build();
+				.authorities(userInfo.getLevel()).build();
 	}
 	
 	public Optional<UserInfo> load(String loginId) {

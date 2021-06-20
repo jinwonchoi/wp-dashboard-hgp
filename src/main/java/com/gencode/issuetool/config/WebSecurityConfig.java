@@ -94,18 +94,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/auth/login").permitAll()
         .antMatchers("/auth/register").permitAll()
         .antMatchers("/auth/user/**").permitAll()
+        .antMatchers("/auth/refreshToken").permitAll()
         .antMatchers("/user/profile/register").permitAll()
         .antMatchers("/error/**").permitAll()
-        .antMatchers("/nexmo/**").permitAll()
-        .antMatchers("/chatsimul/**").permitAll() 
-        .antMatchers("/chatapp/**").permitAll() 
+        .antMatchers("/fmon/**").permitAll() 
         .antMatchers("/powerplant/**").permitAll() 
-        .antMatchers("/user/**","/auth/refreshToken").hasAnyAuthority(UserRole.AGENT.get(), 
+        .antMatchers("/user/**").hasAnyAuthority(UserRole.USER.get(), 
         		UserRole.MANAGER.get(),
         		UserRole.ADMIN.get()).anyRequest().authenticated()
-        .antMatchers("/dashboard/**").hasAnyAuthority(UserRole.AGENT.get(),UserRole.MANAGER.get(),UserRole.ADMIN.get()).anyRequest().authenticated()
-        .antMatchers("/pwrplant/**").hasAnyAuthority(UserRole.AGENT.get(),UserRole.MANAGER.get(),UserRole.ADMIN.get()).anyRequest().authenticated()
-        .antMatchers("/chat/**").hasAnyAuthority(UserRole.AGENT.get(), 
+        .antMatchers("/dashboard/**").hasAnyAuthority(UserRole.USER.get(),UserRole.MANAGER.get(),UserRole.ADMIN.get()).anyRequest().authenticated()
+        .antMatchers("/chat/**").hasAnyAuthority(UserRole.USER.get(), 
         		UserRole.MANAGER.get(),
         		UserRole.ADMIN.get()).anyRequest().authenticated()
         .antMatchers("/admin/**").hasAuthority(UserRole.ADMIN.get()).anyRequest().authenticated()

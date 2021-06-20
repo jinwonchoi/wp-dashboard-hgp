@@ -26,8 +26,8 @@ import com.gencode.issuetool.obj.NoticeBoardEx;
 
 @Component
 public class NoticeBoardDaoImpl extends AbstractDaoImpl implements NoticeBoardDao {
-	final String queryStr = "select id,title,content,register_id,updated_dtm,created_dtm,post_type,post_level,content_type,ref_id, delete_yn, comment_cnt from notice_board where delete_yn='N' ";
-	final String queryStrEx = "select nb.id,nb.title,nb.content,nb.register_id,nb.updated_dtm,nb.created_dtm,nb.post_type,nb.post_level,nb.content_type,nb.ref_id, nb.delete_yn, nb.comment_cnt " + 
+	final String queryStr = "select id,title,content,register_id,updated_dtm,created_dtm,post_type,post_level,content_type,ref_id, delete_yn, comment_cnt, read_cnt from notice_board where delete_yn='N' ";
+	final String queryStrEx = "select nb.id,nb.title,nb.content,nb.register_id,nb.updated_dtm,nb.created_dtm,nb.post_type,nb.post_level,nb.content_type,nb.ref_id, nb.delete_yn, nb.comment_cnt, nb.read_cnt " + 
 			" , frt.addfile_cnt, frt.addfile_type " +
 			 ObjMapper.USER_INFO_LIST +
 			"  from notice_board nb " + 
@@ -89,8 +89,15 @@ public class NoticeBoardDaoImpl extends AbstractDaoImpl implements NoticeBoardDa
 				"ref_id      =:refId, "+
 				"delete_yn   =:deleteYn, "+
 				"comment_cnt =:commentCnt "+
+				"read_cnt =:readCnt "+
 				"WHERE id = :id"
 				,new BeanPropertySqlParameterSource(t));
+	}
+
+	@Override
+	public void incReadCnt(long id) {
+		namedParameterJdbcTemplate.update("UPDATE notice_board SET read_cnt = (read_cnt+1) ,updated_dtm =NOW(3)  where id = :id",
+				new MapSqlParameterSource("id", id));
 	}
 
 //	@Override
@@ -146,6 +153,7 @@ public class NoticeBoardDaoImpl extends AbstractDaoImpl implements NoticeBoardDa
 		obj.setRefId(resultSet.getLong("REF_ID"));
 		obj.setDeleteYn(resultSet.getString("DELETE_YN"));
 		obj.setCommentCnt(resultSet.getInt("COMMENT_CNT"));
+		obj.setReadCnt(resultSet.getInt("READ_CNT"));
 		obj.setUpdatedDtm(Utils.DtToStr(resultSet.getTimestamp("UPDATED_DTM")));
 		obj.setCreatedDtm(Utils.DtToStr(resultSet.getTimestamp("CREATED_DTM")));
 		return obj;
@@ -164,6 +172,8 @@ public class NoticeBoardDaoImpl extends AbstractDaoImpl implements NoticeBoardDa
 		obj.setRefId(resultSet.getLong("REF_ID"));
 		obj.setDeleteYn(resultSet.getString("DELETE_YN"));
 		obj.setCommentCnt(resultSet.getInt("COMMENT_CNT"));
+		obj.setCommentCnt(resultSet.getInt("COMMENT_CNT"));
+		obj.setReadCnt(resultSet.getInt("READ_CNT"));
 		obj.setAddFileCnt(resultSet.getInt("ADDFILE_CNT"));
 		obj.setAddFileType(resultSet.getString("ADDFILE_TYPE"));
 		obj.setUpdatedDtm(Utils.DtToStr(resultSet.getTimestamp("UPDATED_DTM")));

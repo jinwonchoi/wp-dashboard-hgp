@@ -12,40 +12,38 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller 
 public class Html5PathsController { 
-
+//
+//    @RequestMapping( method = {RequestMethod.OPTIONS, RequestMethod.GET}, 
+//    		path = {"/chatsimul/pages/**",
+//    				"/chatsimul/apps/**",
+//    		} )
+//    public String forwardChatSimulPaths() { 
+//        return "forward:/chatsimul/index.html"; 
+//    } 
+//
     @RequestMapping( method = {RequestMethod.OPTIONS, RequestMethod.GET}, 
-    		path = {"/chatsimul/pages/**",
-    				"/chatsimul/apps/**",
-    		} )
-    public String forwardChatSimulPaths() { 
-        return "forward:/chatsimul/index.html"; 
-    } 
-
-    @RequestMapping( method = {RequestMethod.OPTIONS, RequestMethod.GET}, 
-    		path = { "/chatapp/apps/**"
-    				,"/chatapp/dashboard"
-    				,"/chatapp/dashboard/**"
-    				,"/chatapp/user"
-    				,"/chatapp/user/**"
-    				,"/chatapp/pages"
-    				,"/chatapp/pages/**"
-    				,"/chatapp/callback"
+    		path = {
+    				"/fmon/login"
+    				,"/fmon/apps"
+    				,"/fmon/apps/**"
+    				,"/fmon/default"
+    				,"/fmon/dashboard"
+    				,"/fmon/dashboard/**"
+    				,"/fmon/notice-board"
+    				,"/fmon/notice-board/**"
+    				,"/fmon/account"
+    				,"/fmon/account/**"
+    				,"/fmon/admin"
+    				,"/fmon/admin/**"
+    				,"/fmon/main"
+    				,"/fmon/main/**"
+    				,"/fmon/stats"
+    				,"/fmon/stats/**"
+    				,"/fmon/etc"
+    				,"/fmon/etc/**"
     		})
     public String forwardChatAppPaths() { 
-        return "forward:/chatapp"; 
+        return "forward:/fmon"; 
     }
-    @RequestMapping( method = {RequestMethod.OPTIONS, RequestMethod.GET}, 
-    		path = { "/powerplant/apps/**"
-    				,"/powerplant/dashboard"
-    				,"/powerplant/dashboard/**"
-    				,"/powerplant/user"
-    				,"/powerplant/user/**"
-    				,"/powerplant/pages"
-    				,"/powerplant/pages/**"
-    				,"/powerplant/callback"
-    		})
-    public String forwardPowerPlantPaths() { 
-        return "forward:/powerplant"; 
-    } 
 
 }

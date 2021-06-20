@@ -222,7 +222,12 @@ public class UserAccountService {
 	@Transactional
 	public Optional<UserInfo> update(UserInfo userInfo) throws Exception {
 		if (userInfo.getPasswd()!=null&&!userInfo.getPasswd().trim().equals("")) {
-			userInfo.setPasswd(passwordEncoder.encode(userInfo.getPasswd()));
+			//TODO:		
+			if (passwordEncodingUse.equals("yes")) {
+				userInfo.setPasswd(passwordEncoder.encode(userInfo.getPasswd()));
+			} else {
+				userInfo.setPasswd(userInfo.getPasswd());
+			}
 		}
 		userInfoDao.update(userInfo);
 		return userInfoDao.load(userInfo.getId());

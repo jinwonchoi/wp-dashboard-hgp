@@ -24,7 +24,7 @@ public class AppConfig implements WebMvcConfigurer {
 //        registry.addViewController("/").setViewName("index");
 //        registry.addViewController("/login").setViewName("login");
 //        registry.addViewController("/denied").setViewName("denied");
-      registry.addViewController("/powerplant").setViewName("forward:/powerplant/index.html");
+      registry.addViewController("/fmon").setViewName("forward:/fmon/index.html");
     }
 
 //    @Bean
@@ -50,7 +50,7 @@ public class AppConfig implements WebMvcConfigurer {
                 .addResolver(new PathResourceResolver());
         registry.addResourceHandler("/files/profile/**").addResourceLocations("file:files/profile/");
         registry.addResourceHandler("/files/upload/**").addResourceLocations("file:files/upload/");
-        registry.addResourceHandler("/powerplant/**").addResourceLocations("file:files/powerplant/");
+        registry.addResourceHandler("/fmon/**").addResourceLocations("file:files/fmon/");
     }
     
 

@@ -222,6 +222,17 @@ public class NoticeBoardController {
 		}
 	}
 
+	@RequestMapping(method=RequestMethod.POST, value="/incReadCnt/{id}")
+	ResultObj<String> incReadCnt(@PathVariable(name="id") long id) {
+		try {
+			noticeBoardService.incReadCnt(id);
+			return ResultObj.<String>success();
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return ResultObj.<String>errorUnknown();
+		}
+	}
+
 //	@ResponseStatus(HttpStatus.ACCEPTED)
 //	@ExceptionHandler(MaxUploadSizeExceededException.class)
 //	public ResultObj<String> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {

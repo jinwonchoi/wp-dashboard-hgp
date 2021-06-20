@@ -100,6 +100,7 @@ public class NoticeBoardService {
 	}
 	
 	public Optional<NoticeBoardWithFileList> loadPostEx(long id) {
+		noticeBoardDao.incReadCnt(id);
 		NoticeBoardWithFileList result = new NoticeBoardWithFileList(noticeBoardDao.loadEx(id).get());
 		List<FileInfo> attachedFileList = fileInfoDao.getFilesByRefId(id, Constant.FILE_REFERENCE_REF_TYPE_ADDFILE.get()).get();
 		List<FileInfo> embededFileList = fileInfoDao.getFilesByRefId(id, Constant.FILE_REFERENCE_REF_TYPE_NORMAL.get()).get();
@@ -156,6 +157,12 @@ public class NoticeBoardService {
 	public Optional<PageResultObj<List<BoardComment>>> searchComment(PageRequest req) {
 		return boardCommentDao.search(req);
 	}
+	
+	@Transactional
+	public void incReadCnt(long id) {
+		noticeBoardDao.incReadCnt(id);
+	}
+
 	
 	/** 
 	 * 컨텐츠 삽입파일 업로드

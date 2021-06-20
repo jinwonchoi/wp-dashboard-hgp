@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gencode.issuetool.service.UserAccountService;
 import com.gencode.issuetool.service.UserProfileService;
+import com.logpresso.client.Cursor;
+import com.logpresso.client.Logpresso;
 import com.gencode.issuetool.config.JwtTokenProvider;
 import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.exception.ApplicationException;

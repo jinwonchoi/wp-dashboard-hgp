@@ -12,6 +12,6 @@ import com.gencode.issuetool.obj.NoticeBoardWithFileList;
 public interface NoticeBoardDao extends Dao<NoticeBoard> {
 	Optional<NoticeBoardEx> loadEx(long id);
 	Optional<PageResultObj<List<NoticeBoardEx>>> searchEx(PageRequest req);
-//	void incCommentCnt(long id);
+	void incReadCnt(long id);
 //	void decCommentCnt(long id);
 }

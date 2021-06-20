@@ -1,5 +1,8 @@
 package com.gencode.issuetool.ctrl;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +32,23 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gencode.issuetool.service.DashBoardService;
 import com.gencode.issuetool.service.MyUserDetailsService;
+import com.gencode.issuetool.util.GsonUtils;
+import com.gencode.issuetool.util.JsonUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.logpresso.client.Cursor;
+import com.logpresso.client.Tuple;
 import com.gencode.issuetool.config.JwtTokenProvider;
+import com.gencode.issuetool.etc.LogpressoConnector;
 import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.exception.ApplicationException;
 import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.ResultObj;
+import com.gencode.issuetool.io.StompObj;
+import com.gencode.issuetool.logpresso.obj.DashBoardObj;
+import com.gencode.issuetool.obj.AuthUserInfo;
 import com.gencode.issuetool.obj.GroupSum;
 import com.gencode.issuetool.obj.StatsGoal;
 import com.gencode.issuetool.obj.StatsPerDay;
@@ -56,16 +69,56 @@ public class PwrPlantController {
 	 * @return StatsPerDay 
 	 *
 	 */    
-	@RequestMapping("/api/card/card-statistics/subscribers") 
-	ResultObj<List<StatsPerDay>> getCustomerInboundCount() {
-//		try {
-//			Optional<List<StatsPerDay>> statsPerDay = dashBoardService.getCustomerInboundCount(bizId);
-//			return new ResultObj<List<StatsPerDay>>(ReturnCode.SUCCESS, statsPerDay.get());
-//		} catch (Exception e) {
-//			logger.error("normal error", e);
-//			return ResultObj.errorUnknown();
-//		}
-		return null;
+	@RequestMapping("/dashboard/all") 
+	ResultObj<DashBoardObj> getDashboardAll() {
+
+		LogpressoConnector conn = null;
+		Cursor cursor = null;
+		try {
+			DashBoardObj dashBoardObj = new DashBoardObj();
+			dashBoardObj = dashBoardService.getDashboardDataAll();
+	        ResultObj<DashBoardObj> resultObj = ResultObj.success();
+			resultObj.setItem(dashBoardObj);
+			return resultObj;
+		} catch (IOException e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		} finally {
+			try {
+		        if (cursor != null)
+				cursor.close();
+			    if (conn != null)
+			    	conn.close();
+			} catch (IOException e) {}
+		}
+	}
+
+	/* 사업부 사용자 인입 건수
+	 * @return StatsPerDay 
+	 *
+	 */    
+	@RequestMapping("/dashboard/iot") 
+	ResultObj<DashBoardObj> getDashboardIot() {
+
+		LogpressoConnector conn = null;
+		Cursor cursor = null;
+		try {
+			DashBoardObj dashBoardObj = new DashBoardObj();
+			dashBoardObj = dashBoardService.getDashboardDataIot();
+	        ResultObj<DashBoardObj> resultObj = ResultObj.success();
+			resultObj.setItem(dashBoardObj);
+			return resultObj;
+		} catch (IOException e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		} finally {
+			try {
+		        if (cursor != null)
+				cursor.close();
+			    if (conn != null)
+			    	conn.close();
+			} catch (IOException e) {}
+		}
 	}
 
 }

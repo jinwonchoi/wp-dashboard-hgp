@@ -11,6 +11,7 @@ public class NoticeBoard extends Pojo {
 	protected long refId;
 	protected String deleteYn;
 	protected int commentCnt;
+	protected long readCnt;
 	protected String updatedDtm;
 	protected String createdDtm;
 
@@ -123,6 +124,14 @@ public class NoticeBoard extends Pojo {
 
 	public void setCommentCnt(int commentCnt) {
 		this.commentCnt = commentCnt;
+	}
+
+	public long getReadCnt() {
+		return readCnt;
+	}
+
+	public void setReadCnt(long readCnt) {
+		this.readCnt = readCnt;
 	}
 
 }
