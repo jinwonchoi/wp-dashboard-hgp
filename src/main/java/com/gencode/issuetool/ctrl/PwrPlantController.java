@@ -78,6 +78,7 @@ public class PwrPlantController {
 			DashBoardObj dashBoardObj = new DashBoardObj();
 			dashBoardObj = dashBoardService.getDashboardDataAll();
 	        ResultObj<DashBoardObj> resultObj = ResultObj.success();
+	        //logger.info(dashBoardObj.toString());
 			resultObj.setItem(dashBoardObj);
 			return resultObj;
 		} catch (IOException e) {

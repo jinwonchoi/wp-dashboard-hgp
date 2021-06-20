@@ -2,10 +2,14 @@ package com.gencode.issuetool.config;
 
 import org.h2.tools.Server;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.ErrorPage;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -20,11 +24,15 @@ import java.sql.SQLException;
 @EnableJpaRepositories
 public class AppConfig implements WebMvcConfigurer {
 
+	/**
+	 * https://stackoverflow.com/questions/54987428/vue-js-spring-boot-redirect-to-homepage-on-404
+	 */
     public void addViewControllers(ViewControllerRegistry registry) {
 //        registry.addViewController("/").setViewName("index");
 //        registry.addViewController("/login").setViewName("login");
 //        registry.addViewController("/denied").setViewName("denied");
       registry.addViewController("/fmon").setViewName("forward:/fmon/index.html");
+      registry.addViewController("/notFound").setViewName("forward:/fmon/index.html");
     }
 
 //    @Bean
@@ -36,6 +44,19 @@ public class AppConfig implements WebMvcConfigurer {
 //        return bean;
 //    }
 
+    /**
+     * 404 처리
+     * https://stackoverflow.com/questions/44692781/configure-spring-boot-to-redirect-404-to-a-single-page-app
+     * https://stackoverflow.com/questions/54987428/vue-js-spring-boot-redirect-to-homepage-on-404
+     * @return
+     */
+	@Bean
+	public WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> containerCustomizer() {
+	    return container -> {
+	        container.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND,
+	                "/notFound"));
+	    };
+	}
     /**
      * 외부파일경로 설정
      * vue js 경로 설정

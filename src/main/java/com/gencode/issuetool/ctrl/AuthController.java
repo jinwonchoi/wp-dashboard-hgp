@@ -108,6 +108,12 @@ public class AuthController {
 		}
 	}
 
+	/**
+	 * https://www.javainuse.com/spring/ang7-jwt
+	 * @param req
+	 * @param userInfo
+	 * @return
+	 */
 	@RequestMapping(method=RequestMethod.POST, value="/refreshToken")
 	ResultObj<String> refreshToken(HttpServletRequest req, @RequestBody UserInfo userInfo) {
 		try {

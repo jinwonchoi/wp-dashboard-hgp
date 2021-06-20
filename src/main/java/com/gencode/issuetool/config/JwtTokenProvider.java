@@ -40,12 +40,13 @@ public class JwtTokenProvider {
 
 	@Value("${security.jwt.token.expire-length:3600000}")
 	private long validityInMilliseconds = 3600000; // 1h
-
-//	@Value("${security.jwt.token.expire-length:10000}")
-//	private long validityInMilliseconds = 10000; // 10초
-
 	@Value("${security.jwt.token.refresh.expire-length:3600000}")
 	private long validityForRefreshInMilliseconds = 3600000; // 1h
+
+//	@Value("${security.jwt.token.expire-length:1000}")
+//	private long validityInMilliseconds = 1000; // 10초
+//	@Value("${security.jwt.token.refresh.expire-length:3000}")
+//	private long validityForRefreshInMilliseconds = 3000; // 1h
 
 	@Autowired
 	private MyUserDetailsService userDetailsService;

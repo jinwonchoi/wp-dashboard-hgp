@@ -87,7 +87,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	        log.info("token:"+token);
 	        if (token != null && jwtTokenProvider.validateToken(token, res)) {
 	            Authentication auth = token != null ? jwtTokenProvider.getAuthentication(token) : null;
-	            log.info("auth:"+auth);
+	            //log.info("auth:"+auth);
 	            SecurityContextHolder.getContext().setAuthentication(auth);
 	        }
 		} catch (ExpiredJwtException ex) {
