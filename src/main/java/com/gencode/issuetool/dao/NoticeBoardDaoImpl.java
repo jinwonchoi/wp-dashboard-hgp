@@ -141,6 +141,21 @@ public class NoticeBoardDaoImpl extends AbstractDaoImpl implements NoticeBoardDa
 		return internalSearch(this.queryStrEx, req, (resultSet, i) -> { return toNoticeBoardEx(resultSet);});
 	}
 	
+	@Override
+	public Optional<List<NoticeBoard>> searchMyNotice(Map<String, String> map) {
+		String queryStr = "select id,title,content,register_id,updated_dtm,created_dtm,post_type,post_level,content_type,ref_id, delete_yn, comment_cnt, read_cnt from notice_board b, notice_personal a "
+				+ " where b.id = a.notice_id "
+				+ "  and a.user_id =:userId "
+				+ "  and delete_yn='N' "
+				;
+		String userId = map.get("userId");
+		List<NoticeBoard> t = namedParameterJdbcTemplate.query(
+				queryStr, 
+				new MapSqlParameterSource("userId", userId),
+				new BeanPropertyRowMapper<NoticeBoard>(NoticeBoard.class));
+		return Optional.of(t);
+	}
+		
 	private NoticeBoard toNoticeBoard(ResultSet resultSet) throws SQLException {
 		NoticeBoard obj = new NoticeBoard();
 		obj.setId(resultSet.getLong("ID"));

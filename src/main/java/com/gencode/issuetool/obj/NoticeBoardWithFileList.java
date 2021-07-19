@@ -28,6 +28,7 @@ public class NoticeBoardWithFileList extends NoticeBoardEx {
 		this.setRefId(ex.getRefId());
 		this.setDeleteYn(ex.getDeleteYn());
 		this.setCommentCnt(ex.getCommentCnt());
+		this.setReadCnt(ex.getReadCnt());
 		this.setAddFileCnt(ex.getAddFileCnt());
 		this.setAddFileType(ex.getAddFileType());
 		this.setUpdatedDtm(ex.getUpdatedDtm());

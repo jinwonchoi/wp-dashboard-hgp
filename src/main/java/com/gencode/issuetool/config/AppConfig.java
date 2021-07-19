@@ -18,11 +18,17 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
+
+import com.google.api.client.util.Value;
+
 import java.sql.SQLException;
 
 @Configuration
 @EnableJpaRepositories
 public class AppConfig implements WebMvcConfigurer {
+	
+	@Value("cors_url")
+	String corsUrl;
 
 	/**
 	 * https://stackoverflow.com/questions/54987428/vue-js-spring-boot-redirect-to-homepage-on-404
@@ -77,7 +83,8 @@ public class AppConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS").allowedOrigins("http://localhost:8082")
-                .allowCredentials(true).allowedHeaders("*");
+        registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS").allowedOrigins("*")//"http://localhost:8082")
+                .allowCredentials(true)
+                .allowedHeaders("*");
     }
 }

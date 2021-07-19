@@ -36,8 +36,11 @@ import com.gencode.issuetool.obj.FileInfo;
 import com.gencode.issuetool.obj.NoticeBoard;
 import com.gencode.issuetool.obj.NoticeBoardEx;
 import com.gencode.issuetool.obj.NoticeBoardWithFileList;
+import com.gencode.issuetool.obj.NoticePersonal;
 import com.gencode.issuetool.obj.User;
 import com.gencode.issuetool.service.NoticeBoardService;
+
+import io.jsonwebtoken.impl.DefaultClaims;
 
 @RestController
 @RequestMapping("/notice-board")
@@ -83,10 +86,10 @@ public class NoticeBoardController {
 		}
 	}
 	
-	@RequestMapping("/{id}") 
-	ResultObj<NoticeBoardWithFileList> getPost(@PathVariable(name="id") long id) {
+	@RequestMapping(method=RequestMethod.POST, value="/get") 
+	ResultObj<NoticeBoardWithFileList> getPost(@RequestBody NoticePersonal noticePersonal) {
 		try {
-			Optional<NoticeBoardWithFileList> notice = noticeBoardService.loadPostEx(id);
+			Optional<NoticeBoardWithFileList> notice = noticeBoardService.loadPostEx(noticePersonal);
 			if (notice.isPresent()) 
 				return new ResultObj<NoticeBoardWithFileList>(ReturnCode.SUCCESS, notice.get());
 			else 
@@ -113,6 +116,21 @@ public class NoticeBoardController {
 		}
 	}
 	
+	@RequestMapping(method=RequestMethod.POST, value="/mynotices")
+	public ResultObj<List<NoticeBoard>> searchMyNotice(@RequestBody Map<String, String> map) {
+		try {
+			Optional<List<NoticeBoard>> list = noticeBoardService.searchMyNotice(map);
+			if (list.isPresent()) {
+				return new ResultObj<List<NoticeBoard>>(ReturnCode.SUCCESS, list.get());
+			} else {
+				return ResultObj.<List<NoticeBoard>>dataNotFound();
+			}
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return ResultObj.<List<NoticeBoard>>errorUnknown();
+		}
+	}
+		
 	@RequestMapping(value="/upload/embed/{id}", method=RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	ResultObj<FileInfo> uploadEmbedFile(@PathVariable(name="id") long id,
 			@RequestPart("json") FileInfo fileInfo, @RequestPart("upfile") MultipartFile multipartFile) {
@@ -222,10 +240,10 @@ public class NoticeBoardController {
 		}
 	}
 
-	@RequestMapping(method=RequestMethod.POST, value="/incReadCnt/{id}")
-	ResultObj<String> incReadCnt(@PathVariable(name="id") long id) {
+	@RequestMapping(method=RequestMethod.POST, value="/incReadCnt/{noticeId}/{userId}")
+	ResultObj<String> incReadCnt(@PathVariable(name="noticeId") long noticeId,@PathVariable(name="userId") long userId) {
 		try {
-			noticeBoardService.incReadCnt(id);
+			noticeBoardService.incReadCnt(noticeId, userId);
 			return ResultObj.<String>success();
 		} catch (Exception e) {
 			logger.error("normal error", e);

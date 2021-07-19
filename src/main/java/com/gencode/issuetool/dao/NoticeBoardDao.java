@@ -1,6 +1,7 @@
 package com.gencode.issuetool.dao;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.gencode.issuetool.io.PageRequest;
@@ -13,5 +14,7 @@ public interface NoticeBoardDao extends Dao<NoticeBoard> {
 	Optional<NoticeBoardEx> loadEx(long id);
 	Optional<PageResultObj<List<NoticeBoardEx>>> searchEx(PageRequest req);
 	void incReadCnt(long id);
+	Optional<List<NoticeBoard>> searchMyNotice(Map<String, String> map);
+	
 //	void decCommentCnt(long id);
 }

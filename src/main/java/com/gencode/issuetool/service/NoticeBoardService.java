@@ -25,9 +25,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gencode.issuetool.dao.NoticeBoardDao;
+import com.gencode.issuetool.dao.NoticePersonalDao;
 import com.gencode.issuetool.obj.NoticeBoard;
 import com.gencode.issuetool.obj.NoticeBoardEx;
 import com.gencode.issuetool.obj.NoticeBoardWithFileList;
+import com.gencode.issuetool.obj.NoticePersonal;
 import com.gencode.issuetool.storage.AttachFileSystemStorageService;
 import com.gencode.issuetool.storage.EmbedFileSystemStorageService;
 import com.gencode.issuetool.dao.BoardCommentDao;
@@ -53,6 +55,8 @@ public class NoticeBoardService {
 	@Autowired
 	private BoardCommentDao boardCommentDao;
 	@Autowired
+	private NoticePersonalDao noticePersonalDao;
+	@Autowired
 	private FileInfoDao fileInfoDao;
 	@Autowired
 	private FileReferenceDao fileReferenceDao;
@@ -61,17 +65,24 @@ public class NoticeBoardService {
 	private EmbedFileSystemStorageService embedFileService;
 	@Autowired
 	private AttachFileSystemStorageService attachFileService;
-		
+	
+	@Autowired
+	private PushService pushService;
+	
 	@Transactional
 	public Optional<NoticeBoard> addPost(NoticeBoard t) {
 		long noticeId = noticeBoardDao.register(t);
+		noticePersonalDao.insertAll(noticeId);
 		return noticeBoardDao.load(noticeId);
 	}
 	
 	@Transactional
 	public Optional<NoticeBoardEx> addPostEx(NoticeBoard t) {
 		long noticeId = noticeBoardDao.register(t);
-		return noticeBoardDao.loadEx(noticeId);
+		noticePersonalDao.insertAll(noticeId);
+		Optional<NoticeBoardEx> noticeBoardEx = noticeBoardDao.loadEx(noticeId);
+		pushService.sendMsg("all", Constant.PUSH_TAG_NOTICE_BOARD_ADD.get(), noticeBoardEx.get());
+		return noticeBoardEx;
 	}
 	
 	@Transactional
@@ -80,7 +91,10 @@ public class NoticeBoardService {
 		t.setId(noticeId);
 		completeFileUploadOnContentSave(t);
 		cleanseFile(t.getRegisterId());
-		return noticeBoardDao.loadEx(noticeId);
+		noticePersonalDao.insertAll(noticeId);
+		Optional<NoticeBoardEx> noticeBoardEx = noticeBoardDao.loadEx(noticeId);
+		pushService.sendMsg("all", Constant.PUSH_TAG_NOTICE_BOARD_ADD.get(), noticeBoardEx.get());
+		return noticeBoardEx;
 	}
 
 	@Transactional
@@ -99,11 +113,14 @@ public class NoticeBoardService {
 		return noticeBoardDao.load(id);
 	}
 	
-	public Optional<NoticeBoardWithFileList> loadPostEx(long id) {
-		noticeBoardDao.incReadCnt(id);
-		NoticeBoardWithFileList result = new NoticeBoardWithFileList(noticeBoardDao.loadEx(id).get());
-		List<FileInfo> attachedFileList = fileInfoDao.getFilesByRefId(id, Constant.FILE_REFERENCE_REF_TYPE_ADDFILE.get()).get();
-		List<FileInfo> embededFileList = fileInfoDao.getFilesByRefId(id, Constant.FILE_REFERENCE_REF_TYPE_NORMAL.get()).get();
+	public Optional<NoticeBoardWithFileList> loadPostEx(NoticePersonal noticePersonal) {
+		noticeBoardDao.incReadCnt(noticePersonal.getNoticeId());
+		if (noticePersonal.getUserId() > 0) {
+			noticePersonalDao.forceDelete(noticePersonal);
+		}
+		NoticeBoardWithFileList result = new NoticeBoardWithFileList(noticeBoardDao.loadEx(noticePersonal.getNoticeId()).get());
+		List<FileInfo> attachedFileList = fileInfoDao.getFilesByRefId(noticePersonal.getNoticeId(), Constant.FILE_REFERENCE_REF_TYPE_ADDFILE.get()).get();
+		List<FileInfo> embededFileList = fileInfoDao.getFilesByRefId(noticePersonal.getNoticeId(), Constant.FILE_REFERENCE_REF_TYPE_NORMAL.get()).get();
 		result.setAttachedFileList(attachedFileList);
 		result.setEmbededFileList(embededFileList);
 		return Optional.of(result);
@@ -113,11 +130,13 @@ public class NoticeBoardService {
 	public void deletePost(long id) {
 		NoticeBoard notice = noticeBoardDao.load(id).get();
 		noticeBoardDao.delete(id);
-		
+		noticePersonalDao.deleteByNoticeId(id);
+
 		fileInfoDao.getFilesByRefId(id, "").ifPresent( fList->{
 			fList.forEach(e-> embedFileService.deleteFile(id, e.getId()));
 		});
 		cleanseFile(notice.getRegisterId());
+		pushService.sendMsg("all", Constant.PUSH_TAG_NOTICE_BOARD_DELETE.get(), Long.toString(id));
 	}
 	
 	public Optional<PageResultObj<List<NoticeBoard>>> searchPost(PageRequest req) {
@@ -126,6 +145,10 @@ public class NoticeBoardService {
 
 	public Optional<PageResultObj<List<NoticeBoardEx>>> searchPostEx(PageRequest req) {
 		return noticeBoardDao.searchEx(req);
+	}
+
+	public Optional<List<NoticeBoard>> searchMyNotice(Map<String, String> map) {
+		return noticeBoardDao.searchMyNotice(map);
 	}
 	
 	@Transactional
@@ -159,8 +182,11 @@ public class NoticeBoardService {
 	}
 	
 	@Transactional
-	public void incReadCnt(long id) {
-		noticeBoardDao.incReadCnt(id);
+	public void incReadCnt(long noticeId, long userId) {
+		noticeBoardDao.incReadCnt(noticeId);
+		if (userId > 0) {
+			noticePersonalDao.forceDelete(new NoticePersonal(noticeId, userId));
+		}
 	}
 
 	

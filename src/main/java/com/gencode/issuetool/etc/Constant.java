@@ -135,6 +135,11 @@ public enum Constant {
 	WP_FACIL_MAIN_10("facil_main_10"),
 	WP_IOT_MAIN_9("iot_main_9"),
 	WP_IOT_MAIN_10("iot_main_10"),
+	
+	
+	/* push messsage */
+	PUSH_TAG_NOTICE_BOARD_ADD("noticeBoard.add"),
+	PUSH_TAG_NOTICE_BOARD_DELETE("noticeBoard.delete"),
 	;
 	private Constant(String str) {
 		value = str;

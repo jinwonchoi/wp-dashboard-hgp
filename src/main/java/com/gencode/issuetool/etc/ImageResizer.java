@@ -7,6 +7,14 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Mode;
+
+/**
+ * https://stackoverflow.com/questions/10245220/java-image-resize-maintain-aspect-ratio
+ * @author jinno
+ *
+ */
 public class ImageResizer {
 
     /**
@@ -18,6 +26,29 @@ public class ImageResizer {
      * @param scaledHeight absolute height in pixels
      * @throws IOException
      */
+//    public static void resize(String inputImagePath,
+//            String outputImagePath, int scaledWidth, int scaledHeight)
+//            throws IOException {
+//        // reads input image
+//        File inputFile = new File(inputImagePath);
+//        BufferedImage inputImage = ImageIO.read(inputFile);
+//        // creates output image
+//        BufferedImage outputImage = new BufferedImage(scaledWidth,
+//                scaledHeight, inputImage.getType());
+// 
+//        // scales the input image to the output image
+//        Graphics2D g2d = outputImage.createGraphics();
+//        g2d.drawImage(inputImage, 0, 0, scaledWidth, scaledHeight, null);
+//        g2d.dispose();
+// 
+//        // extracts extension of output file
+//        String formatName = outputImagePath.substring(outputImagePath
+//                .lastIndexOf(".") + 1);
+// 
+//        // writes to output file
+//        ImageIO.write(outputImage, formatName, new File(outputImagePath));
+//    }
+ 
     public static void resize(String inputImagePath,
             String outputImagePath, int scaledWidth, int scaledHeight)
             throws IOException {
@@ -25,6 +56,22 @@ public class ImageResizer {
         File inputFile = new File(inputImagePath);
         BufferedImage inputImage = ImageIO.read(inputFile);
  
+        Mode mode = (double) scaledWidth / (double) scaledHeight >= (double) inputImage.getWidth() / (double) inputImage.getHeight() ? Scalr.Mode.FIT_TO_WIDTH
+                : Scalr.Mode.FIT_TO_HEIGHT;
+        
+        inputImage = Scalr.resize(inputImage, Scalr.Method.ULTRA_QUALITY, mode, scaledWidth, scaledHeight);
+        
+        int x = 0;
+        int y = 0;
+
+        if (mode == Scalr.Mode.FIT_TO_WIDTH) {
+            y = (inputImage.getHeight() - scaledHeight) / 2;
+        } else if (mode == Scalr.Mode.FIT_TO_HEIGHT) {
+            x = (inputImage.getWidth() - scaledWidth) / 2;
+        }
+
+        inputImage = Scalr.crop(inputImage, x, y, scaledWidth, scaledHeight);
+
         // creates output image
         BufferedImage outputImage = new BufferedImage(scaledWidth,
                 scaledHeight, inputImage.getType());
@@ -41,7 +88,6 @@ public class ImageResizer {
         // writes to output file
         ImageIO.write(outputImage, formatName, new File(outputImagePath));
     }
- 
     /**
      * Resizes an image by a percentage of original size (proportional).
      * @param inputImagePath Path of the original image
