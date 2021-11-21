@@ -41,6 +41,7 @@ import com.gencode.issuetool.obj.FileReference;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.exception.MethodUnsupportableException;
+import com.gencode.issuetool.exception.NotFoundException;
 import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
@@ -103,8 +104,10 @@ public class NoticeBoardService {
 	}
 	
 	@Transactional
-	public void updatePost(NoticeBoardWithFileList t) {
-		noticeBoardDao.update(t);
+	public void updatePost(NoticeBoardWithFileList t) throws NotFoundException {
+		if (noticeBoardDao.update(t) <=0) {
+			throw new NotFoundException();
+		}
 		completeFileUploadOnContentSave(t);
 		cleanseFile(t.getRegisterId());
 	}

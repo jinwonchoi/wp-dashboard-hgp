@@ -23,4 +23,7 @@ public class PushService {
     public <T> void sendMsg(String receiver, String msgType,  String payload) {
     	template.convertAndSendToUser(receiver,  destination, JsonUtils.toJson(new StompObj(msgType, payload)));
     }
+    public <T> void sendMsgAll(String msgType,  T payload) {
+    	sendMsg("all", msgType, payload);
+    }
 }

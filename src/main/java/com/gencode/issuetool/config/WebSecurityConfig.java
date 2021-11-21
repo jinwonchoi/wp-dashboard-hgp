@@ -102,7 +102,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/user/**").hasAnyAuthority(UserRole.USER.get(), 
         		UserRole.MANAGER.get(),
         		UserRole.ADMIN.get()).anyRequest().authenticated()
+        .antMatchers("/common/**").hasAnyAuthority(UserRole.USER.get(),UserRole.MANAGER.get(),UserRole.ADMIN.get()).anyRequest().authenticated()
         .antMatchers("/dashboard/**").hasAnyAuthority(UserRole.USER.get(),UserRole.MANAGER.get(),UserRole.ADMIN.get()).anyRequest().authenticated()
+        .antMatchers("/plantinfo/**").hasAnyAuthority(UserRole.USER.get(),UserRole.MANAGER.get(),UserRole.ADMIN.get()).anyRequest().authenticated()
         .antMatchers("/chat/**").hasAnyAuthority(UserRole.USER.get(), 
         		UserRole.MANAGER.get(),
         		UserRole.ADMIN.get()).anyRequest().authenticated()

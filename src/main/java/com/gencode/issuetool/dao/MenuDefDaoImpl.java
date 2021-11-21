@@ -49,14 +49,14 @@ public class MenuDefDaoImpl extends AbstractDaoImpl implements MenuDefDao {
 	}
 
 	@Override
-	public void delete(long id) {
-		namedParameterJdbcTemplate.update("DELETE FROM menu_def where id = :id",
+	public long delete(long id) {
+		return namedParameterJdbcTemplate.update("DELETE FROM menu_def where id = :id",
 				new MapSqlParameterSource("id", id));
 	}
 
 	@Override
-	public void update(MenuDef t) {
-		namedParameterJdbcTemplate.update("UPDATE menu_def SET " + 
+	public long update(MenuDef t) {
+		return namedParameterJdbcTemplate.update("UPDATE menu_def SET " + 
 				"name        =:name,"+
 				"menu_path   =:menuPath,"+
 				"roles_access=:rolesAccess,"+

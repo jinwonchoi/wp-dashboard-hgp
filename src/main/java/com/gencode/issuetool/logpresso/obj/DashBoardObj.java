@@ -10,6 +10,8 @@ public class DashBoardObj extends Pojo {
 	String facilMain10;
 	List<String> iotMain09;
 	List<String> iotMain10;
+	List<String> iotMain09Pilot;
+	List<String> iotMain10Pilot;
 
 	public DashBoardObj() {
 		super();
@@ -44,4 +46,17 @@ public class DashBoardObj extends Pojo {
 	public void setIotMain10(List<String> iotMain10) {
 		this.iotMain10 = iotMain10;
 	}
+	public List<String> getIotMain09Pilot() {
+		return iotMain09Pilot;
+	}
+	public void setIotMain09Pilot(List<String> iotMain09Pilot) {
+		this.iotMain09Pilot = iotMain09Pilot;
+	}
+	public List<String> getIotMain10Pilot() {
+		return iotMain10Pilot;
+	}
+	public void setIotMain10Pilot(List<String> iotMain10Pilot) {
+		this.iotMain10Pilot = iotMain10Pilot;
+	}
+	
 }

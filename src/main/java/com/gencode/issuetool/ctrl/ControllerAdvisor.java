@@ -106,6 +106,9 @@ public class ControllerAdvisor {
 			result.setResultMsg("1111Message");
 			return result;
 	    }
+	    if(e instanceof Exception){
+			return ResultObj.errorUnknown();
+	    }
 	    return ResultObj.success();
 	}
 }

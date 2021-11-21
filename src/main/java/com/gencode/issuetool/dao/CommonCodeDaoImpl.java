@@ -50,18 +50,18 @@ public class CommonCodeDaoImpl extends AbstractDaoImpl implements CommonCodeDao 
 	}
 
 	@Override
-	public void delete(long id) {
+	public long delete(long id) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void delete(String id) {
-		namedParameterJdbcTemplate.update("DELETE FROM common_code where group_id = :id",
+	public long delete(String id) {
+		return namedParameterJdbcTemplate.update("DELETE FROM common_code where group_id = :id",
 				new MapSqlParameterSource("id", id));
 	}
 
 	@Override
-	public void update(CommonCode t) {
-		namedParameterJdbcTemplate.update("UPDATE common_code SET " + 
+	public long update(CommonCode t) {
+		return namedParameterJdbcTemplate.update("UPDATE common_code SET " + 
 				"group_id        =:groupId,"+
 				"item_key    =:itemKey,"+
 				"item_value       =:itemValue,"+

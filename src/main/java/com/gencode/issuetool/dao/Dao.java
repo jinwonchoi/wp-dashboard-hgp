@@ -15,8 +15,8 @@ public interface Dao<T> extends AbstractDao {
 
     long register(T t);
     Optional<T> load(long id);
-    void delete(long id);
-    void update(T t);
+    long delete(long id);
+    long update(T t);
     Optional<List<T>> loadAll();
 	Optional<List<T>> search(Map<String, String> map);
 	Optional<PageResultObj<List<T>>> search(PageRequest req);

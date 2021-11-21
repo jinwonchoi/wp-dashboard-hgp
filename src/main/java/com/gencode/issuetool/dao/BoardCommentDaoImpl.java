@@ -56,15 +56,15 @@ public class BoardCommentDaoImpl extends AbstractDaoImpl implements BoardComment
 
 	
 	@Override
-	public void delete(long id) {
+	public long delete(long id) {
 		//namedParameterJdbcTemplate.update("DELETE FROM board_comment where id = :id",
-		namedParameterJdbcTemplate.update("UPDATE board_comment SET delete_yn = 'Y',updated_dtm =NOW(3)  where id = :id",
+		return namedParameterJdbcTemplate.update("UPDATE board_comment SET delete_yn = 'Y',updated_dtm =NOW(3)  where id = :id",
 			new MapSqlParameterSource("id", id));
 	}
 
 	@Override
-	public void update(BoardComment t) {
-		namedParameterJdbcTemplate.update("UPDATE board_comment SET " +
+	public long update(BoardComment t) {
+		return namedParameterJdbcTemplate.update("UPDATE board_comment SET " +
 				"level    =:level,"+
 				"sort_key    =:sortKey,"+
 				"content    =:content,"+

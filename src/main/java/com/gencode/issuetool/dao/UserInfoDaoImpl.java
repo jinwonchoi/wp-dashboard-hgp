@@ -73,21 +73,21 @@ public class UserInfoDaoImpl extends AbstractDaoImpl implements UserInfoDao {
 	}
 
 	@Override
-	public void forceDelete(long id) {
-		namedParameterJdbcTemplate.update("DELETE FROM user_info where id = :id",
+	public long forceDelete(long id) {
+		return namedParameterJdbcTemplate.update("DELETE FROM user_info where id = :id",
 				new MapSqlParameterSource("id", id));
 	}
 
 	@Override
-	public void delete(long id) {
-		namedParameterJdbcTemplate.update("UPDATE user_info SET user_status = 'D', use_yn='N'" + 
+	public long delete(long id) {
+		return namedParameterJdbcTemplate.update("UPDATE user_info SET user_status = 'D', use_yn='N'" + 
 				" WHERE id=:id"
 				,new MapSqlParameterSource("id",id ));
 	}
 
 	@Override
-	public void update(UserInfo t) {
-		namedParameterJdbcTemplate.update("UPDATE user_info SET " +
+	public long update(UserInfo t) {
+		return namedParameterJdbcTemplate.update("UPDATE user_info SET " +
 				"login_id			=:loginId,"+
 				"level				=:level,"+
 				"role				=:role,"+

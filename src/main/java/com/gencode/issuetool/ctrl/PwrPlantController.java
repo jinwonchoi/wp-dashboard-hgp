@@ -49,7 +49,10 @@ import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.io.StompObj;
 import com.gencode.issuetool.logpresso.obj.DashBoardObj;
 import com.gencode.issuetool.obj.AuthUserInfo;
+import com.gencode.issuetool.obj.FileInfo;
 import com.gencode.issuetool.obj.GroupSum;
+import com.gencode.issuetool.obj.IotSensorData;
+import com.gencode.issuetool.obj.NoticeBoardEx;
 import com.gencode.issuetool.obj.StatsGoal;
 import com.gencode.issuetool.obj.StatsPerDay;
 import com.gencode.issuetool.obj.UserInfo;
@@ -122,4 +125,44 @@ public class PwrPlantController {
 		}
 	}
 
+	@RequestMapping("/dashboard/iotpilot") 
+	ResultObj<DashBoardObj> getDashboardIotPilot() {
+
+		LogpressoConnector conn = null;
+		Cursor cursor = null;
+		try {
+			DashBoardObj dashBoardObj = new DashBoardObj();
+			dashBoardObj = dashBoardService.getDashboardDataIotPilot();
+	        ResultObj<DashBoardObj> resultObj = ResultObj.success();
+			resultObj.setItem(dashBoardObj);
+			return resultObj;
+		} catch (IOException e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		} finally {
+			try {
+		        if (cursor != null)
+				cursor.close();
+			    if (conn != null)
+			    	conn.close();
+			} catch (IOException e) {}
+		}
+	}
+
+	@RequestMapping(value="/dashboard/iotpilot/list", method=RequestMethod.POST) 
+	PageResultObj<List<IotSensorData>> getDashboardIotPilotList(@RequestBody PageRequest req) {
+
+		try {
+	        Optional<PageResultObj<List<IotSensorData>>> list = dashBoardService.getDashboardDataIotPilotDetailList(req);
+			if (list.isPresent()) {
+				return new PageResultObj<List<IotSensorData>>(ReturnCode.SUCCESS, list.get());
+			} else {
+				return PageResultObj.<List<IotSensorData>>dataNotFound();
+			}
+
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return PageResultObj.<List<IotSensorData>>errorUnknown();
+		}
+	}
 }

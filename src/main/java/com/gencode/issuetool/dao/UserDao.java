@@ -13,5 +13,5 @@ public interface UserDao extends Dao<User>{
 	Optional<User> login(String userid);
 	Optional<User> load(String userid);
 	void activate(User user);
-	void delete(String userid);
+	long delete(String userid);
 }

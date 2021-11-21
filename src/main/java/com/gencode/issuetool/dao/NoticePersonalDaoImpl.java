@@ -47,41 +47,41 @@ public class NoticePersonalDaoImpl extends AbstractDaoImpl implements NoticePers
 	}
 	
 	@Override
-	public void delete(long id) {
-		//
+	public long delete(long id) {
+		return -1;
 	}
 
 	@Override
-	public void deleteByNoticeId(long noticeId) {
-		namedParameterJdbcTemplate.update("DELETE FROM notice_personal where notice_id = :noticeId",
+	public long deleteByNoticeId(long noticeId) {
+		return namedParameterJdbcTemplate.update("DELETE FROM notice_personal where notice_id = :noticeId",
 			new MapSqlParameterSource("noticeId", noticeId));
 	}
 	
 	@Override
-	public void deleteByUserId(long userId) {
-		namedParameterJdbcTemplate.update("DELETE FROM notice_personal where user_id = :userId",
+	public long deleteByUserId(long userId) {
+		return namedParameterJdbcTemplate.update("DELETE FROM notice_personal where user_id = :userId",
 			new MapSqlParameterSource("userId", userId));
 	}
 	
 	@Override
-	public void forceDelete(NoticePersonal t) {
-		namedParameterJdbcTemplate.update("DELETE FROM notice_personal where notice_id = :noticeId and user_id = :userId",
+	public long forceDelete(NoticePersonal t) {
+		return namedParameterJdbcTemplate.update("DELETE FROM notice_personal where notice_id = :noticeId and user_id = :userId",
 				new BeanPropertySqlParameterSource(t));
 	}
 	
 	@Override
-	public void update(NoticePersonal t) {
-		//throw new NotSupportedException();
+	public long update(NoticePersonal t) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Optional<List<NoticePersonal>> loadAll() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 		
 	@Override
 	public Optional<List<NoticePersonal>> search(Map<String, String> map) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 	
 	private NoticePersonal toNoticePersonal(ResultSet resultSet) throws SQLException {

@@ -48,15 +48,15 @@ public class BizInfoDaoImpl extends AbstractDaoImpl implements BizInfoDao {
 	}
 
 	@Override
-	public void delete(long id) {
+	public long delete(long id) {
 //		namedParameterJdbcTemplate.update("DELETE FROM biz_info where id = :id",
 //				new MapSqlParameterSource("id", id));
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void update(BizInfo t) {
-		namedParameterJdbcTemplate.update("UPDATE biz_info set name = :name,country = :country,lang = :lang,location = :location WHERE id = :id"
+	public long update(BizInfo t) {
+		return namedParameterJdbcTemplate.update("UPDATE biz_info set name = :name,country = :country,lang = :lang,location = :location WHERE id = :id"
 				,new BeanPropertySqlParameterSource(t));
 	}
 

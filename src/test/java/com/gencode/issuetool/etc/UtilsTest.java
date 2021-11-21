@@ -18,7 +18,9 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gencode.issuetool.io.ResultObj;
+import com.gencode.issuetool.obj.IotSensorData;
 import com.gencode.issuetool.obj.UserInfo;
+import com.gencode.issuetool.util.JsonUtils;
 
 public class UtilsTest extends Utils {
 
@@ -35,10 +37,21 @@ public class UtilsTest extends Utils {
 		long a = 3;
 		long b = 7;
 		double c= BigDecimal.valueOf((float)a/b).round(new MathContext(2)).doubleValue();
+		String d = "";
 		System.out.println("a="+a);
 		System.out.println("b="+b);
 		System.out.println("c="+c);
+		System.out.println("d="+d);
+		
 		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testForEach() {
+		int i=0;
+		System.out.println(String.format("%02d %03d", i, ++i));
+		System.out.println(i++);
+		
 	}
 
 	@Test
@@ -67,4 +80,24 @@ public class UtilsTest extends Utils {
 		workDays.forEach((k,v) -> System.out.println(k+":"+workDays.get(k)));
 	}
 	
+	@Test
+	public void parseLogpressoResult() {
+		String strResult = "[{\"time\":\"2021-08-29 17:34:02\", \"INDEX\":\"SN210101-2-1\", \"VALUES\": {\"HUMID\":\"0\", \"SMOKE\":\"25\", \"TEMPERATURE\":\"0\", \"COgas\":\"0\", \"FLARE\":\"정상\"}}]";
+		
+		List<Map<String, Object>> arJsonObjList = new ArrayList<Map<String, Object>>();
+		arJsonObjList = JsonUtils.toObject(strResult, List.class);
+		System.out.println(arJsonObjList.get(0));
+		
+		IotSensorData iotSensorData = new IotSensorData();
+		Map<String, Object> arJsonObj = arJsonObjList.get(0);
+		Map<String, String> valMap=(Map<String, String>)arJsonObj.get(Constant.IOT_DEVICE_VALUES.get());
+		iotSensorData.setDeviceId((String)arJsonObj.get(Constant.IOT_DEVICE_INDEX.get()));
+		iotSensorData.setCreatedDate((String)arJsonObj.get(Constant.IOT_DEVICE_TIME.get()));
+		iotSensorData.setHumid(Double.parseDouble(valMap.get(Constant.IOT_DEVICE_HUMID.get())));
+		iotSensorData.setSmoke(Double.parseDouble(valMap.get(Constant.IOT_DEVICE_SMOKE.get())));
+		iotSensorData.setTemperature(Double.parseDouble(valMap.get(Constant.IOT_DEVICE_TEMPERATURE.get())));
+		iotSensorData.setCoGas(Double.parseDouble(valMap.get(Constant.IOT_DEVICE_COGAS.get())));
+		iotSensorData.setFlare(valMap.get(Constant.IOT_DEVICE_HUMID.get()));
+		System.out.println(iotSensorData);
+	}
 }

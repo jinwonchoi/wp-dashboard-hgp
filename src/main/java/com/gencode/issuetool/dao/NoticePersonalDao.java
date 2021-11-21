@@ -6,8 +6,8 @@ import java.util.Optional;
 import com.gencode.issuetool.obj.NoticePersonal;
 
 public interface NoticePersonalDao extends Dao<NoticePersonal> {
-	void deleteByNoticeId(long noticeId);
-	void deleteByUserId(long userId);
-	void forceDelete(NoticePersonal noticePersonal);
+	long deleteByNoticeId(long noticeId);
+	long deleteByUserId(long userId);
+	long forceDelete(NoticePersonal noticePersonal);
 	long insertAll(long noticeId);
 }

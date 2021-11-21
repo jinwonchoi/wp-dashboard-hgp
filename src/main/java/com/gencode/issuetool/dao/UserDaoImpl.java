@@ -69,14 +69,14 @@ public class UserDaoImpl extends AbstractDaoImpl implements UserDao {
 	}
 	
 	@Override
-	public void delete(long id) {
+	public long delete(long id) {
 		//namedParameterJdbcTemplate.update("DELETE FROM biz_info where id = :id",
 		throw new UnsupportedOperationException();
 	}	
 	
 	@Override
-	public void delete(String userid) {
-		namedParameterJdbcTemplate.update("update user_info set delete_yn = 'Y' where userid = :userid",
+	public long delete(String userid) {
+		return namedParameterJdbcTemplate.update("update user_info set delete_yn = 'Y' where userid = :userid",
 				new MapSqlParameterSource("userid", userid));
 	}
 
@@ -88,7 +88,7 @@ public class UserDaoImpl extends AbstractDaoImpl implements UserDao {
 	}
 	
 	@Override
-	public void update(User user) {
+	public long update(User user) {
 		String queryStr = null;
 		if (user.getPassword()!=null&&!user.getPassword().trim().equals("")) {
 			queryStr = "UPDATE user_info SET userid = :userid,password = :password,username = :username,email = :email,role = :role" + 
@@ -97,7 +97,7 @@ public class UserDaoImpl extends AbstractDaoImpl implements UserDao {
 			queryStr = "UPDATE user_info SET userid = :userid,username = :username,email = :email,role = :role" + 
 					",description = :description,update_date = NOW(3) WHERE userid = :userid";
 		}
-		namedParameterJdbcTemplate.update(queryStr,new BeanPropertySqlParameterSource(user));
+		return namedParameterJdbcTemplate.update(queryStr,new BeanPropertySqlParameterSource(user));
 	}
 	
 	@Override

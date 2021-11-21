@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gencode.issuetool.dao.IotSensorDataDao;
 import com.gencode.issuetool.dao.NoticeBoardDao;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.LogpressoConnector;
@@ -39,6 +40,7 @@ import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.io.SortDirection;
 import com.gencode.issuetool.logpresso.obj.DashBoardObj;
 import com.gencode.issuetool.obj.GroupSum;
+import com.gencode.issuetool.obj.IotSensorData;
 import com.gencode.issuetool.obj.NoticeBoard;
 import com.gencode.issuetool.obj.NoticeBoardEx;
 import com.gencode.issuetool.obj.StatsGoal;
@@ -51,7 +53,7 @@ public class DashBoardService {
 	private final static Logger logger = LoggerFactory.getLogger(DashBoardService.class);
 
 	@Autowired
-	private NoticeBoardDao noticeBoardDao;
+	private IotSensorDataDao iotSensorDataDao;
 
 	public DashBoardObj getDashboardDataAll() throws IOException {
 		DashBoardObj arResult = new DashBoardObj();
@@ -59,19 +61,30 @@ public class DashBoardService {
 		arResult.setDefaultMain(getDashboardData("proc sp_dsMain1()"));
 		arResult.setFacilMain09(getDashboardData("proc sp_dsSub11()"));
 		arResult.setFacilMain10(getDashboardData("proc sp_dsSub12()"));
-		
 		return arResult;
 	}
 
 	public DashBoardObj getDashboardDataIot() throws IOException {
 		DashBoardObj arResult = new DashBoardObj();
 		
-		arResult.setIotMain09(getDashboardDataList("proc sp_dsSub21()"));
-		arResult.setIotMain10(getDashboardDataList("proc sp_dsSub22()"));
+		arResult.setIotMain09(getDashboardDataList("proc sp_dsSub21v2()"));
+		arResult.setIotMain10(getDashboardDataList("proc sp_dsSub22v2()"));
 		
 		return arResult;
 	}
 
+	public DashBoardObj getDashboardDataIotPilot() throws IOException {
+		DashBoardObj arResult = new DashBoardObj();
+		
+		arResult.setIotMain09Pilot(getDashboardDataList("proc sp_dsSubIoTv2()"));
+		//arResult.setIotMain10Pilot(getDashboardDataList("proc sp_dsSubIoT()"));
+		
+		return arResult;
+	}
+
+	public Optional<PageResultObj<List<IotSensorData>>> getDashboardDataIotPilotDetailList(PageRequest req) throws IOException {
+		return iotSensorDataDao.listByCategory(req);
+	}
 	
 	String getDashboardData(String strCmd) throws IOException {
 		

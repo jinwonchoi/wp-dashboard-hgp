@@ -70,15 +70,15 @@ public class NoticeBoardDaoImpl extends AbstractDaoImpl implements NoticeBoardDa
 
 	
 	@Override
-	public void delete(long id) {
+	public long delete(long id) {
 		//namedParameterJdbcTemplate.update("DELETE FROM notice_board where id = :id",
-		namedParameterJdbcTemplate.update("UPDATE notice_board SET delete_yn = 'Y',updated_dtm =NOW(3)  where id = :id",
+		return namedParameterJdbcTemplate.update("UPDATE notice_board SET delete_yn = 'Y',updated_dtm =NOW(3)  where id = :id",
 				new MapSqlParameterSource("id", id));
 	}
 
 	@Override
-	public void update(NoticeBoard t) {
-		namedParameterJdbcTemplate.update("UPDATE notice_board SET " +
+	public long update(NoticeBoard t) {
+		return namedParameterJdbcTemplate.update("UPDATE notice_board SET " +
 				"title      =:title,"+ 
 				"content    =:content,"+
 				"register_id=:registerId,"+

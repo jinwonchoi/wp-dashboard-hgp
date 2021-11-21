@@ -50,7 +50,7 @@ public class LoginHistoryDaoImpl extends AbstractDaoImpl implements LoginHistory
 	}
 
 	@Override
-	public void delete(long id) {
+	public long delete(long id) {
 		throw new UnsupportedOperationException();
 		/*
 		namedParameterJdbcTemplate.update("DELETE FROM biz_info where id = :id",
@@ -60,8 +60,8 @@ public class LoginHistoryDaoImpl extends AbstractDaoImpl implements LoginHistory
 	}
 
 	@Override
-	public void update(LoginHistory t) {
-		namedParameterJdbcTemplate.update("UPDATE login_history SET " + 
+	public long update(LoginHistory t) {
+		return namedParameterJdbcTemplate.update("UPDATE login_history SET " + 
 				"logout_dtm = NOW(3), " +
 				"logout_type=:logoutType " +
 				"WHERE id = :id"

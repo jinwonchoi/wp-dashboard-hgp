@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gencode.issuetool.etc.ReturnCode;
+import com.gencode.issuetool.exception.NotFoundException;
 import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
@@ -69,6 +70,9 @@ public class NoticeBoardController {
 		try {
 			noticeBoardService.updatePost(notice);
 			return ResultObj.<String>success();
+		} catch (NotFoundException nfe) {
+			logger.error("not found error", nfe);
+			return ResultObj.<String>dataNotFound();
 		} catch (Exception e) {
 			logger.error("normal error", e);
 			return ResultObj.<String>errorUnknown();

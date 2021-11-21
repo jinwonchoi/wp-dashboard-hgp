@@ -58,29 +58,29 @@ public class FileReferenceDaoImpl extends AbstractDaoImpl implements FileReferen
 
 	
 	@Override
-	public void delete(long id) {
-		namedParameterJdbcTemplate.update("UPDATE file_reference SET delete_yn = 'Y',updated_dtm =NOW(3) where id = :id",
+	public long delete(long id) {
+		return namedParameterJdbcTemplate.update("UPDATE file_reference SET delete_yn = 'Y',updated_dtm =NOW(3) where id = :id",
 			new MapSqlParameterSource("id", id));
 	}
 	@Override
-	public void delete(FileReference t) {
-		namedParameterJdbcTemplate.update("UPDATE file_reference SET delete_yn = 'Y',updated_dtm =NOW(3) where ref_id = :refId and file_id = :fileId"
+	public long delete(FileReference t) {
+		return namedParameterJdbcTemplate.update("UPDATE file_reference SET delete_yn = 'Y',updated_dtm =NOW(3) where ref_id = :refId and file_id = :fileId"
 				,new BeanPropertySqlParameterSource(t));
 	}
 	@Override
-	public void forceDelete(long id) {
-		namedParameterJdbcTemplate.update("DELETE FROM file_reference where id = :id",
+	public long forceDelete(long id) {
+		return namedParameterJdbcTemplate.update("DELETE FROM file_reference where id = :id",
 			new MapSqlParameterSource("id", id));
 	}
 	@Override
-	public void forceDelete(FileReference t) {
-		namedParameterJdbcTemplate.update("DELETE FROM file_reference where ref_id = :refId and file_id = :fileId"
+	public long forceDelete(FileReference t) {
+		return namedParameterJdbcTemplate.update("DELETE FROM file_reference where ref_id = :refId and file_id = :fileId"
 				,new BeanPropertySqlParameterSource(t));
 	}
 	
 	@Override
-	public void update(FileReference t) {
-		namedParameterJdbcTemplate.update("UPDATE file_reference SET " +
+	public long update(FileReference t) {
+		return namedParameterJdbcTemplate.update("UPDATE file_reference SET " +
 				"file_id = :fileId,"+
 				"ref_id = :refId,"+
 				"ref_type = :refType,"+

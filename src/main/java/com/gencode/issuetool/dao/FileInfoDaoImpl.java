@@ -64,26 +64,26 @@ public class FileInfoDaoImpl extends AbstractDaoImpl implements FileInfoDao {
 
 	
 	@Override
-	public void delete(long id) {
-		namedParameterJdbcTemplate.update("UPDATE file_info SET delete_yn = 'Y',updated_dtm =NOW(3)  where id = :id",
+	public long delete(long id) {
+		return namedParameterJdbcTemplate.update("UPDATE file_info SET delete_yn = 'Y',updated_dtm =NOW(3)  where id = :id",
 			new MapSqlParameterSource("id", id));
 	}
 
 	@Override
-	public void forceDelete(long id) {
-		namedParameterJdbcTemplate.update("DELETE FROM file_info where id = :id",
+	public long forceDelete(long id) {
+		return namedParameterJdbcTemplate.update("DELETE FROM file_info where id = :id",
 			new MapSqlParameterSource("id", id));
 	}
 	
 	@Override
-	public void completeUpload(long id) {
-		namedParameterJdbcTemplate.update("UPDATE file_info SET status = 'C',updated_dtm =NOW(3)  where id = :id",
+	public long completeUpload(long id) {
+		return namedParameterJdbcTemplate.update("UPDATE file_info SET status = 'C',updated_dtm =NOW(3)  where id = :id",
 				new MapSqlParameterSource("id", id));
 	}
 	
 	@Override
-	public void update(FileInfo t) {
-		namedParameterJdbcTemplate.update("UPDATE file_info SET " +
+	public long update(FileInfo t) {
+		return namedParameterJdbcTemplate.update("UPDATE file_info SET " +
 				"file_name =:fileName,"+ 
 				"file_type =:fileType,"+ 
 				"file_size =:fileSize,"+

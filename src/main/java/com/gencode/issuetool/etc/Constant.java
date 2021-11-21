@@ -140,6 +140,52 @@ public enum Constant {
 	/* push messsage */
 	PUSH_TAG_NOTICE_BOARD_ADD("noticeBoard.add"),
 	PUSH_TAG_NOTICE_BOARD_DELETE("noticeBoard.delete"),
+	PUSH_TAG_NOTICE_BOARD_UPDATE("noticeBoard.update"),
+	PUSH_TAG_PLANT_INFO_ADD("plantInfo.add"),
+	PUSH_TAG_PLANT_INFO_DELETE("plantInfo.delete"),
+	PUSH_TAG_PLANT_INFO_UPDATE("plantInfo.update"),
+	PUSH_TAG_AREA_INFO_ADD("areaInfo.add"),
+	PUSH_TAG_AREA_INFO_DELETE("areaInfo.delete"),
+	PUSH_TAG_AREA_INFO_UPDATE("areaInfo.update"),
+	PUSH_TAG_FACILITY_INFO_ADD("facilityInfo.add"),
+	PUSH_TAG_FACILITY_INFO_DELETE("facilityInfo.delete"),
+	PUSH_TAG_FACILITY_INFO_UPDATE("facilityInfo.update"),
+	PUSH_TAG_INTERIOR_INFO_ADD("interiorInfo.add"),
+	PUSH_TAG_INTERIOR_INFO_DELETE("interiorInfo.delete"),
+	PUSH_TAG_INTERIOR_INFO_UPDATE("interiorInfo.update"),
+	PUSH_TAG_IOT_DEVICE_INFO_ADD("iotDeviceInfo.add"),
+	PUSH_TAG_IOT_DEVICE_INFO_DELETE("iotDeviceInfo.delete"),
+	PUSH_TAG_IOT_DEVICE_INFO_UPDATE("iotDeviceInfo.update"),
+	PUSH_TAG_ETC_DEVICE_INFO_ADD("etcDeviceInfo.add"),
+	PUSH_TAG_ETC_DEVICE_INFO_DELETE("etcDeviceInfo.delete"),
+	PUSH_TAG_ETC_DEVICE_INFO_UPDATE("etcDeviceInfo.update"),
+
+	PUSH_TAG_IOT_RULE_INFO_ADD("iotRuleInfo.add"),
+	PUSH_TAG_IOT_RULE_INFO_DELETE("iotRuleInfo.delete"),
+	PUSH_TAG_IOT_RULE_INFO_UPDATE("iotRuleInfo.update"),
+
+	PUSH_TAG_FACIL_RULE_INFO_ADD("facilRuleInfo.add"),
+	PUSH_TAG_FACIL_RULE_INFO_DELETE("facilRuleInfo.delete"),
+	PUSH_TAG_FACIL_RULE_INFO_UPDATE("facilRuleInfo.update"),
+
+	PUSH_TAG_FACIL_TAG_INFO_ADD("facilTagInfo.add"),
+	PUSH_TAG_FACIL_TAG_INFO_DELETE("facilTagInfo.delete"),
+	PUSH_TAG_FACIL_TAG_INFO_UPDATE("facilTagInfo.update"),
+
+	PUSH_TAG_FACIL_TAG_MAPPING_ADD("facilTagMapping.add"),
+	PUSH_TAG_FACIL_TAG_MAPPING_DELETE("facilTagMapping.delete"),
+	PUSH_TAG_FACIL_TAG_MAPPING_DELETE_BY_RULE_ID("facilTagMapping.deleteByRuleId"),
+	PUSH_TAG_FACIL_TAG_MAPPING_UPDATE("facilTagMapping.update"),
+
+	/*  */
+	IOT_DEVICE_TIME("time"),
+	IOT_DEVICE_INDEX("INDEX"),
+	IOT_DEVICE_VALUES("VALUES"),
+	IOT_DEVICE_HUMID("HUMID"),
+	IOT_DEVICE_SMOKE("SMOKE"),
+	IOT_DEVICE_TEMPERATURE("TEMPERATURE"),
+	IOT_DEVICE_COGAS("COgas"),
+	IOT_DEVICE_FLARE("FLARE"),
 	;
 	private Constant(String str) {
 		value = str;

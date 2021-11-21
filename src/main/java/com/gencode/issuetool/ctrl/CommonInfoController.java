@@ -53,10 +53,10 @@ public class CommonInfoController {
 	@Autowired
 	private CommonInfoService commonInfoService;
 
-	@RequestMapping("/list/{lang}") 
-	ResultObj<List<CommonCode>> getCommonCodeList(@PathVariable(name="lang") String lang) {
+	@RequestMapping("/list") 
+	ResultObj<List<CommonCode>> getCommonCodeList() {
 		try {
-			Optional<List<CommonCode>> list = commonInfoService.loadAll(lang);
+			Optional<List<CommonCode>> list = commonInfoService.loadAll();
 			if (list.isPresent()) {
 				return new ResultObj<List<CommonCode>>(ReturnCode.SUCCESS, list.get());
 			} else {
@@ -69,11 +69,10 @@ public class CommonInfoController {
 		}
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, value="/search/{lang}")
-	public ResultObj<List<CommonCode>> searchCommoncode(@PathVariable(name="lang") String lang,
-			@RequestBody Map<String, String> map) {
+	@RequestMapping(method=RequestMethod.POST, value="/search")
+	public ResultObj<List<CommonCode>> searchCommoncode(@RequestBody Map<String, String> map) {
 		try {
-			Optional<List<CommonCode>> list = commonInfoService.search(lang, map);
+			Optional<List<CommonCode>> list = commonInfoService.search(map);
 			if (list.get().size() == 0) {
 				return new ResultObj<List<CommonCode>>(ReturnCode.DATA_NOT_FOUND, null);
 			} else {
@@ -85,35 +84,4 @@ public class CommonInfoController {
 		}
 	}
 
-	@RequestMapping("/bizInfo/list/{lang}") 
-	ResultObj<List<BizInfo>> getBizInfoList(@PathVariable(name="lang") String lang) {
-		try {
-			Optional<List<BizInfo>> list = commonInfoService.loadAllBizInfo(lang);
-			if (list.isPresent()) {
-				return new ResultObj<List<BizInfo>>(ReturnCode.SUCCESS, list.get());
-			} else {
-				return ResultObj.<List<BizInfo>>dataNotFound();
-			}
-
-		} catch (Exception e) {
-			logger.error("normal error", e);
-			return ResultObj.errorUnknown();
-		}
-	}
-	
-	@RequestMapping(method=RequestMethod.POST, value="/bizInfo/search/{lang}")
-	public ResultObj<List<BizInfo>> searchBizInfo(@PathVariable(name="lang") String lang,
-			@RequestBody Map<String, String> map) {
-		try {
-			Optional<List<BizInfo>> list = commonInfoService.searchBizInfo(lang, map);
-			if (list.get().size() == 0) {
-				return new ResultObj<List<BizInfo>>(ReturnCode.DATA_NOT_FOUND, null);
-			} else {
-				return new ResultObj<List<BizInfo>>(ReturnCode.SUCCESS, list.get());
-			}
-		} catch (Exception e) {
-			logger.error("normal error", e);
-			return ResultObj.errorUnknown();
-		}
-	}
 }

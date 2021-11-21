@@ -49,14 +49,14 @@ public class RoleDefDaoImpl extends AbstractDaoImpl implements RoleDefDao {
 	}
 
 	@Override
-	public void delete(long id) {
-		namedParameterJdbcTemplate.update("DELETE FROM role_def where role_id = :id",
+	public long delete(long id) {
+		return namedParameterJdbcTemplate.update("DELETE FROM role_def where role_id = :id",
 				new MapSqlParameterSource("id", id));
 	}
 
 	@Override
-	public void update(RoleDef t) {
-		namedParameterJdbcTemplate.update("UPDATE role_def SET " +
+	public long update(RoleDef t) {
+		return namedParameterJdbcTemplate.update("UPDATE role_def SET " +
 				"role_name =:roleName "+ 
 				"WHERE role_id = :roleId"
 				,new BeanPropertySqlParameterSource(t));
