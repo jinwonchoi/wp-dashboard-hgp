@@ -35,8 +35,8 @@ public class EventTimeLineDaoImpl extends AbstractDaoImpl implements EventTimeLi
 	@Override
 	public long register(EventTimeLine t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO event_time_line (iot_rule_code, iot_rule_name, data_type, interior_id, critic_val, rule_desc, tip_desc, now(), now()) " + 
-				"VALUES(:iotRuleCode,iotRuleName, dataType, :interiorId, :criticVal, :ruleDesc, :tipDesc)"
+		namedParameterJdbcTemplate.update("INSERT INTO event_time_line (iot_rule_code, iot_rule_name, data_type, interior_id, critic_val, rule_desc, tip_desc, updated_dtm, created_dtm) " + 
+				"VALUES(:iotRuleCode,iotRuleName, dataType, :interiorId, :criticVal, :ruleDesc, :tipDesc, now(), now())"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}

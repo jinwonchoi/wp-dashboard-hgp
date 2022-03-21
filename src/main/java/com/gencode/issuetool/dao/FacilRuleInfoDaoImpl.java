@@ -27,7 +27,9 @@ import com.gencode.issuetool.obj.FacilRuleInfo;
 public class FacilRuleInfoDaoImpl extends AbstractDaoImpl implements FacilRuleInfoDao {
 
 	final String fields= "id, facil_rule_code,facil_rule_name, data_type, facility_id, critic_val, rule_desc, tip_desc, updated_dtm, created_dtm";
-	
+	final String queryStr= "select fri.id, fri.facil_rule_code,fri.facil_rule_name, fri.data_type, fri.facility_id, fri.critic_val, fri.rule_desc, fri.tip_desc, fri.updated_dtm, fri.created_dtm from facil_rule_info fri "
+	+ " left join facil_tag_mapping ftm on (ftm.FACIL_RULE_ID =fri.id) "
+	+ " where 1=1";
 	public FacilRuleInfoDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		super(jdbcTemplate, namedParameterJdbcTemplate);
 	}
@@ -35,8 +37,8 @@ public class FacilRuleInfoDaoImpl extends AbstractDaoImpl implements FacilRuleIn
 	@Override
 	public long register(FacilRuleInfo t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO facil_rule_info (facil_rule_code,facil_rule_name, data_type, facility_id, critic_val, rule_desc, tip_desc, now(), now()) " + 
-				"VALUES(:facilRuleCode,:facilRuleName, :dataType, :facilityId, :criticVal, :ruleDesc, :tipDesc)"
+		namedParameterJdbcTemplate.update("INSERT INTO facil_rule_info (facil_rule_code,facil_rule_name, data_type, facility_id, critic_val, rule_desc, tip_desc, updated_dtm, created_dtm) " + 
+				"VALUES(:facilRuleCode,:facilRuleName, :dataType, :facilityId, :criticVal, :ruleDesc, :tipDesc, now(), now())"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}
@@ -96,7 +98,7 @@ public class FacilRuleInfoDaoImpl extends AbstractDaoImpl implements FacilRuleIn
 
 	@Override
 	public Optional<PageResultObj<List<FacilRuleInfo>>> search(PageRequest req) {
-		String queryStr = "select "+fields+" from facil_rule_info where 1=1";
+		String queryStr = this.queryStr;
 		return internalSearch(queryStr, req, FacilRuleInfo.class);
 	}
 

@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomFilter implements Filter {
 	@Value("${vuejs.version}") String vuejsVersion;
+	@Value("${iframe.url}") String iframeUrl;
+	
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -34,6 +36,7 @@ public class CustomFilter implements Filter {
          */
         res.addHeader("Access-Control-Expose-Headers", "Vuejs-Version");
         res.addHeader("Vuejs-Version", vuejsVersion);
+        res.addHeader("X-Frame-Options", "ALLOW-FROM "+iframeUrl);//"http://file.rozetatech.com:8082/");
         chain.doFilter(req, res);
 	}
 

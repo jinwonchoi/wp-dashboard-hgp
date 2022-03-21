@@ -35,8 +35,8 @@ public class FacilTagInfoDaoImpl extends AbstractDaoImpl implements FacilTagInfo
 	@Override
 	public long register(FacilTagInfo t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO facil_tag_info (tag_name, facility_id, data_type, tag_desc, tag_style, now(), now()) " + 
-				"VALUES(:tagName, :facilityId, :dataType, :tagDesc, :tagStyle)"
+		namedParameterJdbcTemplate.update("INSERT INTO facil_tag_info (tag_name, facility_id, data_type, tag_desc, tag_style, updated_dtm, created_dtm) " + 
+				"VALUES(:tagName, :facilityId, :dataType, :tagDesc, :tagStyle, now(), now())"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}

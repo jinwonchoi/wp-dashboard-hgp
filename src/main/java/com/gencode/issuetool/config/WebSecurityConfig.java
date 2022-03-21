@@ -99,6 +99,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/error/**").permitAll()
         .antMatchers("/fmon/**").permitAll() 
         .antMatchers("/powerplant/**").permitAll() 
+        .antMatchers("/prototype/**").permitAll()
+        
         .antMatchers("/user/**").hasAnyAuthority(UserRole.USER.get(), 
         		UserRole.MANAGER.get(),
         		UserRole.ADMIN.get()).anyRequest().authenticated()
@@ -175,7 +177,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        source.registerCorsConfiguration("/**", configuration);
 //        return source;
 //    }
-//    
+//
     @Bean
     public AuthenticationEntryPoint unauthorizedEntryPoint() {
         return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,

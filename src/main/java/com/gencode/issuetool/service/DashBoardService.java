@@ -59,16 +59,31 @@ public class DashBoardService {
 		DashBoardObj arResult = new DashBoardObj();
 		
 		arResult.setDefaultMain(getDashboardData("proc sp_dsMain1()"));
-		arResult.setFacilMain09(getDashboardData("proc sp_dsSub11()"));
-		arResult.setFacilMain10(getDashboardData("proc sp_dsSub12()"));
+//		arResult.setFacilMain09(getDashboardData("proc sp_dsSub11()"));
+//		arResult.setFacilMain10(getDashboardData("proc sp_dsSub12()"));
+
+//		String facilMain09 = getDashboardData("proc sp_dsSub109()");
+//		System.out.println("facilMain09["+facilMain09+"]");
+//		arResult.setFacilMain09(facilMain09);
+//		String facilMain10 = getDashboardData("proc sp_dsSub110()");
+//		System.out.println("facilMain10["+facilMain10+"]");
+//		arResult.setFacilMain10(facilMain10);
+//		arResult.setFacilMain00(getDashboardData("proc sp_dsSub100()"));
+
+		arResult.setFacilMain09(getDashboardData("proc sp_dsSub109()"));
+		arResult.setFacilMain10(getDashboardData("proc sp_dsSub110()"));
+		arResult.setFacilMain00(getDashboardData("proc sp_dsSub100()"));
 		return arResult;
 	}
 
 	public DashBoardObj getDashboardDataIot() throws IOException {
 		DashBoardObj arResult = new DashBoardObj();
 		
-		arResult.setIotMain09(getDashboardDataList("proc sp_dsSub21v2()"));
-		arResult.setIotMain10(getDashboardDataList("proc sp_dsSub22v2()"));
+//		arResult.setIotMain09(getDashboardDataList("proc sp_dsSub21()"));
+//		arResult.setIotMain10(getDashboardDataList("proc sp_dsSub22()"));
+		arResult.setIotMain09(getDashboardDataList("proc sp_dsSub209()"));
+		arResult.setIotMain10(getDashboardDataList("proc sp_dsSub210()"));
+		arResult.setIotMain00(getDashboardDataList("proc sp_dsSub200()"));
 		
 		return arResult;
 	}

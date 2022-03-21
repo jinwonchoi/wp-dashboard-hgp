@@ -176,6 +176,22 @@ public enum Constant {
 	PUSH_TAG_FACIL_TAG_MAPPING_DELETE("facilTagMapping.delete"),
 	PUSH_TAG_FACIL_TAG_MAPPING_DELETE_BY_RULE_ID("facilTagMapping.deleteByRuleId"),
 	PUSH_TAG_FACIL_TAG_MAPPING_UPDATE("facilTagMapping.update"),
+	
+	/* chat, board */ 
+	PUSH_TAG_PROTOTYPE_NOTICE_BOARD_ADD("prototype.noticeBoard.add"),
+	PUSH_TAG_PROTOTYPE_NOTICE_BOARD_DELETE("prototype.noticeBoard.delete"),
+	PUSH_TAG_PROTOTYPE_NOTICE_BOARD_UPDATE("prototype.noticeBoard.update"),
+	PUSH_TAG_PROTOTYPE_BOARD_COMMENT_ADD("prototype.boardComment.add"),
+	PUSH_TAG_PROTOTYPE_BOARD_COMMENT_DELETE("prototype.boardComment.delete"),
+	PUSH_TAG_PROTOTYPE_BOARD_COMMENT_UPDATE("prototype.boardComment.update"),
+	PUSH_TAG_PROTOTYPE_CHAT_ADD("prototype.chat.add"),
+	PUSH_TAG_PROTOTYPE_CHAT_DELETE("prototype.chat.delete"),
+	PUSH_TAG_PROTOTYPE_CHAT_UPDATE("prototype.chat.update"),
+	PUSH_TAG_PROTOTYPE_CHATMSG_RESET("prototype.chat.reset"),
+	PUSH_TAG_PROTOTYPE_CHATMSG_ADD("prototype.chatmsg.add"),
+	PUSH_TAG_PROTOTYPE_CHATMSG_DELETE("prototype.chatmsg.delete"),
+	PUSH_TAG_PROTOTYPE_CHATMSG_UPDATE("prototype.chatmsg.update"),
+	PUSH_TAG_PROTOTYPE_CHATMSG_STATUS("prototype.chatmsg.status"),
 
 	/*  */
 	IOT_DEVICE_TIME("time"),
