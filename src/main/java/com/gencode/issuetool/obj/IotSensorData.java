@@ -12,8 +12,7 @@ public class IotSensorData extends Pojo {
 	public IotSensorData() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-	
+	}	
 
 	public IotSensorData(String createdDate, String deviceId, double humid, double smoke, double temperature,
 			double coGas, String flare) {

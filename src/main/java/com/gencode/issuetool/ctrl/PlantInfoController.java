@@ -26,7 +26,6 @@ import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.obj.PlantInfo;
 import com.gencode.issuetool.service.PlantInfoService;
 
-
 @RestController
 @RequestMapping("/plantinfo/plant")
 @CrossOrigin(origins = "${cors_url}")

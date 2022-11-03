@@ -25,7 +25,7 @@ import com.gencode.issuetool.obj.EtcDeviceInfo;
 @Component("EtcDeviceInfoDao")
 public class EtcDeviceInfoDaoImpl extends AbstractDaoImpl implements EtcDeviceInfoDao {
 
-	final String fields= "id,device_id,device_type,device_name,device_serno,device_desc,interior_id,pos_x,pos_y,pos_z,dir_x,dir_y,dir_z,register_date,install_date,term_date,updated_dtm,created_dtm";
+	final String fields= "id,device_id,org_device_id,device_type,interior_id,pmt_no,rptr_no,seq,cctv_path,cctv_userid,cctv_pwd,device_desc,updated_dtm,created_dtm";
 	
 	public EtcDeviceInfoDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		super(jdbcTemplate, namedParameterJdbcTemplate);
@@ -34,8 +34,8 @@ public class EtcDeviceInfoDaoImpl extends AbstractDaoImpl implements EtcDeviceIn
 	@Override
 	public long register(EtcDeviceInfo t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO etc_device_info (device_id,device_type,device_name,device_serno,device_desc,interior_id,pos_x,pos_y,pos_z,dir_x,dir_y,dir_z,register_date,install_date,term_date,updated_dtm,created_dtm) " + 
-				"VALUES(:deviceId,:deviceType,:deviceName,:deviceSerno,:deviceDesc,:interiorId,:posX,:posY,:posZ,:dirX,:dirY,:dirZ,:registerDate,:installDate,:termDate,NOW(3), NOW(3))"
+		namedParameterJdbcTemplate.update("INSERT INTO etc_device_info (device_id,org_device_id,device_type,interior_id,pmt_no,rptr_no,seq,cctv_path,cctv_userid,cctv_pwd,device_desc,updated_dtm,created_dtm) " + 
+				"VALUES(:deviceId,:orgDeviceId,:deviceType,:interiorId,:pmtNo,:rptrNo,:seq,:cctvPath,:cctvUserid,:cctvPwd,:deviceDesc,:updatedDate,NOW(3), NOW(3))"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}
@@ -60,23 +60,18 @@ public class EtcDeviceInfoDaoImpl extends AbstractDaoImpl implements EtcDeviceIn
 	@Override
 	public long update(EtcDeviceInfo t) {
 		return namedParameterJdbcTemplate.update("UPDATE etc_device_info SET " +
-				"id           =:id          ,"+
-				"device_id    =:deviceId    ,"+
-				"device_type  =:deviceType  ,"+
-				"device_name  =:deviceName  ,"+
-				"device_serno =:deviceSerno ,"+
-				"device_desc  =:deviceDesc  ,"+
-				"interior_id      =:interiorId      ,"+
-				"pos_x        =:posX        ,"+
-				"pos_y        =:posY        ,"+
-				"pos_z        =:posZ        ,"+
-				"dir_x        =:dirX        ,"+
-				"dir_y        =:dirY        ,"+
-				"dir_z        =:dirZ        ,"+
-				"register_date=:registerDate,"+
-				"install_date =:installDate ,"+
-				"term_date    =:termDate    ,"+
-				"updated_dtm  =NOW(3)"+
+				"device_id     =:deviceId,"+
+				"org_device_id =:orgDeviceId,"+
+				"device_type   =:deviceType,"+
+				"interior_id   =:interiorId,"+
+				"pmt_no        =:pmtNo,"+
+				"rptr_no       =:rptrNo,"+
+				"seq           =:seq,"+
+				"cctv_path     =:cctvPath,"+
+				"cctv_userid   =:cctvUserid,"+
+				"cctv_pwd      =:cctvPwd,"+
+				"device_desc   =:deviceDesc ,"+
+				"updated_dtm   =NOW(3)"+
 				"WHERE id = :id"
 				,new BeanPropertySqlParameterSource(t));
 	}

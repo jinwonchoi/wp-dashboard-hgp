@@ -26,7 +26,7 @@ import com.gencode.issuetool.obj.FacilityInfo;
 @Component("FacilityInfoDao")
 public class FacilityInfoDaoImpl extends AbstractDaoImpl implements FacilityInfoDao {
 
-	final String fields= "id, facil_code, facil_name, area_id, description";
+	final String fields= "id, facil_code, facil_name, facil_name2, plant_part_id, description";
 	
 	
 	public FacilityInfoDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -36,8 +36,8 @@ public class FacilityInfoDaoImpl extends AbstractDaoImpl implements FacilityInfo
 	@Override
 	public long register(FacilityInfo t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO facility_info (facil_code, facil_name,plant_id,description) " + 
-				"VALUES(:facilCode, :facilName,:plantId,:description)"
+		namedParameterJdbcTemplate.update("INSERT INTO facility_info (facil_code, facil_name, facil_name2,plant_part_id,description) " + 
+				"VALUES(:facilCode, :facilName, :facilName2,:plantId,:description)"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}
@@ -64,7 +64,8 @@ public class FacilityInfoDaoImpl extends AbstractDaoImpl implements FacilityInfo
 		return namedParameterJdbcTemplate.update("UPDATE facility_info SET " +
 				"facil_code =:facilCode,"+
 				"facil_name =:facilName,"+
-				"plant_id   =:plantId,"+
+				"facil_name2 =:facilName2,"+
+				"plant_part_id   =:plantPartId,"+
 				"description=:description "+
 				"WHERE id = :id"
 				,new BeanPropertySqlParameterSource(t));

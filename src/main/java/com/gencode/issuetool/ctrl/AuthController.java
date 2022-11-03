@@ -33,9 +33,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.gencode.issuetool.service.LoginHistoryService;
-import com.gencode.issuetool.service.MyUserDetailsService;
-
 import io.jsonwebtoken.impl.DefaultClaims;
 
 import com.gencode.issuetool.config.JwtTokenProvider;
@@ -48,8 +45,10 @@ import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.ResultObj;
-import com.gencode.issuetool.obj.UserInfo;
 import com.gencode.issuetool.obj.AuthUserInfo;
+import com.gencode.issuetool.obj.UserInfo;
+import com.gencode.issuetool.service.LoginHistoryService;
+import com.gencode.issuetool.service.MyUserDetailsService;
 
 @RestController
 @RequestMapping("/auth")

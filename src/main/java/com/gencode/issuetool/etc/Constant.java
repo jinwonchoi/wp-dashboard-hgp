@@ -147,6 +147,9 @@ public enum Constant {
 	PUSH_TAG_AREA_INFO_ADD("areaInfo.add"),
 	PUSH_TAG_AREA_INFO_DELETE("areaInfo.delete"),
 	PUSH_TAG_AREA_INFO_UPDATE("areaInfo.update"),
+	PUSH_TAG_PLANT_PART_INFO_ADD("plantPartInfo.add"),
+	PUSH_TAG_PLANT_PART_INFO_DELETE("plantPartInfo.delete"),
+	PUSH_TAG_PLANT_PART_INFO_UPDATE("plantPartInfo.update"),
 	PUSH_TAG_FACILITY_INFO_ADD("facilityInfo.add"),
 	PUSH_TAG_FACILITY_INFO_DELETE("facilityInfo.delete"),
 	PUSH_TAG_FACILITY_INFO_UPDATE("facilityInfo.update"),
@@ -177,6 +180,8 @@ public enum Constant {
 	PUSH_TAG_FACIL_TAG_MAPPING_DELETE_BY_RULE_ID("facilTagMapping.deleteByRuleId"),
 	PUSH_TAG_FACIL_TAG_MAPPING_UPDATE("facilTagMapping.update"),
 	
+	PUSH_TAG_TAG_DVC_PUSH_EVENT_ADD("tagDvcPushEvent.add"),
+	
 	/* chat, board */ 
 	PUSH_TAG_PROTOTYPE_NOTICE_BOARD_ADD("prototype.noticeBoard.add"),
 	PUSH_TAG_PROTOTYPE_NOTICE_BOARD_DELETE("prototype.noticeBoard.delete"),
@@ -193,6 +198,19 @@ public enum Constant {
 	PUSH_TAG_PROTOTYPE_CHATMSG_UPDATE("prototype.chatmsg.update"),
 	PUSH_TAG_PROTOTYPE_CHATMSG_STATUS("prototype.chatmsg.status"),
 
+	DASHBOARD_VALUE_DECIAML_SIZE(100),
+	
+	DASHBOARD_STATS_TIME_MODE_1MONTH("1m"),
+	DASHBOARD_STATS_TIME_MODE_1DAY("1D"),
+	DASHBOARD_STATS_TIME_MODE_1HOUR("1H"),
+	DASHBOARD_STATS_TIME_MODE_1MINUTE("1M"),
+
+	IOT_VALUE_NAME_TEMP("온도(℃)"),
+	IOT_VALUE_NAME_HUMID("습도(%)"),
+	IOT_VALUE_NAME_SMOKE("연기농도"),
+	IOT_VALUE_NAME_CO("CO농도"),
+	IOT_VALUE_NAME_FLARE("불꽃"),
+	
 	/*  */
 	IOT_DEVICE_TIME("time"),
 	IOT_DEVICE_INDEX("INDEX"),

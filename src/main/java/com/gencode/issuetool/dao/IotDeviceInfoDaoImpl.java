@@ -26,7 +26,7 @@ import com.gencode.issuetool.obj.IotDeviceInfo;
 @Component("IotDeviceInfoDao")
 public class IotDeviceInfoDaoImpl extends AbstractDaoImpl implements IotDeviceInfoDao {
 
-	final String fields= "id,device_id,device_type,interior_id,pos_x,pos_y,pos_z,updated_dtm,created_dtm";
+	final String fields= "id,device_id,org_device_id,device_type,interior_id,pmt_no,rptr_no,seq,device_desc,updated_dtm,created_dtm";
 	
 	public IotDeviceInfoDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		super(jdbcTemplate, namedParameterJdbcTemplate);
@@ -35,8 +35,8 @@ public class IotDeviceInfoDaoImpl extends AbstractDaoImpl implements IotDeviceIn
 	@Override
 	public long register(IotDeviceInfo t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO iot_device_info (device_id,device_type,interior_id,pos_x,pos_y,pos_z,updated_dtm,created_dtm) " + 
-				"VALUES(:deviceId,:deviceType,:interiorId,:posX,:posY,:posZ,NOW(3), NOW(3))"
+		namedParameterJdbcTemplate.update("INSERT INTO iot_device_info (device_id,org_device_id,device_type,interior_id,pmt_no,rptr_no,seq,device_desc,updated_dtm,created_dtm) " + 
+				"VALUES(:deviceId,:orgDeviceId,:deviceType,:interiorId,:pmtNo,:rptrNo,:seq,:deviceDesc,:updatedDate,NOW(3), NOW(3))"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}
@@ -61,14 +61,15 @@ public class IotDeviceInfoDaoImpl extends AbstractDaoImpl implements IotDeviceIn
 	@Override
 	public long update(IotDeviceInfo t) {
 		return namedParameterJdbcTemplate.update("UPDATE iot_device_info SET " +
-				"device_id  =:deviceId  ,"+
-				"device_type=:deviceType,"+
-				"interior_id    =:interiorId    ,"+
-				"pos_x      =:posX      ,"+
-				"pos_y      =:posY      ,"+
-				"pos_z      =:posZ      ,"+
-				"updated_dtm=:updatedDtm,"+
-				"created_dtm=:createdDtm "+
+				"device_id     =:deviceId,"+
+				"org_device_id =:orgDeviceId,"+
+				"device_type   =:deviceType,"+
+				"interior_id   =:interiorId,"+
+				"pmt_no        =:pmtNo,"+
+				"rptr_no       =:rptrNo,"+
+				"seq           =:seq,"+
+				"device_desc   =:deviceDesc ,"+
+				"updated_dtm   =NOW(3)"+
 				"WHERE id = :id"
 				,new BeanPropertySqlParameterSource(t));
 	}

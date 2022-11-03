@@ -23,10 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.gencode.issuetool.dao.NoticeBoardDao;
 import com.gencode.issuetool.dao.AreaInfoDao;
-import com.gencode.issuetool.obj.NoticeBoard;
-import com.gencode.issuetool.obj.AreaInfo;
+import com.gencode.issuetool.dao.NoticeBoardDao;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.exception.MethodUnsupportableException;
@@ -35,6 +33,8 @@ import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SortDirection;
+import com.gencode.issuetool.obj.AreaInfo;
+import com.gencode.issuetool.obj.NoticeBoard;
 
 @Service
 public class AreaInfoService {

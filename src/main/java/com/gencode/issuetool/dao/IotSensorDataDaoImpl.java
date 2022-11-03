@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,7 +20,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
 import com.gencode.issuetool.etc.Constant;
-import com.gencode.issuetool.etc.LogpressoConnector;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
@@ -27,13 +27,17 @@ import com.gencode.issuetool.io.SearchMapObj;
 import com.gencode.issuetool.obj.IotSensorData;
 import com.gencode.issuetool.obj.User;
 import com.gencode.issuetool.obj.UserInfo;
+import com.gencode.issuetool.service.LogpressoConnector;
 import com.gencode.issuetool.util.JsonUtils;
 import com.logpresso.client.Cursor;
+import com.logpresso.client.Logpresso;
 import com.logpresso.client.Tuple;
 
 @Component("IoTSensorDataDao")
 public class IotSensorDataDaoImpl extends AbstractLogpressoDaoImpl implements IotSensorDataDao {
 
+	@Autowired
+	LogpressoConnector conn;
 	public IotSensorDataDaoImpl() {
 		super();
 	}
@@ -94,8 +98,9 @@ public class IotSensorDataDaoImpl extends AbstractLogpressoDaoImpl implements Io
 	
 	@Override
 	public Optional<PageResultObj<List<IotSensorData>>> listByCategory(PageRequest req) throws IOException {
-		LogpressoConnector conn = null;
 		Cursor cursor = null;
+		Logpresso logpresso = null;
+
 		try {
 			List<IotSensorData> arResult  = new ArrayList<IotSensorData>();
 			
@@ -104,9 +109,10 @@ public class IotSensorDataDaoImpl extends AbstractLogpressoDaoImpl implements Io
 			
 			String categoryId = req.getParamMap().get("categoryId");
 			String deviceId = req.getSearchByOrMap().get("deviceId");
-			conn = new LogpressoConnector();
+			//conn = new LogpressoConnector();
 			//cursor = conn.executeQuery("proc sp_dsmain()");
-			cursor = conn.executeQuery(String.format("proc sp_dsSubIoTList(\"%s\")", categoryId));
+			logpresso = conn.getConnection();
+			cursor = conn.executeQuery(logpresso, String.format("proc sp_dsSubIoTList(\"%s\")", categoryId));
 			//cursor = conn.executeQuery("table if_wth_fcst");
 			int i = 0;
 	        while (cursor.hasNext()) {
@@ -134,7 +140,7 @@ public class IotSensorDataDaoImpl extends AbstractLogpressoDaoImpl implements Io
 	        if (cursor != null)
 			cursor.close();
 		    if (conn != null)
-		    	conn.close();
+		    	conn.close(logpresso);
 		}
 	}
 

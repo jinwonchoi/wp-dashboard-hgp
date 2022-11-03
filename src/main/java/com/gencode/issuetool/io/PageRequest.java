@@ -15,11 +15,12 @@ public class PageRequest extends Pojo {
 	Map<String, String> searchMap;
 	Map<String, String> searchByOrMap;
 	Map<String, String> paramMap;
+	Map<String, String> paramValMap;
 
 	public PageRequest() {
 	}
 
-	public PageRequest(	int pageNo, int pageSize, int lastOffset, SortDirection sortDir, String sortField, Map<String, String> searchMap, Map<String, String> searchByOrMap, Map<String, String> paramMap) {
+	public PageRequest(	int pageNo, int pageSize, int lastOffset, SortDirection sortDir, String sortField, Map<String, String> searchMap, Map<String, String> searchByOrMap, Map<String, String> paramMap, Map<String, String> paramValMap) {
 		setPage(pageNo, pageSize);
 		this.lastOffset=lastOffset;
 		this.sortField = sortField;
@@ -27,14 +28,16 @@ public class PageRequest extends Pojo {
 		this.searchMap = searchMap;
 		this.searchByOrMap = searchByOrMap;
 		this.paramMap = paramMap;
+		this.paramValMap=paramValMap;
 	}
 	
-	public PageRequest(	int pageNo, int pageSize, int lastOffset, Map<String, String> searchMap, Map<String, String> searchByOrMap,Map<String, String> paramMap) {
+	public PageRequest(	int pageNo, int pageSize, int lastOffset, Map<String, String> searchMap, Map<String, String> searchByOrMap,Map<String, String> paramMap, Map<String, String> paramValMap) {
 		setPage(pageNo, pageSize);
 		this.lastOffset=lastOffset;
 		this.searchMap = searchMap;
 		this.searchByOrMap = searchByOrMap;
 		this.paramMap = paramMap;
+		this.paramValMap = paramValMap;
 	}
 
 	public PageRequest(	int pageNo, int pageSize, int lastOffset) {
@@ -108,6 +111,14 @@ public class PageRequest extends Pojo {
 
 	public void setParamMap(Map<String, String> paramMap) {
 		this.paramMap = paramMap;
+	}
+	
+	public Map<String, String> getParamValMap() {
+		return paramValMap;
+	}
+
+	public void setParamValMap(Map<String, String> paramValMap) {
+		this.paramValMap = paramValMap;
 	}
 
 	public int getOffset() {

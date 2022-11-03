@@ -17,7 +17,7 @@ import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.io.SortDirection;
-import com.gencode.issuetool.logpresso.obj.DashBoardObj;
+import com.gencode.issuetool.logpresso.obj.DashboardObj;
 import com.gencode.issuetool.obj.AuthUserInfo;
 import com.gencode.issuetool.obj.NoticeBoard;
 import com.gencode.issuetool.obj.NoticeBoardEx;
@@ -107,10 +107,10 @@ public class UTWPDashBoardRunnerForRest {
 			AuthUserInfo authUserInfo = (AuthUserInfo) result.getItem();
 			token = authUserInfo.getToken();
 
-			Type type2 = new TypeToken<ResultObj<DashBoardObj>>() {
+			Type type2 = new TypeToken<ResultObj<DashboardObj>>() {
 			}.getType();
-			RestClient<DashBoardObj> restClient2 = new RestClient<DashBoardObj>(token);
-			ResultObj<DashBoardObj> list = (ResultObj<DashBoardObj>) restClient2
+			RestClient<DashboardObj> restClient2 = new RestClient<DashboardObj>(token);
+			ResultObj<DashboardObj> list = (ResultObj<DashboardObj>) restClient2
 					.callJsonHttp(testData.URL + "/pwrplant/dashboard/all", "", type2);
 			logger.info(list.getItem().toString());
 			logger.assertResult("GetUserList", "token으로 사용자목록 가져오기", ReturnCode.SUCCESS.get().equals(list.getResultCode()));
@@ -143,10 +143,10 @@ public class UTWPDashBoardRunnerForRest {
 			AuthUserInfo authUserInfo = (AuthUserInfo) result.getItem();
 			token = authUserInfo.getToken();
 
-			Type type2 = new TypeToken<ResultObj<DashBoardObj>>() {
+			Type type2 = new TypeToken<ResultObj<DashboardObj>>() {
 			}.getType();
-			RestClient<DashBoardObj> restClient2 = new RestClient<DashBoardObj>(token);
-			ResultObj<DashBoardObj> list = (ResultObj<DashBoardObj>) restClient2
+			RestClient<DashboardObj> restClient2 = new RestClient<DashboardObj>(token);
+			ResultObj<DashboardObj> list = (ResultObj<DashboardObj>) restClient2
 					.callJsonHttp(testData.URL + "/pwrplant/dashboard/iot", "", type2);
 			logger.info(list.getItem().toString());
 			logger.assertResult("GetUserList", "token으로 사용자목록 가져오기", ReturnCode.SUCCESS.get().equals(list.getResultCode()));
@@ -379,7 +379,7 @@ public class UTWPDashBoardRunnerForRest {
 		}.getType();
 		Map<String, String> map = new HashMap<String, String>();
 		Map<String, String> paramMap = new HashMap<String, String>();
-		PageRequest req = new PageRequest(1, 10, 0, SortDirection.ASC, "id", map, map, paramMap);
+		PageRequest req = new PageRequest(1, 10, 0, SortDirection.ASC, "id", map, map, paramMap, null);
 		PageResultObj<List<NoticeBoardEx>> result = (PageResultObj<List<NoticeBoardEx>>) (new RestClient<List<NoticeBoardEx>>(
 				token)).callJsonHttp(url, req, type);
 		logger.debug("_callListPageNotice result[" + result + "]");

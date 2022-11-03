@@ -26,7 +26,7 @@ import com.gencode.issuetool.obj.FacilTagInfo;
 @Component("FacilTagInfoDao")
 public class FacilTagInfoDaoImpl extends AbstractDaoImpl implements FacilTagInfoDao {
 
-	final String fields= "id, tag_name, facility_id, data_type, tag_desc, tag_style, updated_dtm, created_dtm";
+	final String fields= "id,tag_name,tag_desc,plant_type,facility_id,alrm_type,alrm_val1,alrm_val2,trip_type,trip_val1,trip_val2,plant_no,plant_part_code,facil_code,scr_seq,val_type,func_cd,start_register,address,data_len,tag_desc2, tag_print_name, redundancy, updated_dtm,created_dtm";
 	
 	public FacilTagInfoDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		super(jdbcTemplate, namedParameterJdbcTemplate);
@@ -35,8 +35,8 @@ public class FacilTagInfoDaoImpl extends AbstractDaoImpl implements FacilTagInfo
 	@Override
 	public long register(FacilTagInfo t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO facil_tag_info (tag_name, facility_id, data_type, tag_desc, tag_style, updated_dtm, created_dtm) " + 
-				"VALUES(:tagName, :facilityId, :dataType, :tagDesc, :tagStyle, now(), now())"
+		namedParameterJdbcTemplate.update("INSERT INTO facil_tag_info (tag_name,tag_desc,plant_type,facility_id,alrm_type,alrm_val1,alrm_val2,trip_type,trip_val1,trip_val2,plant_no,plant_part_code,facil_code,scr_seq,val_type,func_cd,start_register,end_register,data_len,tag_desc2, tag_print_name, redundancy,updated_dtm,created_dtm) " + 
+				"VALUES(:tagName,:tagDesc,:plantType,:facilityId,:alrmType,:alrmVal1,:alrmVal2,:tripType,:tripVal1,:tripVal2,:plantNo,:plantPartCode,:facilCode,:scrSeq,:valType,:funcCd,:startRegister,:address,:dataLen,:tagDesc2, :tagPrintName, :redundancy, now(), now())"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}
@@ -61,13 +61,29 @@ public class FacilTagInfoDaoImpl extends AbstractDaoImpl implements FacilTagInfo
 	@Override
 	public long update(FacilTagInfo t) {
 		return namedParameterJdbcTemplate.update("UPDATE facil_tag_info SET " +
-				"tag_name    = :tagName,"+ 
-				"facility_id = :facilityId,"+
-				"data_type   = :dataType,"+
-				"tag_desc    = :tagDesc,"+
-				"tag_style   = :tagStyle,"+
-				"updated_dtm = now(), "+
-				"created_dtm = now() " +
+				"tag_name       =:tagName,"+
+				"tag_desc       =:tagDesc,"+
+				"plant_type     =:plantType,"+
+				"facility_id    =:facilityId,"+
+				"alrm_type      =:alrmType,"+
+				"alrm_val1      =:alrmVal1,"+
+				"alrm_val2      =:alrmVal2,"+
+				"trip_type      =:tripType,"+
+				"trip_val1      =:tripVal1,"+
+				"trip_val2      =:tripVal2,"+
+				"plant_no       =:plantNo,"+
+				"plant_part_code=:plantPartCode,"+
+				"facil_code     =:facilCode,"+
+				"scr_seq        =:scrSeq,"+
+				"val_type       =:valType,"+
+				"func_cd        =:funcCd,"+
+				"start_register =:startRegister,"+
+				"address   =:address,"+
+				"data_len       =:dataLen,"+
+				"tag_desc2       =:tagDesc2,"+
+				"tag_print_name  =:tagPrintName,"+
+				"redundancy       =:redundancy,"+
+				"updated_dtm    =now(3)"+
 				"WHERE id = :id"
 				,new BeanPropertySqlParameterSource(t));
 	}

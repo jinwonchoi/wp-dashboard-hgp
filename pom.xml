@@ -18,9 +18,19 @@
 		<profile>
 			<id>prod</id>
 			<properties>
+				<rp.build.filename>phdg-dashboard</rp.build.filename>
 				<deployed.filename>war</deployed.filename>
 				<deployed.version>1.0.1</deployed.version>
 				<properties.dirname>/profile/prod</properties.dirname>
+			</properties>
+		</profile>
+		<profile>
+			<id>phdg</id>
+			<properties>
+				<rp.build.filename>phdg-dashboard</rp.build.filename>
+				<deployed.filename>war</deployed.filename>
+				<deployed.version>1.0.1</deployed.version>
+				<properties.dirname>/profile/phdg</properties.dirname>
 			</properties>
 		</profile>
 		<profile>
@@ -265,6 +275,12 @@
 		    <artifactId>imgscalr-lib</artifactId>
 		    <version>4.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>3.1.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -282,6 +298,7 @@
                 </configuration>
             </plugin>
 		</plugins>
+		<finalName>${rp.build.filename}_${deployed.version}</finalName>
 	</build>
 	<repositories>
 		<repository>

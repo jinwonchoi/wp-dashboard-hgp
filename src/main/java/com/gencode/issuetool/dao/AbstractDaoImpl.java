@@ -30,7 +30,7 @@ abstract public class AbstractDaoImpl<T> implements AbstractDao<T> {
 	protected final JdbcTemplate jdbcTemplate;
 	protected final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
-	AbstractDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+	public AbstractDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
 	}
@@ -99,6 +99,7 @@ abstract public class AbstractDaoImpl<T> implements AbstractDao<T> {
 		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 		namedParameters.addValues(searchMapObj.map()).addValues(searchMapByOrObj.map());
 		namedParameters.addValues(paramMapObj.map()).addValues(paramMapObj.map());
+		namedParameters.addValues(req.getParamValMap());
 		if (orderByStr.equals("")&&req.getSortField()!=null&&!req.getSortField().equals("")) {
 			orderByStr = " order by "+ _alias + Utils.unCamel(req.getSortField())+
 			((req.getSortDir()==SortDirection.ASC)?" asc":" desc");

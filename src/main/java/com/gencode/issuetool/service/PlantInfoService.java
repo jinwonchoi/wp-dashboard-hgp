@@ -25,8 +25,6 @@ import org.springframework.util.StringUtils;
 
 import com.gencode.issuetool.dao.NoticeBoardDao;
 import com.gencode.issuetool.dao.PlantInfoDao;
-import com.gencode.issuetool.obj.NoticeBoard;
-import com.gencode.issuetool.obj.PlantInfo;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.exception.MethodUnsupportableException;
@@ -35,6 +33,8 @@ import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SortDirection;
+import com.gencode.issuetool.obj.NoticeBoard;
+import com.gencode.issuetool.obj.PlantInfo;
 
 @Service
 public class PlantInfoService {

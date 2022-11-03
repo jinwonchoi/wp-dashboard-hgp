@@ -25,8 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.gencode.issuetool.obj.BizInfo;
-import com.gencode.issuetool.obj.CommonCode;
 import com.gencode.issuetool.dao.BizInfoDao;
 import com.gencode.issuetool.dao.CommonCodeDao;
 import com.gencode.issuetool.etc.Constant;
@@ -36,6 +34,8 @@ import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SortDirection;
+import com.gencode.issuetool.obj.BizInfo;
+import com.gencode.issuetool.obj.CommonCode;
 
 @Service
 public class CommonInfoService {
@@ -62,12 +62,4 @@ public class CommonInfoService {
 		return commonCodeDao.search(req);
 	}
 	
-	public Optional<List<BizInfo>> loadAllBizInfo(String langFlag) {
-		return bizInfoDao.loadAll(langFlag);
-	}
-
-	public Optional<List<BizInfo>> searchBizInfo(String langFlag, Map<String, String> req) {
-		return bizInfoDao.search(langFlag, req);
-	}
-
 }

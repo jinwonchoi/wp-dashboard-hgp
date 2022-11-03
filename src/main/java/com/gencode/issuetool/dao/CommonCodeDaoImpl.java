@@ -18,7 +18,6 @@ import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SearchMapObj;
-import com.gencode.issuetool.obj.BizInfo;
 import com.gencode.issuetool.obj.CommonCode;
 
 @Component

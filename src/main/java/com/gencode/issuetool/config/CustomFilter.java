@@ -36,7 +36,7 @@ public class CustomFilter implements Filter {
          */
         res.addHeader("Access-Control-Expose-Headers", "Vuejs-Version");
         res.addHeader("Vuejs-Version", vuejsVersion);
-        res.addHeader("X-Frame-Options", "ALLOW-FROM "+iframeUrl);//"http://file.rozetatech.com:8082/");
+        res.addHeader("X-Frame-Options", "ALLOW-FROM "+iframeUrl);
         chain.doFilter(req, res);
 	}
 

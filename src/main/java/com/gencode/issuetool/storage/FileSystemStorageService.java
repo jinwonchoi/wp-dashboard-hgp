@@ -30,14 +30,14 @@ import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gencode.issuetool.obj.FileInfo;
+import com.gencode.issuetool.obj.FileReference;
 import com.gencode.issuetool.dao.FileInfoDao;
 import com.gencode.issuetool.dao.FileReferenceDao;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.exception.StorageException;
 import com.gencode.issuetool.exception.StorageFileNotFoundException;
-import com.gencode.issuetool.obj.FileInfo;
-import com.gencode.issuetool.obj.FileReference;
 
 @Service
 public class FileSystemStorageService {

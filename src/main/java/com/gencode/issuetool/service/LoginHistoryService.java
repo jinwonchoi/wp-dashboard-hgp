@@ -24,14 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gencode.issuetool.obj.LoginHistory;
+import com.gencode.issuetool.obj.User;
+import com.gencode.issuetool.obj.UserInfo;
 import com.gencode.issuetool.dao.LoginHistoryDao;
 import com.gencode.issuetool.dao.UserDao;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.exception.TooManyRowException;
-import com.gencode.issuetool.obj.LoginHistory;
-import com.gencode.issuetool.obj.User;
-import com.gencode.issuetool.obj.UserInfo;
 
 @Service
 public class LoginHistoryService {

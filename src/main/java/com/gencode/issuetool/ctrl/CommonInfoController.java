@@ -26,9 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.gencode.issuetool.service.CommonInfoService;
-import com.gencode.issuetool.service.UserAccountService;
-import com.gencode.issuetool.service.UserProfileService;
 import com.gencode.issuetool.config.JwtTokenProvider;
 import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.exception.ApplicationException;
@@ -42,6 +39,9 @@ import com.gencode.issuetool.obj.CommonCode;
 import com.gencode.issuetool.obj.FileInfo;
 import com.gencode.issuetool.obj.NoticeBoardEx;
 import com.gencode.issuetool.obj.UserInfo;
+import com.gencode.issuetool.service.CommonInfoService;
+import com.gencode.issuetool.service.UserAccountService;
+import com.gencode.issuetool.service.UserProfileService;
 
 @RestController
 @RequestMapping("/common")

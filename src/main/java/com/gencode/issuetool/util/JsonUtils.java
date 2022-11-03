@@ -38,7 +38,7 @@ public final class JsonUtils {
 			return OBJECT_MAPPER.writeValueAsString(value);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e.getMessage(), e);
-		}
+		} 
 	}
 
 	/**

@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.gencode.issuetool.service.UserAccountService;
-import com.gencode.issuetool.service.UserProfileService;
 import com.logpresso.client.Cursor;
 import com.logpresso.client.Logpresso;
 import com.gencode.issuetool.config.JwtTokenProvider;
@@ -41,6 +39,8 @@ import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.obj.FileInfo;
 import com.gencode.issuetool.obj.PasswdChange;
 import com.gencode.issuetool.obj.UserInfo;
+import com.gencode.issuetool.service.UserAccountService;
+import com.gencode.issuetool.service.UserProfileService;
 
 @RestController
 @RequestMapping("/user")

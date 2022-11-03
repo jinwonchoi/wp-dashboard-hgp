@@ -23,12 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gencode.issuetool.dao.FacilTagInfoDao;
-import com.gencode.issuetool.obj.FacilTagInfo;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.exception.NotFoundException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SortDirection;
+import com.gencode.issuetool.obj.FacilTagInfo;
 
 @Service
 public class FacilTagInfoService {

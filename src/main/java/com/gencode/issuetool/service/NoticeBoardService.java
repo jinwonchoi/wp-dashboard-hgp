@@ -24,20 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.gencode.issuetool.dao.NoticeBoardDao;
-import com.gencode.issuetool.dao.NoticePersonalDao;
-import com.gencode.issuetool.obj.NoticeBoard;
-import com.gencode.issuetool.obj.NoticeBoardEx;
-import com.gencode.issuetool.obj.NoticeBoardWithFileList;
-import com.gencode.issuetool.obj.NoticePersonal;
-import com.gencode.issuetool.storage.AttachFileSystemStorageService;
-import com.gencode.issuetool.storage.EmbedFileSystemStorageService;
 import com.gencode.issuetool.dao.BoardCommentDao;
 import com.gencode.issuetool.dao.FileInfoDao;
 import com.gencode.issuetool.dao.FileReferenceDao;
-import com.gencode.issuetool.obj.BoardComment;
-import com.gencode.issuetool.obj.FileInfo;
-import com.gencode.issuetool.obj.FileReference;
+import com.gencode.issuetool.dao.NoticeBoardDao;
+import com.gencode.issuetool.dao.NoticePersonalDao;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.exception.MethodUnsupportableException;
@@ -46,6 +37,15 @@ import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SortDirection;
+import com.gencode.issuetool.obj.BoardComment;
+import com.gencode.issuetool.obj.FileInfo;
+import com.gencode.issuetool.obj.FileReference;
+import com.gencode.issuetool.obj.NoticeBoard;
+import com.gencode.issuetool.obj.NoticeBoardEx;
+import com.gencode.issuetool.obj.NoticeBoardWithFileList;
+import com.gencode.issuetool.obj.NoticePersonal;
+import com.gencode.issuetool.storage.AttachFileSystemStorageService;
+import com.gencode.issuetool.storage.EmbedFileSystemStorageService;
 
 @Service
 public class NoticeBoardService {

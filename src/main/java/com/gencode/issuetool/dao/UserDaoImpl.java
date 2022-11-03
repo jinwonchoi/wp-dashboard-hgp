@@ -24,9 +24,9 @@ import org.springframework.stereotype.Repository;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.SortDirection;
+import com.gencode.issuetool.obj.User;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SearchMapObj;
-import com.gencode.issuetool.obj.User;
 
 @Component("UserDao")
 public class UserDaoImpl extends AbstractDaoImpl implements UserDao {

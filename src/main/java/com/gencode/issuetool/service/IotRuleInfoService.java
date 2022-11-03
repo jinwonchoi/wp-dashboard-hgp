@@ -23,12 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gencode.issuetool.dao.IotRuleInfoDao;
-import com.gencode.issuetool.obj.IotRuleInfo;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.exception.NotFoundException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SortDirection;
+import com.gencode.issuetool.obj.IotRuleInfo;
 
 @Service
 public class IotRuleInfoService {

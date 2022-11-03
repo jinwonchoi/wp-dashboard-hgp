@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -78,6 +80,15 @@ public class Utils {
 	public static String yyyyMMddHHmmss(){
 		return new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 	}
+	public static String yyyyMMddHHmmssHypen(){
+		return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+	}
+	public static String yyyyMMddHHmmssSSSHypen(){
+		return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
+	}
+	public static String yyyyMMddHHmmssSSSHypen(Date _date){
+		return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(_date);
+	}
 	public static String yyyyMMddHHmmssSSS(){
 		return new java.text.SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
 	}
@@ -90,10 +101,19 @@ public class Utils {
 	public static String yyyyMMddHHmmssSSS(Date _date){
 		return new java.text.SimpleDateFormat("yyyyMMddHHmmssSSS").format(_date);
 	}
+	public static String YYYYMMDDWithHypen(){
+		return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+	}
 	public static String YYYYMMDDWithHypen(Date _date){
-		return new java.text.SimpleDateFormat("yyyy-MM-dd").format(_date);
+		return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(_date);
 	}
 	
+	public static Date addHoursToDate(Date date, int hours) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.HOUR_OF_DAY,  hours);
+		return calendar.getTime();
+	}
 	public static String fileNameByTimestamp() {
 		return Long.toString(System.currentTimeMillis());
 	}
@@ -156,5 +176,25 @@ public class Utils {
 	public static void delete(String path, String fileName) throws IOException {
 		Path file = Paths.get(path, fileName);
 		Files.delete(file);
+	}
+	
+	public static List<String> splitWord(String strOrg, int wordCnt) {
+		String[] arStrOrg=strOrg.split(" ");
+		List<String> arResult= new ArrayList<String>();
+		StringBuffer sb = new StringBuffer();
+		int cnt=0;
+		for (String item : arStrOrg) {
+			sb.append(item+" ");
+			if (cnt%3==(wordCnt-1)) {
+				arResult.add(sb.deleteCharAt(sb.length()-1).toString());
+				sb.setLength(0);
+			}
+			cnt++;
+		}
+		if (sb.length() > 0) {
+			arResult.add(sb.deleteCharAt(sb.length()-1).toString());
+			sb.setLength(0);
+		}
+		return arResult;
 	}
 }

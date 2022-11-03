@@ -3,23 +3,17 @@ package com.gencode.issuetool.obj;
 public class EtcDeviceInfo extends Pojo {
 	protected long id;
 	protected String deviceId;
+	protected String orgDeviceId;
 	protected String deviceType;
-	protected String deviceName;
-	protected String deviceSerno;
-	protected String deviceDesc;
 	protected long interiorId;
-	protected InteriorInfo interiorInfo; 
-	
-	protected float posX;
-	protected float posY;
-	protected float posZ;
-	protected float dirX;
-	protected float dirY;
-	protected float dirZ;
-	
-	protected String registerDate;
-	protected String installDate;
-	protected String termDate;
+	protected InteriorInfo interiorInfo;
+	protected String pmtNo;
+	protected String rptrNo;
+	protected String seq;
+	protected String cctvPath;
+	protected String cctvUserid;
+	protected String cctvPwd;
+	protected String deviceDesc;
 	protected String updatedDtm;
 	protected String createdDtm;
 	
@@ -36,12 +30,22 @@ public class EtcDeviceInfo extends Pojo {
 		this.id = id;
 	}
 
+	
+
 	public String getDeviceId() {
 		return deviceId;
 	}
 
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+	}
+
+	public String getOrgDeviceId() {
+		return orgDeviceId;
+	}
+
+	public void setOrgDeviceId(String orgDeviceId) {
+		this.orgDeviceId = orgDeviceId;
 	}
 
 	public String getDeviceType() {
@@ -51,35 +55,6 @@ public class EtcDeviceInfo extends Pojo {
 	public void setDeviceType(String deviceType) {
 		this.deviceType = deviceType;
 	}
-
-	public String getDeviceName() {
-		return deviceName;
-	}
-
-	public void setDeviceName(String deviceName) {
-		this.deviceName = deviceName;
-	}
-
-	public String getDeviceSerno() {
-		return deviceSerno;
-	}
-
-	public void setDeviceSerno(String deviceSerno) {
-		this.deviceSerno = deviceSerno;
-	}
-
-	public String getDeviceDesc() {
-		return deviceDesc;
-	}
-
-	public void setDeviceDesc(String deviceDesc) {
-		this.deviceDesc = deviceDesc;
-	}
-
-	public String getRegisterDate() {
-		return registerDate;
-	}
-
 
 	public long getInteriorId() {
 		return interiorId;
@@ -97,72 +72,60 @@ public class EtcDeviceInfo extends Pojo {
 		this.interiorInfo = interiorInfo;
 	}
 
-	public float getPosX() {
-		return posX;
+	public String getPmtNo() {
+		return pmtNo;
 	}
 
-	public void setPosX(float posX) {
-		this.posX = posX;
+	public void setPmtNo(String pmtNo) {
+		this.pmtNo = pmtNo;
 	}
 
-	public float getPosY() {
-		return posY;
+	public String getRptrNo() {
+		return rptrNo;
 	}
 
-	public void setPosY(float posY) {
-		this.posY = posY;
+	public void setRptrNo(String rptrNo) {
+		this.rptrNo = rptrNo;
 	}
 
-	public float getPosZ() {
-		return posZ;
+	public String getSeq() {
+		return seq;
 	}
 
-	public void setPosZ(float posZ) {
-		this.posZ = posZ;
+	public void setSeq(String seq) {
+		this.seq = seq;
 	}
 
-	public float getDirX() {
-		return dirX;
+	public String getCctvPath() {
+		return cctvPath;
 	}
 
-	public void setDirX(float dirX) {
-		this.dirX = dirX;
+	public void setCctvPath(String cctvPath) {
+		this.cctvPath = cctvPath;
 	}
 
-	public float getDirY() {
-		return dirY;
+	public String getCctvUserid() {
+		return cctvUserid;
 	}
 
-	public void setDirY(float dirY) {
-		this.dirY = dirY;
+	public void setCctvUserid(String cctvUserid) {
+		this.cctvUserid = cctvUserid;
 	}
 
-	public float getDirZ() {
-		return dirZ;
+	public String getCctvPwd() {
+		return cctvPwd;
 	}
 
-	public void setDirZ(float dirZ) {
-		this.dirZ = dirZ;
+	public void setCctvPwd(String cctvPwd) {
+		this.cctvPwd = cctvPwd;
 	}
 
-	public void setRegisterDate(String registerDate) {
-		this.registerDate = registerDate;
+	public String getDeviceDesc() {
+		return deviceDesc;
 	}
 
-	public String getInstallDate() {
-		return installDate;
-	}
-
-	public void setInstallDate(String installDate) {
-		this.installDate = installDate;
-	}
-
-	public String getTermDate() {
-		return termDate;
-	}
-
-	public void setTermDate(String termDate) {
-		this.termDate = termDate;
+	public void setDeviceDesc(String deviceDesc) {
+		this.deviceDesc = deviceDesc;
 	}
 
 	public String getUpdatedDtm() {

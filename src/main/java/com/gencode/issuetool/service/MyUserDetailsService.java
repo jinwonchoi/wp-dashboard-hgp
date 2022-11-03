@@ -27,7 +27,6 @@ import com.gencode.issuetool.exception.ApplicationException;
 import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
-//import com.gencode.issuetool.mail.EmailService;
 import com.gencode.issuetool.obj.UserInfo;
 
 @Service
