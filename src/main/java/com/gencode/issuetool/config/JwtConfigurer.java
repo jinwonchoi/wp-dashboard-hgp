@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>인증관련 JWT토큰 어댑터
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.config;
 
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;

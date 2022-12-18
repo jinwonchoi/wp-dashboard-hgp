@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>센서장비현황 집계 DAO 처리현황
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.sql.PreparedStatement;
@@ -26,6 +30,9 @@ import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SearchMapObj;
+import com.gencode.issuetool.io.StatsGenTimeMode;
+import com.gencode.issuetool.io.TimeMode;
+import com.gencode.issuetool.obj.IotData;
 import com.gencode.issuetool.obj.IotDataHistStat;
 
 /**
@@ -40,6 +47,9 @@ import com.gencode.issuetool.obj.IotDataHistStat;
 public class IotDataHistStatDaoImpl extends AbstractDaoImpl implements IotDataHistStatDao {
 
 	final String fields= "created_dtm,time_mode,interior_code,device_id,avg_humid_val,avg_smoke_val,avg_temp_val,avg_co_val,min_humid_val,min_smoke_val,min_temp_val,min_co_val,max_humid_val,max_smoke_val,max_temp_val,max_co_val,flame_cnt";
+	final String fieldsRealChartAvg= "created_dtm,time_mode,interior_code,device_id,avg_humid_val humid_val,avg_smoke_val smoke_val,avg_temp_val temp_val,avg_co_val co_val,flame_cnt flame";
+	final String fieldsRealChartMax= "created_dtm,time_mode,interior_code,device_id,min_humid_val humid_val,min_smoke_val smoke_val,min_temp_val temp_val,min_co_val co_val,flame_cnt flame";
+	final String fieldsRealChartMin= "created_dtm,time_mode,interior_code,device_id,max_humid_val humid_val,max_smoke_val smoke_val,max_temp_val temp_val,max_co_val co_val,flame_cnt flame";
 	@Value("${chart-data-array-size:30}") int chartDataArraySize;
 
 	
@@ -101,19 +111,9 @@ public class IotDataHistStatDaoImpl extends AbstractDaoImpl implements IotDataHi
 	 * 최종건 없으면 삭제 스킵하도록 현재시간-1 리턴 
 	 */
 	public String getPreGenFromDtm(String timeMode) {
-		String timeStr;
-		String timeFrmt;
-		if (timeMode.equals(Constant.DASHBOARD_STATS_TIME_MODE_1DAY.get())) {
-			timeStr= "day";
-			timeFrmt="00:00";
-		}else if (timeMode.equals(Constant.DASHBOARD_STATS_TIME_MODE_1HOUR.get())) {
-			timeStr= "hour";
-			timeFrmt="%H:00";
-		}else {//if (timeMode.equals("1M")) {
-			timeStr= "minute";
-			timeFrmt="%H:%i";
-		}
-		return jdbcTemplate.queryForObject("select ifnull(max(created_dtm), date_format(date_sub(now(), interval 1 "+timeStr+"), '%Y-%m-%d "+timeFrmt+"')) from iot_data_hist_stat where time_mode = '"+timeMode+"'", String.class);
+		StatsGenTimeMode statsGenTimeMode = new StatsGenTimeMode(timeMode);
+		return jdbcTemplate.queryForObject("select ifnull(max(created_dtm), date_format(date_sub(now(), interval "+statsGenTimeMode.getStrTime()+"), '%Y-%m-%d "
+							+statsGenTimeMode.getStrDateFrmt()+"')) from iot_data_hist_stat where time_mode = '"+timeMode+"'", String.class);
 			
 	}
 	
@@ -215,6 +215,50 @@ public class IotDataHistStatDaoImpl extends AbstractDaoImpl implements IotDataHi
 				}});
 	}
 	@Override
+	public String getCreatedDtmPre6HourlyDataGen() {
+		return getPreGenFromDtm(Constant.DASHBOARD_STATS_TIME_MODE_6HOUR.get());
+	}
+	
+	/**
+	 * 5. 시간단위 등록
+		5.1. 시간단위 등록시 기존등록 삭제
+		stat테이블=>stat테이블
+	 */
+	@Override
+	public int cleansePre6HourlyDataGen(String createdDtm) {
+		return cleansePreviousDataGen(createdDtm, Constant.DASHBOARD_STATS_TIME_MODE_6HOUR.get());
+	}
+	/**
+	 * 5. 시간단위 등록
+		5.2. 최종시간이후 현재시간 등록
+		stat테이블=>stat테이블
+	 */
+	@Override
+	public int generate6HourlyData(String createdDtm) {
+		return namedParameterJdbcTemplate.update("insert into iot_data_hist_stat\r\n" + 
+				"select substr(date(substr(created_dtm,1,10))+interval 6 * (hour(created_dtm) div 6) hour,1,16) created_dtm , '6H', interior_code,device_id,\r\n" + 
+				"	min(min_humid_val) min_humid_val,\r\n" + 
+				"	avg(avg_humid_val) avg_humid_val,\r\n" + 
+				"	max(max_humid_val) max_humid_val,\r\n" + 
+				"	min(min_smoke_val) min_smoke_val,\r\n" + 
+				"	avg(avg_smoke_val) avg_smoke_val,\r\n" + 
+				"	max(max_smoke_val) max_smoke_val,\r\n" + 
+				"	min(min_temp_val) min_temp_val,\r\n" + 
+				"	avg(avg_temp_val) avg_temp_val,\r\n" + 
+				"	max(max_temp_val) max_temp_val,\r\n" + 
+				"	min(min_co_val) min_co_val,\r\n" + 
+				"	avg(avg_co_val) avg_co_val,\r\n" + 
+				"	max(max_co_val) max_co_val,\r\n" + 
+				"	sum(flame_cnt) flame_cnt\r\n" + 
+				"from iot_data_hist_stat\r\n" + 
+				"where created_dtm >= :createdDtm \r\n" + 
+				"and time_mode='1H'\r\n" + 
+				"group by substr(date(substr(created_dtm,1,10))+interval 6 * (hour(created_dtm) div 6) hour,1,16), interior_code,device_id",
+				new MapSqlParameterSource() {{
+					addValue("createdDtm",createdDtm);
+				}});
+	}
+	@Override
 	public String getCreatedDtmPreDailyDataGen() {
 		return getPreGenFromDtm(Constant.DASHBOARD_STATS_TIME_MODE_1DAY.get());
 	}
@@ -283,7 +327,7 @@ public class IotDataHistStatDaoImpl extends AbstractDaoImpl implements IotDataHi
 		return jdbcTemplate.update("delete from iot_data_hist_stat \r\n" + 
 				"where created_dtm < date_format(date_sub(now(), interval 30 day), '%Y-%m-%d %H:00')\r\n" + 
 				//"and created_dtm < (select ifnull(max(created_dtm), date_format(date_sub(now(), interval 30 day), '%Y-%m-%d %H:00:00.000')) from iot_data_hist_stat where time_mode = '1H');\r\n" + 
-				"and time_mode='1H'");
+				"and time_mode in ('1H','6H')");
 	}
 	
 	/**
@@ -293,26 +337,7 @@ public class IotDataHistStatDaoImpl extends AbstractDaoImpl implements IotDataHi
 	 */
 	@Override
 	public Optional<List<IotDataHistStat>> getStatsCnt(PageRequest req) {
-		String strTime;
-		String strDateFrmt;
-		String timeMode;
-		if (req.getParamMap().get("timeMode").equals("1H")) {
-			strTime = "hour";
-			strDateFrmt = "%H:%i";
-			timeMode="1M";
-		} else if (req.getParamMap().get("timeMode").equals("1D")) {
-			strTime = "day";
-			strDateFrmt = "%H:00";
-			timeMode="1H";
-		} else if (req.getParamMap().get("timeMode").equals("1m")) {
-			strTime = "month";
-			strDateFrmt = "%H:00";
-			timeMode="1D";
-		} else  {//if (mode.equals("M")) {
-				strTime = "minute";
-				strDateFrmt = "%H:%i";
-				timeMode="1M";
-		}
+		TimeMode timeMode = new TimeMode(req.getParamMap());
 		
 		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
 		List<IotDataHistStat> t = namedParameterJdbcTemplate.query
@@ -331,7 +356,7 @@ public class IotDataHistStatDaoImpl extends AbstractDaoImpl implements IotDataHi
 						"	max(max_co_val) max_co_val,\r\n" + 
 						"	sum(flame_cnt) flame_cnt " + 
 						" from iot_data_hist_stat " +
-						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL 1 "+strTime+"),'%Y-%m-%d "+strDateFrmt+"') and time_mode='"+timeMode+"' " + 
+						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') " + 
 						searchMapObj.andQuery() + 
 						" group by interior_code,device_id " + 
 						" order by interior_code,device_id"
@@ -341,8 +366,27 @@ public class IotDataHistStatDaoImpl extends AbstractDaoImpl implements IotDataHi
 	}
 
 	@Override
-	public Optional<List<IotDataHistStat>> getRealtimeChartData(PageRequest req) {
-		// TODO Auto-generated method stub
-		return null;
+	public Optional<List<IotData>> getRealtimeChartData(PageRequest req) {
+		TimeMode timeMode = new TimeMode(req.getParamMap());
+		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		String fieldList;
+		if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = fieldsRealChartMax;
+		} else if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MIN.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = fieldsRealChartMin;
+		} else {//if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = fieldsRealChartAvg;
+		}
+		List<IotData> t = namedParameterJdbcTemplate.query
+				("select "+fieldList+" from iot_data_hist_stat b, " +
+						"(select distinct created_dtm idx_dtm from iot_data_hist_stat " +
+						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') and time_mode='"+timeMode.getTimeMode()+"' " + 
+						" order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a"+ 
+						"	where created_dtm = a.idx_dtm " + 
+						searchMapObj.andQuery() +
+						" order by interior_code,device_id,created_dtm "
+						, new MapSqlParameterSource(req.getParamMap())
+						, new BeanPropertyRowMapper<IotData>(IotData.class));
+		return Optional.of(t);
 	}
 }

@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>대시보드 데이터처리 스케줄러
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.schedule;
 
 import java.io.IOException;
@@ -26,23 +30,23 @@ public class DashboardScheduler {
 	
 	private final static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 	
-	@Scheduled(cron="0 0 * * * *")
+	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
 	public void processDashboardDataHourly() {
 		logger.info("DASH BOARD SCHEDULER RUN HOURLY:");
 		try {
 			dashboardService.addTagFireIdx();
-			//dashboardService.addIotFireIdx();
+			dashboardService.cleanseTagFireIdx();
 		} catch (Exception e) {
 			logger.error("Scheduler error", e);
 		}
 	}
 
-	@Scheduled(cron="0 0 * * * *")
+	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
 	public void processDashboardDataHourly2() {
 		logger.info("DASH BOARD SCHEDULER RUN HOURLY:");
 		try {
-			//dashboardService.addTagFireIdx();
 			dashboardService.addIotFireIdx();
+			dashboardService.cleanseIotFireIdx();
 		} catch (Exception e) {
 			logger.error("Scheduler error", e);
 		}
@@ -55,10 +59,10 @@ public class DashboardScheduler {
 			//TagData
 			dashboardService.addTagData();
 			dashboardService.cleanseTagData();
-			//IotData
+//			//IotData
 			dashboardService.addIotData();
 			dashboardService.cleanseIotData();
-			//IotMain
+//			//IotMain
 			dashboardService.addIotMain();
 			dashboardService.cleanseIotMain();
 		} catch (Exception e) {
@@ -80,8 +84,10 @@ public class DashboardScheduler {
 	public void generateDashboardTagDataStats() {
 		logger.info("DASH BOARD SCHEDULER RUN MINUTE: GEN TAG DATA STAT");
 		try {
+			dashboardService.genTagFireIdxHistStats();
+			dashboardService.genIotFireIdxHistStats();
 			dashboardService.genTagDataHistStats();
-			//dashboardService.genIotDataHistStats();		
+			dashboardService.genIotDataHistStats();		
 			dashboardService.genIotMainHistStats();		
 		} catch (Exception e) {
 			logger.error("Scheduler error", e);

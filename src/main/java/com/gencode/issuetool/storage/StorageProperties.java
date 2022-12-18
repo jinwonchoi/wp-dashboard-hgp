@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>파일처리 관련 설정정보
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.storage;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;

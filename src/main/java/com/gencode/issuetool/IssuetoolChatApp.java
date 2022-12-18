@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>Springboot entry 클래스
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool;
 
 import org.springframework.beans.factory.annotation.Value;

@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>센서별 상태값 처리집계 DAO inteface정의
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.util.List;
@@ -36,6 +40,19 @@ public interface IotMainHistStatDao extends Dao<IotMainHistStat> {
 		stat테이블=>stat테이블
 	 */
 	int generateHourlyData(String createdDtm);
+	/**
+	 * 5-1. 6시간단위 등록
+		5.1. 6시간단위 등록시 기존등록 삭제
+		stat테이블=>stat테이블
+	 */
+	String getCreatedDtmPre6HourlyDataGen();
+	int cleansePre6HourlyDataGen(String createdDtm);
+	/**
+	 * 5-1. 6시간단위 등록
+		5.2. 최종시간이후 현재시간 등록
+		stat테이블=>stat테이블
+	 */
+	int generate6HourlyData(String createdDtm);
 	/**
 	 * 6. 일단위 등록
 		6.1. 일단위 등록시 기존등록 삭제
@@ -79,5 +96,5 @@ public interface IotMainHistStatDao extends Dao<IotMainHistStat> {
 	 * @param map
 	 * @return
 	 */
-	Optional<List<IotMainHistStat>> getRealtimeChartData(PageRequest req);
+	Optional<List<IotMain>> getRealtimeChartData(PageRequest req);
 }

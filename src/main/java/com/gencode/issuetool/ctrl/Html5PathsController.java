@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>vue.js통해서 다른 경로로 url이 들어왔을때 404 아닌 index.html로 포워딩 controller
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.ctrl;
 
 import org.springframework.stereotype.Controller;

@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>설비태그화재지수 집계관련 DAO inteface정의
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.util.List;
@@ -6,6 +10,7 @@ import java.util.Optional;
 
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.obj.TagData;
+import com.gencode.issuetool.obj.TagFireIdx;
 import com.gencode.issuetool.obj.TagFireIdxHistStat;
 
 
@@ -36,6 +41,19 @@ public interface TagFireIdxHistStatDao extends Dao<TagFireIdxHistStat> {
 		stat테이블=>stat테이블
 	 */
 	int generateHourlyData(String createdDtm);
+	/**
+	 * 5-1. 6시간단위 등록
+		5.1. 6시간단위 등록시 기존등록 삭제
+		stat테이블=>stat테이블
+	 */
+	String getCreatedDtmPre6HourlyDataGen();
+	int cleansePre6HourlyDataGen(String createdDtm);
+	/**
+	 * 5-1. 6시간단위 등록
+		5.2. 최종시간이후 현재시간 등록
+		stat테이블=>stat테이블
+	 */
+	int generate6HourlyData(String createdDtm);
 	/**
 	 * 6. 일단위 등록
 		6.1. 일단위 등록시 기존등록 삭제
@@ -77,5 +95,5 @@ public interface TagFireIdxHistStatDao extends Dao<TagFireIdxHistStat> {
 	 * @param map
 	 * @return
 	 */
-	Optional<List<TagFireIdxHistStat>> getRealtimeChartData(PageRequest req);
+	Optional<List<TagFireIdx>> getRealtimeChartData(PageRequest req);
 }

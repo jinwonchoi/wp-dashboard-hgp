@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>센서장비화재지수관련 집계 DAO 처리구현
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.sql.PreparedStatement;
@@ -23,10 +27,15 @@ import org.springframework.stereotype.Component;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.ObjMapper;
 import com.gencode.issuetool.etc.Utils;
+import com.gencode.issuetool.io.ColumnChartTimeMode;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SearchMapObj;
+import com.gencode.issuetool.io.StatsGenTimeMode;
+import com.gencode.issuetool.io.TimeMode;
+import com.gencode.issuetool.obj.IotFireIdx;
 import com.gencode.issuetool.obj.IotFireIdxHistStat;
+import com.gencode.issuetool.obj.TagFireIdx;
 
 /**
  * 1. 5초단원 조회내역 일괄 입력
@@ -101,19 +110,9 @@ public class IotFireIdxHistStatDaoImpl extends AbstractDaoImpl implements IotFir
 	 * 최종건 없으면 삭제 스킵하도록 현재시간-1 리턴 
 	 */
 	public String getPreGenFromDtm(String timeMode) {
-		String timeStr;
-		String timeFrmt;
-		if (timeMode.equals(Constant.DASHBOARD_STATS_TIME_MODE_1DAY.get())) {
-			timeStr= "day";
-			timeFrmt="00:00";
-		}else if (timeMode.equals(Constant.DASHBOARD_STATS_TIME_MODE_1HOUR.get())) {
-			timeStr= "hour";
-			timeFrmt="%H:00";
-		}else {//if (timeMode.equals("1M")) {
-			timeStr= "minute";
-			timeFrmt="%H:%i";
-		}
-		return jdbcTemplate.queryForObject("select ifnull(max(created_dtm), date_format(date_sub(now(), interval 1 "+timeStr+"), '%Y-%m-%d "+timeFrmt+"')) from iot_fire_idx_hist_stat where time_mode = '"+timeMode+"'", String.class);
+		StatsGenTimeMode statsGenTimeMode = new StatsGenTimeMode(timeMode);
+		return jdbcTemplate.queryForObject("select ifnull(max(created_dtm), date_format(date_sub(now(), interval "+statsGenTimeMode.getStrTime()+"), '%Y-%m-%d "
+							+statsGenTimeMode.getStrDateFrmt()+"')) from iot_fire_idx_hist_stat where time_mode = '"+timeMode+"'", String.class);
 			
 	}
 	
@@ -155,7 +154,7 @@ public class IotFireIdxHistStatDaoImpl extends AbstractDaoImpl implements IotFir
 				"	max(max_fire_idx) max_fire_idx,\r\n" + 
 				"	sum(case when (fire_idx > 4000) then 1 else 0 end) alarm_cnt,\r\n" + 
 				"	sum(case when (fire_idx > 8000) then 1 else 0 end) critical_cnt\r\n" + 
-				"from tag_fire_idx_hist\r\n" + 
+				"from iot_fire_idx_hist\r\n" + 
 				"where created_dtm >= :createdDtm \r\n" + 
 				"group by substr(created_dtm, 1,16), interior_code",
 				new MapSqlParameterSource() {{
@@ -194,6 +193,42 @@ public class IotFireIdxHistStatDaoImpl extends AbstractDaoImpl implements IotFir
 				"where created_dtm >= :createdDtm \r\n" + 
 				"and time_mode='1M'\r\n" + 
 				"group by concat(substr(created_dtm, 1,13),':00'), interior_code",
+				new MapSqlParameterSource() {{
+					addValue("createdDtm",createdDtm);
+				}});
+	}
+	@Override
+	public String getCreatedDtmPre6HourlyDataGen() {
+		return getPreGenFromDtm(Constant.DASHBOARD_STATS_TIME_MODE_6HOUR.get());
+	}
+	
+	/**
+	 * 5. 시간단위 등록
+		5.1. 시간단위 등록시 기존등록 삭제
+		stat테이블=>stat테이블
+	 */
+	@Override
+	public int cleansePre6HourlyDataGen(String createdDtm) {
+		return cleansePreviousDataGen(createdDtm, Constant.DASHBOARD_STATS_TIME_MODE_6HOUR.get());
+	}
+	/**
+	 * 5. 시간단위 등록
+		5.2. 최종시간이후 현재시간 등록
+		stat테이블=>stat테이블
+	 */
+	@Override
+	public int generate6HourlyData(String createdDtm) {
+		return namedParameterJdbcTemplate.update("insert into iot_fire_idx_hist_stat\r\n" + 
+				"select substr(date(substr(created_dtm,1,10))+interval 6 * (hour(created_dtm) div 6) hour,1,16) created_dtm , '6H', interior_code,\r\n" + 
+				"	avg(avg_fire_idx) avg_fire_idx,\r\n" + 
+				"	min(min_fire_idx) min_fire_idx,\r\n" + 
+				"	max(max_fire_idx) max_fire_idx,\r\n" + 
+				"	sum(alarm_cnt) alarm_cnt,\r\n" + 
+				"	sum(critical_cnt) critical_cnt\r\n" + 
+				"from iot_fire_idx_hist_stat\r\n" + 
+				"where created_dtm >= :createdDtm \r\n" + 
+				"and time_mode='1M'\r\n" + 
+				"group by substr(date(substr(created_dtm,1,10))+interval 6 * (hour(created_dtm) div 6) hour,1,16), interior_code",
 				new MapSqlParameterSource() {{
 					addValue("createdDtm",createdDtm);
 				}});
@@ -263,32 +298,18 @@ public class IotFireIdxHistStatDaoImpl extends AbstractDaoImpl implements IotFir
 	}
 	
 	/**
-	 * 최근1시간 timeMode=1H
-	 * 최근1일 timeMode=1D
-	 * 최근1달 timeMode=1m	 
+	 * timeMode=5S 기본실시간
+	 * timeMode=1M 1분단위 칩계
+	 * timeMode=1H 1시간단위 집계
+	 * timeMode=6H 6시간단위 집계
+	 * timeMode=1D 1일단위 집계
+	 * timeMode=1m 1달단위 집계 ===> 미사용	 
+	 * 단위: 1시간, 6시간, 1일, 1주, 1달
+	 * 
 	 */
 	@Override
 	public Optional<List<IotFireIdxHistStat>> getStatsCnt(PageRequest req) {
-		String strTime;
-		String strDateFrmt;
-		String timeMode;
-		if (req.getParamMap().get("timeMode").equals("1H")) {
-			strTime = "hour";
-			strDateFrmt = "%H:%i";
-			timeMode="1M";
-		} else if (req.getParamMap().get("timeMode").equals("1D")) {
-			strTime = "day";
-			strDateFrmt = "%H:00";
-			timeMode="1H";
-		} else if (req.getParamMap().get("timeMode").equals("1m")) {
-			strTime = "month";
-			strDateFrmt = "%H:00";
-			timeMode="1D";
-		} else  {//if (mode.equals("M")) {
-				strTime = "minute";
-				strDateFrmt = "%H:%i";
-				timeMode="1M";
-		}
+		ColumnChartTimeMode timeMode = new ColumnChartTimeMode(req.getParamMap().get("timeMode"));
 		
 		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
 		List<IotFireIdxHistStat> t = namedParameterJdbcTemplate.query
@@ -299,18 +320,39 @@ public class IotFireIdxHistStatDaoImpl extends AbstractDaoImpl implements IotFir
 						"	sum(alarm_cnt) alarm_cnt," + 
 						"	sum(critical_cnt) critical_cnt " + 
 						" from iot_fire_idx_hist_stat " +
-						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL 1 "+strTime+"),'%Y-%m-%d "+strDateFrmt+"') and time_mode='"+timeMode+"' " + 
+						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') " + 
 						searchMapObj.andQuery() + 
 						" group by interior_code " + 
 						" order by interior_code"
-						, new MapSqlParameterSource(req.getParamMap())
+						, searchMapObj.params()
 						, new BeanPropertyRowMapper<IotFireIdxHistStat>(IotFireIdxHistStat.class));
 		return Optional.of(t);
 	}
 
 	@Override
-	public Optional<List<IotFireIdxHistStat>> getRealtimeChartData(PageRequest req) {
-		// TODO Auto-generated method stub
-		return null;
+	public Optional<List<IotFireIdx>> getRealtimeChartData(PageRequest req) {
+		TimeMode timeMode = new TimeMode(req.getParamMap());
+		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		String fieldList;
+		if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = " max_fire_idx fire_idx";
+		} else if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MIN.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = " min_fire_idx fire_idx";
+		} else {//if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = " avg_fire_idx fire_idx";
+		}
+		List<IotFireIdx> t = namedParameterJdbcTemplate.query
+				("select interior_code,created_dtm, " + 
+						fieldList + 
+						" from iot_fire_idx_hist_stat b, " +
+						"(select distinct created_dtm idx_dtm from iot_fire_idx_hist_stat " +
+						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') and time_mode='"+timeMode.getTimeMode()+"' " + 
+						" order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a"+ 
+						" where created_dtm = a.idx_dtm " +
+						searchMapObj.andQuery() + 
+						" order by interior_code,created_dtm"
+						, searchMapObj.params()
+						, new BeanPropertyRowMapper<IotFireIdx>(IotFireIdx.class));
+		return Optional.of(t);
 	}
 }

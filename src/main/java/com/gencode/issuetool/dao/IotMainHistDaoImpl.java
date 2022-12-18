@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>센서상태값처리 DAO 처리구현
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.sql.PreparedStatement;
@@ -18,6 +22,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
+import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.ObjMapper;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.PageRequest;
@@ -104,12 +109,28 @@ public class IotMainHistDaoImpl extends AbstractDaoImpl implements IotMainHistDa
 	@Override
 	public Optional<List<IotMain>> getRealtimeChartData(PageRequest req) {
 		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		String fieldsStr;
+		
+		String valType = Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valType"))?Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get():Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get();
+				
+		if ((Constant.IOT_REALTIME_CHART_FIELD_HUMID.get().equals(req.getParamMap().get("fieldType")))) {
+			fieldsStr = "created_dtm,interior_code,"+valType+"_humid_val avg_temp_val";
+		} else if ((Constant.IOT_REALTIME_CHART_FIELD_SMOKE.get().equals(req.getParamMap().get("fieldType")))) {
+			fieldsStr = "created_dtm,interior_code,"+valType+"_smoke_val avg_temp_val";
+		} else if ((Constant.IOT_REALTIME_CHART_FIELD_CO.get().equals(req.getParamMap().get("fieldType")))) {
+			fieldsStr = "created_dtm,interior_code,"+valType+"_co_val avg_temp_val";
+		} else if ((Constant.IOT_REALTIME_CHART_FIELD_FLAME.get().equals(req.getParamMap().get("fieldType")))) {
+			fieldsStr = "created_dtm,interior_code,"+valType+"_flame avg_temp_val";
+		} else {//if ((Constant.IOT_REALTIME_CHART_FIELD_TEMP.get().equals(req.getParamMap().get("fieldType")))) {
+			fieldsStr = "created_dtm,interior_code,"+valType+"_temp_val avg_temp_val";
+		}
+		
 		List<IotMain> t = namedParameterJdbcTemplate.query
-				("select "+fields+" from iot_main_hist b, (select distinct created_dtm idx_dtm from iot_main_hist 	where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+				("select "+fieldsStr+" from iot_main_hist b, (select distinct created_dtm idx_dtm from iot_main_hist 	where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
 						"	where created_dtm = a.idx_dtm " + 
 						searchMapObj.andQuery() +
 						" order by interior_code,created_dtm "
-						, new MapSqlParameterSource(req.getParamMap())
+						, searchMapObj.params()
 						, new BeanPropertyRowMapper<IotMain>(IotMain.class));
 		return Optional.of(t);
 	}

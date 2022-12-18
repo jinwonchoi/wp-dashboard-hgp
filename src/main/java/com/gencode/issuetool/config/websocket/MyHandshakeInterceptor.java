@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>웹소켓기능 관련 접속시 처리기능
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.config.websocket;
 
 import org.springframework.beans.factory.annotation.Autowired;

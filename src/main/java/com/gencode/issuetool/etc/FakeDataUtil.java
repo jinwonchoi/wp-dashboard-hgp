@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>로그프레소연동 테스트데이터핸들러
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.etc;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -91,43 +95,43 @@ public class FakeDataUtil {
 	
 	public static String generateTotalFireIdxData() {
 		/*
+{
+	totalfireidx: [
+		{plant_no: "M1",idx: 12.3,},
+		{plant_no: "M2",idx: 12.3,},
+		{plant_no: "MC",idx: 12.3,}
+	],
+	facilfireidx: [
 		{
-			totalfireidx: [
-				{plant_no: "M1",idx: 12.3,},
-				{plant_no: "M2",idx: 12.3,},
-				{plant_no: "MC",idx: 12.3,}
+			plant_no: "M1",
+			items: [
+				{plant_part: "FP", idx: 12.3, },
+				{plant_part: "MAA",idx: 12.3,},
+				{plant_part: "MAV",idx: 12.3,},
+				{plant_part: "MAB",idx: 12.3,},
+				{plant_part: "MAK",idx: 12.3,},
+				{plant_part: "MKD",idx: 12.3,},
 			],
-			facilfireidx: [
-						{
-							plant_no: "M1",
-							items: [
-								{plant_part: "FP", idx: 12.3, },
-								{plant_part: "MAA",idx: 12.3,},
-								{plant_part: "MAV",idx: 12.3,},
-								{plant_part: "MAB",idx: 12.3,},
-								{plant_part: "MAK",idx: 12.3,},
-								{plant_part: "MKD",idx: 12.3,},
-							],
-						},
-						{
-							plant_no: "M2",
-							items: [
-								{plant_part: "FP",idx: 12.3,},
-								{plant_part: "MAA",idx: 12.3,},
-								{plant_part: "MAV",idx: 12.3,},
-								{plant_part: "MAB",idx: 12.3,},
-								{plant_part: "MAK",idx: 12.3,},
-								{plant_part: "MKD",idx: 12.3,},
-							],
-						},
+		},
+		{
+			plant_no: "M2",
+			items: [
+				{plant_part: "FP",idx: 12.3,},
+				{plant_part: "MAA",idx: 12.3,},
+				{plant_part: "MAV",idx: 12.3,},
+				{plant_part: "MAB",idx: 12.3,},
+				{plant_part: "MAK",idx: 12.3,},
+				{plant_part: "MKD",idx: 12.3,},
 			],
-			iotfireidx: [
-				{area_code: "TURBIN01",idx: 12.3,},
-				{area_code: "TURBIN02",idx: 12.3,},
-				{area_code: "MCTRL",idx: 12.3,},
-				{area_code: "UNDERCBL",idx: 12.3,},
-			],
-		}
+		},
+	],
+	iotfireidx: [
+		{area_code: "TURBIN01",idx: 12.3,},
+		{area_code: "TURBIN02",idx: 12.3,},
+		{area_code: "MCTRL",idx: 12.3,},
+		{area_code: "UNDERCBL",idx: 12.3,},
+	],
+}
 		*/
 		Map<String, List<Map<String, Object>>> mapTotal= new HashMap<String, List<Map<String, Object>>>();
 		

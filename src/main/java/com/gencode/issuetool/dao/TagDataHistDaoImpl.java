@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>설비태그현황상태값관련 DAO 처리구현
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.sql.PreparedStatement;
@@ -18,6 +22,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
+import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.ObjMapper;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.PageRequest;
@@ -100,13 +105,20 @@ public class TagDataHistDaoImpl extends AbstractDaoImpl implements TagDataHistDa
 
 	@Override
 	public Optional<List<TagData>> getRealtimeChartData(PageRequest req) {
-		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), "b.", false);
+		String fieldsStr;
+		if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valType"))) {
+			fieldsStr= "created_dtm,plant_no,plant_part_code,facil_code,tag_name,scr_seq,max_tag_val tag_val,status";	
+		} else {
+			fieldsStr= "created_dtm,plant_no,plant_part_code,facil_code,tag_name,scr_seq, tag_val,status";
+		}
+		
 		List<TagData> t = namedParameterJdbcTemplate.query
-				("select "+fields+" from tag_data_hist b, (select distinct created_dtm idx_dtm from tag_data_hist 	where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+				("select "+fieldsStr+" from tag_data_hist b, (select distinct created_dtm idx_dtm from tag_data_hist 	where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
 						"	where created_dtm = a.idx_dtm " + 
 						searchMapObj.andQuery() +
 						" order by plant_no,plant_part_code,facil_code,tag_name,scr_seq,created_dtm "
-						, new MapSqlParameterSource(req.getParamMap())
+						, searchMapObj.params()
 						, new BeanPropertyRowMapper<TagData>(TagData.class));
 		return Optional.of(t);
 	}

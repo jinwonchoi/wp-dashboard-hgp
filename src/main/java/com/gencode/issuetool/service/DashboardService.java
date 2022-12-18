@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>대시보드화면처리관련 업무처리서비스
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.service;
 
 import java.io.File;
@@ -61,6 +65,7 @@ import com.gencode.issuetool.logpresso.obj.DashboardObj;
 import com.gencode.issuetool.obj.FacilTagInfo;
 import com.gencode.issuetool.obj.IotData;
 import com.gencode.issuetool.obj.IotFireIdx;
+import com.gencode.issuetool.obj.IotFireIdxHistStat;
 import com.gencode.issuetool.obj.IotMain;
 import com.gencode.issuetool.obj.IotMainHistStat;
 import com.gencode.issuetool.obj.IotSensorData;
@@ -71,6 +76,7 @@ import com.gencode.issuetool.obj.TagDataHistStat;
 import com.gencode.issuetool.obj.TagDvcEventHist;
 import com.gencode.issuetool.obj.TagDvcPushEvent;
 import com.gencode.issuetool.obj.TagFireIdx;
+import com.gencode.issuetool.obj.TagFireIdxHistStat;
 import com.gencode.issuetool.util.JsonUtils;
 import com.logpresso.client.Cursor;
 import com.logpresso.client.Logpresso;
@@ -167,17 +173,20 @@ public class DashboardService {
 	/**
 	 * 화재지수변동추이
 	 *  - 30일분 1일 평균으로 tag_fire_dix_hist 조회
-	 *  - 1분
+	 *  - 기본 5초
+	 *  - 1분, 1시간, 6시간, 1일 단위
 	 *  - 키는 예>"1호기:MAA"
 	 * @return
 	 * @throws IOException
 	 */
-	public RealtimeChartObj getTagFireIdxDaily(Map<String, String> map) throws IOException {
+	public RealtimeChartObj getTagFireIdxRealtimeChart(PageRequest req) throws IOException {
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
 		Map<String, List<List<String>>> mapResult = new TreeMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		
-		Optional<List<TagFireIdx>> daoList = tagFireIdxHistDao.getDailyAverageByMonth();
+		Optional<List<TagFireIdx>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+									tagFireIdxHistDao.getRealtimeChartData(req):tagFireIdxHistStatDao.getRealtimeChartData(req);
+
 		String[] prevKeyStr = {""};
 		daoList.get().forEach( e -> {
 			String keyStr = (String)e.getPlantNo()+":"+(String)e.getPlantPartCode();
@@ -211,15 +220,15 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */
-	public ColumnChartObj getTagFireIdxCntOverStable() throws IOException {
+	public ColumnChartObj getTagFireIdxCntOverStable(PageRequest req) throws IOException {
 		ArrayList<String> listData = new ArrayList<String>();
 		ArrayList<Object> listTagNames = new ArrayList<Object>();
-		Optional<List<TagFireIdx>> daoList = tagFireIdxHistDao.getCountOverStableByMonth();
+		Optional<List<TagFireIdxHistStat>> daoList = tagFireIdxHistStatDao.getStatsCnt(req);
 		daoList.get().forEach( e -> {
 			String keyStr = (e.getPlantPartCode().contains("AVERAGE")?"평균":
 					cacheMapManager.getMapPlantPartInfoByCode().get((String)e.getPlantNo()+":"+(String)e.getPlantPartCode()).getDescription())
 					+"("+e.getPlantNo()+")";
-			listData.add(Long.toString(e.getFireIdx()));
+			listData.add(Long.toString(e.getAlarmCnt()));
 			listTagNames.add(Utils.splitWord(keyStr,2));
 		});
 		return new ColumnChartObj(listTagNames,
@@ -245,12 +254,14 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */
-	public RealtimeChartObj getIotFireIdxDaily() throws IOException {
+	public RealtimeChartObj getIotFireIdxRealtimeChart(PageRequest req) throws IOException {
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
 		Map<String, List<List<String>>> mapResult = new TreeMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		
-		Optional<List<IotFireIdx>> daoList = iotFireIdxHistDao.getDailyAverageByMonth();
+		Optional<List<IotFireIdx>> daoList = (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+											iotFireIdxHistDao.getRealtimeChartData(req):
+											iotFireIdxHistStatDao.getRealtimeChartData(req);
 		String[] prevKeyStr = {""};
 		daoList.get().forEach( e -> {
 			String keyStr = (String)e.getInteriorCode();
@@ -281,14 +292,14 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */
-	public ColumnChartObj getIotFireIdxCntOverStable() throws IOException {
+	public ColumnChartObj getIotFireIdxCntOverStable(PageRequest req) throws IOException {
 		ArrayList<String> listData = new ArrayList<String>();
 		ArrayList<Object> listInteriorNames = new ArrayList<Object>();
-		Optional<List<IotFireIdx>> daoList = iotFireIdxHistDao.getCountOverStableByMonth();
+		Optional<List<IotFireIdxHistStat>> daoList = iotFireIdxHistStatDao.getStatsCnt(req);
 		daoList.get().forEach( e -> {
 			String keyStr = e.getInteriorCode().contains("AVERAGE")?"평균"
 					:cacheMapManager.getMapInteriorInfoByCode().get(e.getInteriorCode()).getInteriorName();
-			listData.add(Long.toString(e.getFireIdx()));
+			listData.add(Long.toString(e.getAlarmCnt()));
 			listInteriorNames.add(Utils.splitWord(keyStr,2));
 		});
 		return new ColumnChartObj(listInteriorNames,
@@ -370,6 +381,26 @@ public class DashboardService {
 		arResult.setTagMain(FakeDataUtil.getMapTagData(FakeDataUtil.generateTagData())); //설비별위험현황
 		return arResult;
 	}
+	/**
+	 * 	7. hst테이블 클랜징
+		1시간전 데이터 삭제
+		stat최종이 1시간전데이터이면 삭제안함
+	 */
+	@Transactional
+	public void cleanseTagFireIdx() throws Exception { 
+		int returnCnt = tagFireIdxHistDao.cleanseData();
+		logger.info("cleanseTagFireIdx:"+returnCnt);
+	}
+	/**
+	 * 	7. hst테이블 클랜징
+		1시간전 데이터 삭제
+		stat최종이 1시간전데이터이면 삭제안함
+	 */
+	@Transactional
+	public void cleanseIotFireIdx() throws Exception { 
+		int returnCnt = iotFireIdxHistDao.cleanseData();
+		logger.info("cleanseIotFireIdx:"+returnCnt);
+	}
 
 	/**
 	 * 	7. hst테이블 클랜징
@@ -381,7 +412,6 @@ public class DashboardService {
 		int returnCnt = iotMainHistDao.cleanseData();
 		logger.info("cleanseIotMain:"+returnCnt);
 	}
-	
 	
 	/**
 	 * 	7. hst테이블 클랜징
@@ -404,7 +434,7 @@ public class DashboardService {
 		int returnCnt = tagDataHistDao.cleanseData();
 		logger.info("cleanseTagData:"+returnCnt);
 	}
-	
+
 	/**
 	 * iotMain을 통계용 데이터 집계
 	 */
@@ -421,6 +451,12 @@ public class DashboardService {
 		logger.info("cleansePreHourlyDataGen:"+cleanseCnt);
 		genCnt = iotMainHistStatDao.generateHourlyData(createdDtm);
 		logger.info("generateHourlyData:"+genCnt);
+		
+		createdDtm = iotMainHistStatDao.getCreatedDtmPre6HourlyDataGen();
+		cleanseCnt = iotMainHistStatDao.cleansePre6HourlyDataGen(createdDtm);
+		logger.info("cleansePre6HourlyDataGen:"+cleanseCnt);
+		genCnt = iotMainHistStatDao.generate6HourlyData(createdDtm);
+		logger.info("generate6HourlyData:"+genCnt);
 		
 		createdDtm = iotMainHistStatDao.getCreatedDtmPreDailyDataGen();
 		cleanseCnt = iotMainHistStatDao.cleansePreDailyDataGen(createdDtm);
@@ -451,6 +487,12 @@ public class DashboardService {
 		genCnt = iotDataHistStatDao.generateHourlyData(createdDtm);
 		logger.info("generateHourlyData:"+genCnt);
 		
+		createdDtm = iotDataHistStatDao.getCreatedDtmPre6HourlyDataGen();
+		cleanseCnt = iotDataHistStatDao.cleansePre6HourlyDataGen(createdDtm);
+		logger.info("cleansePre6HourlyDataGen:"+cleanseCnt);
+		genCnt = iotDataHistStatDao.generate6HourlyData(createdDtm);
+		logger.info("generate6HourlyData:"+genCnt);
+		
 		createdDtm = iotDataHistStatDao.getCreatedDtmPreDailyDataGen();
 		cleanseCnt = iotDataHistStatDao.cleansePreDailyDataGen(createdDtm);
 		logger.info("cleansePreDailyDataGen:"+cleanseCnt);
@@ -480,6 +522,12 @@ public class DashboardService {
 		genCnt = tagDataHistStatDao.generateHourlyData(createdDtm);
 		logger.info("generateHourlyData:"+genCnt);
 		
+		createdDtm = tagDataHistStatDao.getCreatedDtmPre6HourlyDataGen();
+		cleanseCnt = tagDataHistStatDao.cleansePre6HourlyDataGen(createdDtm);
+		logger.info("cleansePre6HourlyDataGen:"+cleanseCnt);
+		genCnt = tagDataHistStatDao.generate6HourlyData(createdDtm);
+		logger.info("generate6HourlyData:"+genCnt);
+
 		createdDtm = tagDataHistStatDao.getCreatedDtmPreDailyDataGen();
 		cleanseCnt = tagDataHistStatDao.cleansePreDailyDataGen(createdDtm);
 		logger.info("cleansePreDailyDataGen:"+cleanseCnt);
@@ -497,14 +545,70 @@ public class DashboardService {
 	 */
 	@Transactional
 	public void genTagFireIdxHistStats() {
-		//TODO
+		String createdDtm = tagFireIdxHistStatDao.getCreatedDtmPreMinuteDataGen();
+		int cleanseCnt = tagFireIdxHistStatDao.cleansePreMinuteDataGen(createdDtm);
+		logger.info("cleansePreMinuteDataGen:"+cleanseCnt);
+		int genCnt = tagFireIdxHistStatDao.generateMinuteData(createdDtm);
+		logger.info("generateMinuteData:"+genCnt);
+
+		createdDtm = tagFireIdxHistStatDao.getCreatedDtmPreHourlyDataGen();
+		cleanseCnt = tagFireIdxHistStatDao.cleansePreHourlyDataGen(createdDtm);
+		logger.info("cleansePreHourlyDataGen:"+cleanseCnt);
+		genCnt = tagFireIdxHistStatDao.generateHourlyData(createdDtm);
+		logger.info("generateHourlyData:"+genCnt);
+		
+		createdDtm = tagFireIdxHistStatDao.getCreatedDtmPre6HourlyDataGen();
+		cleanseCnt = tagFireIdxHistStatDao.cleansePre6HourlyDataGen(createdDtm);
+		logger.info("cleansePre6HourlyDataGen:"+cleanseCnt);
+		genCnt = tagFireIdxHistStatDao.generate6HourlyData(createdDtm);
+		logger.info("generate6HourlyData:"+genCnt);
+
+		createdDtm = tagFireIdxHistStatDao.getCreatedDtmPreDailyDataGen();
+		cleanseCnt = tagFireIdxHistStatDao.cleansePreDailyDataGen(createdDtm);
+		logger.info("cleansePreDailyDataGen:"+cleanseCnt);
+		genCnt = tagFireIdxHistStatDao.generateDailyData(createdDtm);
+		logger.info("generateDailyData:"+genCnt);
+
+		cleanseCnt = tagFireIdxHistStatDao.cleanseMinuteData();
+		logger.info("cleanseMinuteData:"+cleanseCnt);
+		cleanseCnt = tagFireIdxHistStatDao.cleanseHourlyData();
+		logger.info("cleanseHourlyData:"+cleanseCnt);
+
 	}	
 	/**
 	 * iotFireIdx 로 통계용 데이터 집계
 	 */
 	@Transactional
 	public void genIotFireIdxHistStats() {
-		//TODO
+		String createdDtm = iotFireIdxHistStatDao.getCreatedDtmPreMinuteDataGen();
+		int cleanseCnt = iotFireIdxHistStatDao.cleansePreMinuteDataGen(createdDtm);
+		logger.info("cleansePreMinuteDataGen:"+cleanseCnt);
+		int genCnt = iotFireIdxHistStatDao.generateMinuteData(createdDtm);
+		logger.info("generateMinuteData:"+genCnt);
+		
+		createdDtm = iotFireIdxHistStatDao.getCreatedDtmPreHourlyDataGen();
+		cleanseCnt = iotFireIdxHistStatDao.cleansePreHourlyDataGen(createdDtm);
+		logger.info("cleansePreHourlyDataGen:"+cleanseCnt);
+		genCnt = iotFireIdxHistStatDao.generateHourlyData(createdDtm);
+		logger.info("generateHourlyData:"+genCnt);
+				
+		createdDtm = iotFireIdxHistStatDao.getCreatedDtmPre6HourlyDataGen();
+		cleanseCnt = iotFireIdxHistStatDao.cleansePre6HourlyDataGen(createdDtm);
+		logger.info("cleansePre6HourlyDataGen:"+cleanseCnt);
+		genCnt = iotFireIdxHistStatDao.generate6HourlyData(createdDtm);
+		logger.info("generate6HourlyData:"+genCnt);
+
+		createdDtm = iotFireIdxHistStatDao.getCreatedDtmPreDailyDataGen();
+		cleanseCnt = iotFireIdxHistStatDao.cleansePreDailyDataGen(createdDtm);
+		logger.info("cleansePreDailyDataGen:"+cleanseCnt);
+		genCnt = iotFireIdxHistStatDao.generateDailyData(createdDtm);
+		logger.info("generateDailyData:"+genCnt);
+
+		cleanseCnt = iotFireIdxHistStatDao.cleanseMinuteData();
+		logger.info("cleanseMinuteData:"+cleanseCnt);
+		cleanseCnt = iotFireIdxHistStatDao.cleanseHourlyData();
+		logger.info("cleanseHourlyData:"+cleanseCnt);
+
 	}	
 
 	/**
@@ -515,13 +619,16 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */	
-	public RealtimeChartObj getIotMainRealTimeChartByAllInteriors(PageRequest req) throws Exception {
+	public RealtimeChartObj getIotMainRealtimeChartByAllInteriors(PageRequest req) throws Exception {
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
 		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		String[] prevKeyStr = {""};
 		
-		Optional<List<IotMain>> daoList = iotMainHistDao.getRealtimeChartData(req);
+		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+										iotMainHistDao.getRealtimeChartData(req):
+										iotMainHistStatDao.getRealtimeChartData(req);
+
 		daoList.get().forEach( e -> {
 			String keyStr = (String)e.getInteriorCode();
 			if (mapResult.get(keyStr)==null && listData.size()>0) {
@@ -553,14 +660,16 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */	
-	public RealtimeChartObj getIotMainRealTimeChartByInterior(PageRequest req) throws Exception {
+	public RealtimeChartObj getIotMainRealtimeChartByInterior(PageRequest req) throws Exception {
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
 		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<List<String>>> listData = new ArrayList<List<List<String>>>();
 		for(int i=0;i<5;i++) {
 			listData.add(new ArrayList<List<String>>());
 		}
-		Optional<List<IotMain>> daoList = iotMainHistDao.getRealtimeChartData(req);
+		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+				iotMainHistDao.getRealtimeChartData(req):iotMainHistStatDao.getRealtimeChartData(req);
+
 		daoList.get().forEach( e -> {
 			listData.get(0).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
@@ -612,7 +721,9 @@ public class DashboardService {
 		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		
-		Optional<List<IotData>> daoList = iotDataHistDao.getRealtimeChartData(req);
+		Optional<List<IotData>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+				iotDataHistDao.getRealtimeChartData(req):iotDataHistStatDao.getRealtimeChartData(req);
+
 		String[] prevKeyStr = {""};
 		daoList.get().forEach( e -> {
 			String keyStr = //(String)e.getPlantNo()+":"+(String)e.getPlantPartCode()+":"+(String)e.getFacilCode()+":"+
@@ -644,13 +755,15 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */	
-	public RealtimeChartObj getTagDataRealTimeChart(PageRequest req) throws Exception {
+	public RealtimeChartObj getTagDataRealtimeChart(PageRequest req) throws Exception {
 		//List<String> listNames = new ArrayList<String>();
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
 		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		
-		Optional<List<TagData>> daoList = tagDataHistDao.getRealtimeChartData(req);
+		Optional<List<TagData>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+				tagDataHistDao.getRealtimeChartData(req):tagDataHistStatDao.getRealtimeChartData(req);
+
 		String[] prevKeyStr = {""};
 		daoList.get().forEach( e -> {
 			String keyStr = //(String)e.getPlantNo()+":"+(String)e.getPlantPartCode()+":"+(String)e.getFacilCode()+":"+

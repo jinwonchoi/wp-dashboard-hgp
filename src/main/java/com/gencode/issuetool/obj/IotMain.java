@@ -1,3 +1,8 @@
+/**
+ * <overview>센서현황 조회값 결과 공간별 수치객체
+- 기본객체
+</overview>
+ */
 package com.gencode.issuetool.obj;
 
 public class IotMain extends Pojo {

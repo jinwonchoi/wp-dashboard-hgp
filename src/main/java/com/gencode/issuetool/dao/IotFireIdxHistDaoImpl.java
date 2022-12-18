@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>센서장비화재지수관련 DAO 처리구현
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.sql.PreparedStatement;
@@ -90,16 +94,21 @@ public class IotFireIdxHistDaoImpl extends AbstractDaoImpl implements IotFireIdx
 	}
 
 	@Override
-	public Optional<List<IotFireIdx>> getDailyAverageByMonth() {
-		List<IotFireIdx> t = jdbcTemplate.query
-				("select substr(created_dtm, 1,10) created_dtm , interior_code, round(avg(fire_idx),0) fire_idx, 0 max_fire_idx from iot_fire_idx_hist " + 
-						" where created_dtm > DATE_SUB(NOW(), INTERVAL 1 month) " + 
-						" group by substr(created_dtm, 1,10) , interior_code" +
-						" order by interior_code, substr(created_dtm, 1,10) "
+	public Optional<List<IotFireIdx>> getRealtimeChartData(PageRequest req) {
+		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		List<IotFireIdx> t = namedParameterJdbcTemplate.query
+				("select substr(created_dtm, 1,19) created_dtm , interior_code, round(fire_idx,0) fire_idx, 0 max_fire_idx from iot_fire_idx_hist b," + 
+						"(select distinct created_dtm idx_dtm from iot_fire_idx_hist 	where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" + 
+						"	where created_dtm = a.idx_dtm " + 
+						searchMapObj.andQuery() +
+						" group by substr(created_dtm, 1,19) , interior_code" +
+						" order by interior_code, substr(created_dtm, 1,19) "
+						, new MapSqlParameterSource(req.getParamMap())
 						, new BeanPropertyRowMapper<IotFireIdx>(IotFireIdx.class));
 		return Optional.of(t);
 	}
 	
+	@Deprecated
 	@Override
 	public Optional<List<IotFireIdx>> getCountOverStableByMonth() {
 		List<IotFireIdx> t = jdbcTemplate.query
@@ -128,6 +137,17 @@ public class IotFireIdxHistDaoImpl extends AbstractDaoImpl implements IotFireIdx
 	public Optional<PageResultObj<List<IotFireIdx>>> search(PageRequest req) {
 		String queryStr = "select "+fields+" from iot_fire_idx_hist where 1=1";
 		return internalSearch(queryStr, req, IotFireIdx.class);
+	}
+	/**
+	 * 7. hst테이블 클랜징
+		1시간전 데이터 삭제
+		stat최종이 1시간전데이터이면 삭제안함
+	 */
+	@Override
+	public int cleanseData() {
+		return jdbcTemplate.update("delete from iot_fire_idx_hist \r\n" + 
+				"where created_dtm < date_format(date_sub(now(), interval 1 hour), '%Y-%m-%d %H:%i:00.000')\r\n" + 
+				"and date_format(date_sub(now(), interval 1 hour), '%Y-%m-%d %H:%i') < (select ifnull(max(created_dtm), date_format(date_sub(now(), interval 1 hour), '%Y-%m-%d %H:%i')) from iot_fire_idx_hist_stat where time_mode = '1M')");
 	}
 
 }

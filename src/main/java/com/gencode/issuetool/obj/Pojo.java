@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>공통 Pojo 객체 정의
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.obj;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

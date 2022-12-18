@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>설비태그현황상태값 집계관련 DAO 처리구현
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.sql.PreparedStatement;
@@ -23,9 +27,13 @@ import org.springframework.stereotype.Component;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.ObjMapper;
 import com.gencode.issuetool.etc.Utils;
+import com.gencode.issuetool.io.ColumnChartTimeMode;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SearchMapObj;
+import com.gencode.issuetool.io.StatsGenTimeMode;
+import com.gencode.issuetool.io.TimeMode;
+import com.gencode.issuetool.obj.TagData;
 import com.gencode.issuetool.obj.TagDataHistStat;
 
 /**
@@ -101,19 +109,9 @@ public class TagDataHistStatDaoImpl extends AbstractDaoImpl implements TagDataHi
 	 * 최종건 없으면 삭제 스킵하도록 현재시간-1 리턴 
 	 */
 	public String getPreGenFromDtm(String timeMode) {
-		String timeStr;
-		String timeFrmt;
-		if (timeMode.equals(Constant.DASHBOARD_STATS_TIME_MODE_1DAY.get())) {
-			timeStr= "day";
-			timeFrmt="00:00";
-		}else if (timeMode.equals(Constant.DASHBOARD_STATS_TIME_MODE_1HOUR.get())) {
-			timeStr= "hour";
-			timeFrmt="%H:00";
-		}else {//if (timeMode.equals("1M")) {
-			timeStr= "minute";
-			timeFrmt="%H:%i";
-		}
-		return jdbcTemplate.queryForObject("select ifnull(max(created_dtm), date_format(date_sub(now(), interval 1 "+timeStr+"), '%Y-%m-%d "+timeFrmt+"')) from tag_data_hist_stat where time_mode = '"+timeMode+"'", String.class);
+		StatsGenTimeMode statsGenTimeMode = new StatsGenTimeMode(timeMode);
+		return jdbcTemplate.queryForObject("select ifnull(max(created_dtm), date_format(date_sub(now(), interval "+statsGenTimeMode.getStrTime()+"), '%Y-%m-%d "
+							+statsGenTimeMode.getStrDateFrmt()+"')) from tag_data_hist_stat where time_mode = '"+timeMode+"'", String.class);
 			
 	}
 	
@@ -199,6 +197,42 @@ public class TagDataHistStatDaoImpl extends AbstractDaoImpl implements TagDataHi
 				}});
 	}
 	@Override
+	public String getCreatedDtmPre6HourlyDataGen() {
+		return getPreGenFromDtm(Constant.DASHBOARD_STATS_TIME_MODE_6HOUR.get());
+	}
+	
+	/**
+	 * 5. 시간단위 등록
+		5.1. 시간단위 등록시 기존등록 삭제
+		stat테이블=>stat테이블
+	 */
+	@Override
+	public int cleansePre6HourlyDataGen(String createdDtm) {
+		return cleansePreviousDataGen(createdDtm, Constant.DASHBOARD_STATS_TIME_MODE_6HOUR.get());
+	}
+	/**
+	 * 5. 시간단위 등록
+		5.2. 최종시간이후 현재시간 등록
+		stat테이블=>stat테이블
+	 */
+	@Override
+	public int generate6HourlyData(String createdDtm) {
+		return namedParameterJdbcTemplate.update("insert into tag_data_hist_stat\r\n" + 
+				"select substr(date(substr(created_dtm,1,10))+interval 6 * (hour(created_dtm) div 6) hour,1,16) created_dtm , '6H', plant_no, plant_part_code, facil_code, tag_name, scr_seq,\r\n" + 
+				"	avg(avg_tag_val) avg_tag_val,\r\n" + 
+				"	min(min_tag_val) min_tag_val,\r\n" + 
+				"	max(max_tag_val) max_tag_val,\r\n" + 
+				"	sum(alarm_cnt) alarm_cnt,\r\n" + 
+				"	sum(critical_cnt) critical_cnt\r\n" + 
+				"from tag_data_hist_stat\r\n" + 
+				"where created_dtm >= :createdDtm \r\n" + 
+				"and time_mode='1H'\r\n" + 
+				"group by substr(date(substr(created_dtm,1,10))+interval 6 * (hour(created_dtm) div 6) hour,1,16), plant_no, plant_part_code, facil_code, tag_name, scr_seq",
+				new MapSqlParameterSource() {{
+					addValue("createdDtm",createdDtm);
+				}});
+	}
+	@Override
 	public String getCreatedDtmPreDailyDataGen() {
 		return getPreGenFromDtm(Constant.DASHBOARD_STATS_TIME_MODE_1DAY.get());
 	}
@@ -259,7 +293,7 @@ public class TagDataHistStatDaoImpl extends AbstractDaoImpl implements TagDataHi
 		return jdbcTemplate.update("delete from tag_data_hist_stat \r\n" + 
 				"where created_dtm < date_format(date_sub(now(), interval 30 day), '%Y-%m-%d %H:00')\r\n" + 
 				//"and created_dtm < (select ifnull(max(created_dtm), date_format(date_sub(now(), interval 30 day), '%Y-%m-%d %H:00:00.000')) from tag_data_hist_stat where time_mode = '1H');\r\n" + 
-				"and time_mode='1H'");
+				"and time_mode in ('1H','6H')");
 	}
 	
 	/**
@@ -269,26 +303,7 @@ public class TagDataHistStatDaoImpl extends AbstractDaoImpl implements TagDataHi
 	 */
 	@Override
 	public Optional<List<TagDataHistStat>> getStatsCnt(PageRequest req) {
-		String strTime;
-		String strDateFrmt;
-		String timeMode;
-		if (req.getParamMap().get("timeMode").equals("1H")) {
-			strTime = "hour";
-			strDateFrmt = "%H:%i";
-			timeMode="1M";
-		} else if (req.getParamMap().get("timeMode").equals("1D")) {
-			strTime = "day";
-			strDateFrmt = "%H:00";
-			timeMode="1H";
-		} else if (req.getParamMap().get("timeMode").equals("1m")) {
-			strTime = "month";
-			strDateFrmt = "%H:00";
-			timeMode="1D";
-		} else  {//if (mode.equals("M")) {
-				strTime = "minute";
-				strDateFrmt = "%H:%i";
-				timeMode="1M";
-		}
+		ColumnChartTimeMode timeMode = new ColumnChartTimeMode(req.getParamMap().get("timeMode"));
 		
 		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
 		List<TagDataHistStat> t = namedParameterJdbcTemplate.query
@@ -299,18 +314,40 @@ public class TagDataHistStatDaoImpl extends AbstractDaoImpl implements TagDataHi
 						"sum(alarm_cnt) alarm_cnt, " + 
 						"sum(critical_cnt) critical_cnt " + 
 						" from tag_data_hist_stat " +
-						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL 1 "+strTime+"),'%Y-%m-%d "+strDateFrmt+"') and time_mode='"+timeMode+"' " + 
+						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"')" + 
 						searchMapObj.andQuery() + 
 						" group by plant_no,plant_part_code,facil_code,tag_name,scr_seq " + 
 						" order by plant_no,plant_part_code,facil_code,tag_name,scr_seq"
-						, new MapSqlParameterSource(req.getParamMap())
+						, searchMapObj.params()
 						, new BeanPropertyRowMapper<TagDataHistStat>(TagDataHistStat.class));
 		return Optional.of(t);
 	}
 
 	@Override
-	public Optional<List<TagDataHistStat>> getRealtimeChartData(PageRequest req) {
-		// TODO Auto-generated method stub
-		return null;
+	public Optional<List<TagData>> getRealtimeChartData(PageRequest req) {
+		//created_dtm,plant_no,plant_part_code,facil_code,tag_name,scr_seq,tag_val,max_tag_val,status
+		TimeMode timeMode = new TimeMode(req.getParamMap());
+		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		String fieldList;
+		if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = ",max_tag_val tag_val";
+		} else if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MIN.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = ",min_tag_val tag_val";
+		} else {//if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get().equals(req.getParamMap().get("valLevel"))) {
+			fieldList = ",avg_tag_val tag_val";
+		}
+
+		List<TagData> t = namedParameterJdbcTemplate.query
+				
+				("select plant_no,plant_part_code,facil_code,tag_name,scr_seq,created_dtm"+fieldList+
+						" from tag_data_hist_stat b, (select distinct created_dtm idx_dtm from tag_data_hist_stat "+
+						" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') and time_mode='"+timeMode.getTimeMode()+"' " + 
+						" order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+						"	where created_dtm = a.idx_dtm " + 
+						searchMapObj.andQuery() +
+						" order by plant_no,plant_part_code,facil_code,tag_name,scr_seq,created_dtm "
+						, searchMapObj.params()
+						, new BeanPropertyRowMapper<TagData>(TagData.class));
+		return Optional.of(t);
 	}
 }

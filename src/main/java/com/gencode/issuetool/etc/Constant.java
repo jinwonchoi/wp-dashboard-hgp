@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>공통상수값정의
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.etc;
 
 public enum Constant {
@@ -199,11 +203,17 @@ public enum Constant {
 	PUSH_TAG_PROTOTYPE_CHATMSG_STATUS("prototype.chatmsg.status"),
 
 	DASHBOARD_VALUE_DECIAML_SIZE(100),
-	
+
+	DASHBOARD_FIRE_IDX_ALARM_VALUE(4000),
+	DASHBOARD_FIRE_IDX_CRITICAL_VALUE(8000),
+
 	DASHBOARD_STATS_TIME_MODE_1MONTH("1m"),
+	DASHBOARD_STATS_TIME_MODE_1WEEK("1W"),
 	DASHBOARD_STATS_TIME_MODE_1DAY("1D"),
+	DASHBOARD_STATS_TIME_MODE_6HOUR("6H"),
 	DASHBOARD_STATS_TIME_MODE_1HOUR("1H"),
 	DASHBOARD_STATS_TIME_MODE_1MINUTE("1M"),
+	DASHBOARD_STATS_TIME_MODE_5SEC("5S"),
 
 	IOT_VALUE_NAME_TEMP("온도(℃)"),
 	IOT_VALUE_NAME_HUMID("습도(%)"),
@@ -211,6 +221,17 @@ public enum Constant {
 	IOT_VALUE_NAME_CO("CO농도"),
 	IOT_VALUE_NAME_FLARE("불꽃"),
 	
+	IOT_REALTIME_CHART_FIELD_HUMID("humid"),
+	IOT_REALTIME_CHART_FIELD_SMOKE("smoke"),
+	IOT_REALTIME_CHART_FIELD_TEMP("temp"),
+	IOT_REALTIME_CHART_FIELD_CO("co"),
+	IOT_REALTIME_CHART_FIELD_FLAME("flame"),
+	IOT_REALTIME_CHART_VAL_LEVEL_MAX("max"),
+	IOT_REALTIME_CHART_VAL_LEVEL_AVG("avg"),
+	IOT_REALTIME_CHART_VAL_LEVEL_MIN("min"),
+
+	//humid_val,smoke_val,temp_val,co_val,flame
+	//max, avg, 
 	/*  */
 	IOT_DEVICE_TIME("time"),
 	IOT_DEVICE_INDEX("INDEX"),

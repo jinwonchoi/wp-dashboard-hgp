@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>대시보드기능관련 controller
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.ctrl;
 
 import java.io.IOException;
@@ -119,12 +123,11 @@ public class PwrPlantController {
 		}
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, "/dashboard/tagfireidx/daily") 
-	ResultObj<RealtimeChartObj> getTagFireIdxDaily(@RequestBody Map<String, String> map) {
+	@RequestMapping("/dashboard/tagfireidx/realtime") 
+	ResultObj<RealtimeChartObj> getTagFireIdxRealtimeChart(@RequestBody PageRequest req) {
 
 		try {
-			RealtimeChartObj dashBoardObj = new RealtimeChartObj();
-			dashBoardObj = dashBoardService.getTagFireIdxDaily(map);
+			RealtimeChartObj dashBoardObj = dashBoardService.getTagFireIdxRealtimeChart(req);
 	        ResultObj<RealtimeChartObj> resultObj = ResultObj.success();
 			resultObj.setItem(dashBoardObj);
 			return resultObj;
@@ -136,11 +139,10 @@ public class PwrPlantController {
 	}
 	
 	@RequestMapping("/dashboard/tagfireidx/cntOverStable") 
-	ResultObj<ColumnChartObj> getTagFireIdxCntOverStable() {
+	ResultObj<ColumnChartObj> getTagFireIdxCntOverStable(@RequestBody PageRequest req) {
 
 		try {
-			ColumnChartObj dashBoardObj = new ColumnChartObj();
-			dashBoardObj = dashBoardService.getTagFireIdxCntOverStable();
+			ColumnChartObj dashBoardObj = dashBoardService.getTagFireIdxCntOverStable(req);
 	        ResultObj<ColumnChartObj> resultObj = ResultObj.success();
 			resultObj.setItem(dashBoardObj);
 			return resultObj;
@@ -167,12 +169,12 @@ public class PwrPlantController {
 		}
 	}
 	
-	@RequestMapping("/dashboard/iotfireidx/daily") 
-	ResultObj<RealtimeChartObj> getIotFireIdxDaily() {
+	@RequestMapping("/dashboard/iotfireidx/realtime") 
+	ResultObj<RealtimeChartObj> getIotFireIdxRealtimeChart(@RequestBody PageRequest req) {
 
 		try {
 			RealtimeChartObj dashBoardObj = new RealtimeChartObj();
-			dashBoardObj = dashBoardService.getIotFireIdxDaily();
+			dashBoardObj = dashBoardService.getIotFireIdxRealtimeChart(req);
 	        ResultObj<RealtimeChartObj> resultObj = ResultObj.success();
 			resultObj.setItem(dashBoardObj);
 			return resultObj;
@@ -184,11 +186,11 @@ public class PwrPlantController {
 	}
 	
 	@RequestMapping("/dashboard/iotfireidx/cntOverStable") 
-	ResultObj<ColumnChartObj> getIotFireIdxCntOverStable() {
+	ResultObj<ColumnChartObj> getIotFireIdxCntOverStable(@RequestBody PageRequest req) {
 
 		try {
 			ColumnChartObj dashBoardObj = new ColumnChartObj();
-			dashBoardObj = dashBoardService.getIotFireIdxCntOverStable();
+			dashBoardObj = dashBoardService.getIotFireIdxCntOverStable(req);
 	        ResultObj<ColumnChartObj> resultObj = ResultObj.success();
 			resultObj.setItem(dashBoardObj);
 			return resultObj;
@@ -217,11 +219,10 @@ public class PwrPlantController {
 	
 	
 	@RequestMapping("/dashboard/tagmain/realtime") 
-	ResultObj<RealtimeChartObj> getTagDataRealTimeChart(@RequestBody PageRequest req) {
+	ResultObj<RealtimeChartObj> getTagDataRealtimeChart(@RequestBody PageRequest req) {
 
 		try {
-			RealtimeChartObj columnChartObj = new RealtimeChartObj();
-			columnChartObj = dashBoardService.getTagDataRealTimeChart(req);
+			RealtimeChartObj columnChartObj = dashBoardService.getTagDataRealtimeChart(req);
 	        ResultObj<RealtimeChartObj> resultObj = ResultObj.success();
 			resultObj.setItem(columnChartObj);
 			return resultObj;
@@ -328,11 +329,11 @@ public class PwrPlantController {
 	}
 	
 	@RequestMapping("/dashboard/iotmain/realtime/overall") 
-	ResultObj<RealtimeChartObj> getIotMainRealTimeChartOverall(@RequestBody PageRequest req) {
+	ResultObj<RealtimeChartObj> getIotMainRealtimeChartOverall(@RequestBody PageRequest req) {
 
 		try {
 			RealtimeChartObj columnChartObj = new RealtimeChartObj();
-			columnChartObj = dashBoardService.getIotMainRealTimeChartByAllInteriors(req);
+			columnChartObj = dashBoardService.getIotMainRealtimeChartByAllInteriors(req);
 	        ResultObj<RealtimeChartObj> resultObj = ResultObj.success();
 			resultObj.setItem(columnChartObj);
 			return resultObj;
@@ -358,11 +359,11 @@ public class PwrPlantController {
 		
 	}
 	@RequestMapping("/dashboard/iotmain/realtime") 
-	ResultObj<RealtimeChartObj> getIotMainRealTimeChart(@RequestBody PageRequest req) {
+	ResultObj<RealtimeChartObj> getIotMainRealtimeChart(@RequestBody PageRequest req) {
 
 		try {
 			RealtimeChartObj columnChartObj = new RealtimeChartObj();
-			columnChartObj = dashBoardService.getIotMainRealTimeChartByInterior(req);
+			columnChartObj = dashBoardService.getIotMainRealtimeChartByInterior(req);
 	        ResultObj<RealtimeChartObj> resultObj = ResultObj.success();
 			resultObj.setItem(columnChartObj);
 			return resultObj;

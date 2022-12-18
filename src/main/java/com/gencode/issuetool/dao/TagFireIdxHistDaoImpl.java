@@ -1,3 +1,7 @@
+/**=========================================================================================
+<overview>설비태그화재지수관련 DAO 처리구현
+  </overview>
+==========================================================================================*/
 package com.gencode.issuetool.dao;
 
 import java.sql.PreparedStatement;
@@ -23,6 +27,7 @@ import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SearchMapObj;
+import com.gencode.issuetool.obj.TagData;
 import com.gencode.issuetool.obj.TagFireIdx;
 
 @Component("TagFireIdxHistDao")
@@ -92,16 +97,21 @@ public class TagFireIdxHistDaoImpl extends AbstractDaoImpl implements TagFireIdx
 	}
 
 	@Override
-	public Optional<List<TagFireIdx>> getDailyAverageByMonth(Map<String, String> map) {
-		List<TagFireIdx> t = jdbcTemplate.query
-				("select substr(created_dtm, 1,10) created_dtm , plant_no, plant_part_code, round(avg(fire_idx),0) fire_idx, 0 max_fire_idx from tag_fire_idx_hist " + 
-						" where created_dtm > DATE_SUB(NOW(), INTERVAL 1 month) " + 
-						" group by substr(created_dtm, 1,10) , plant_no, plant_part_code" +
-						" order by plant_no, plant_part_code, substr(created_dtm, 1,10) "
+	public Optional<List<TagFireIdx>> getRealtimeChartData(PageRequest req) {
+		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		List<TagFireIdx> t = namedParameterJdbcTemplate.query
+				("select substr(created_dtm, 1,19) created_dtm , plant_no, plant_part_code, round(fire_idx,0) fire_idx, 0 max_fire_idx from tag_fire_idx_hist b, "+
+						"(select distinct created_dtm idx_dtm from tag_fire_idx_hist 	where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" + 
+						"	where created_dtm = a.idx_dtm " + 
+						searchMapObj.andQuery() +
+						//" group by substr(created_dtm, 1,10) , plant_no, plant_part_code" +
+						" order by plant_no, plant_part_code, substr(created_dtm, 1,19) "
+						, new MapSqlParameterSource(req.getParamMap())
 						, new BeanPropertyRowMapper<TagFireIdx>(TagFireIdx.class));
 		return Optional.of(t);
 	}
-	
+
+	@Deprecated
 	@Override
 	public Optional<List<TagFireIdx>> getCountOverStableByMonth() {
 		List<TagFireIdx> t = jdbcTemplate.query
@@ -131,5 +141,19 @@ public class TagFireIdxHistDaoImpl extends AbstractDaoImpl implements TagFireIdx
 		String queryStr = "select "+fields+" from tag_fire_idx_hist where 1=1";
 		return internalSearch(queryStr, req, TagFireIdx.class);
 	}
+	
+
+	/**
+	 * 7. hst테이블 클랜징
+		1시간전 데이터 삭제
+		stat최종이 1시간전데이터이면 삭제안함
+	 */
+	@Override
+	public int cleanseData() {
+		return jdbcTemplate.update("delete from tag_fire_idx_hist \r\n" + 
+				"where created_dtm < date_format(date_sub(now(), interval 1 hour), '%Y-%m-%d %H:%i:00.000')\r\n" + 
+				"and date_format(date_sub(now(), interval 1 hour), '%Y-%m-%d %H:%i') < (select ifnull(max(created_dtm), date_format(date_sub(now(), interval 1 hour), '%Y-%m-%d %H:%i')) from tag_fire_idx_hist_stat where time_mode = '1M')");
+	}
+
 
 }
