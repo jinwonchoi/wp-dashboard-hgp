@@ -14,6 +14,8 @@ import com.gencode.issuetool.obj.IotMain;
 public interface IotMainHistDao extends Dao<IotMain> {
 	int[] register(List<IotMain> t);
 	Optional<List<IotMain>> getRealtimeChartData(PageRequest req);
+	Optional<List<IotMain>> getRealtimeChartDataByInteriorList(PageRequest req);
+	
 	/**
 	 * 7. hst테이블 클랜징
 		1시간전 데이터 삭제

@@ -12,5 +12,5 @@ import com.gencode.issuetool.obj.UserInfo;
 
 public interface IotSensorDataDao extends Dao<IotSensorData> {
  	Optional<List<IotSensorData>> searchExtrict(Map<String, String> map);
- 	Optional<PageResultObj<List<IotSensorData>>> listByCategory(PageRequest req) throws IOException;
+ 	//Optional<PageResultObj<List<IotSensorData>>> listByCategory(PageRequest req) throws IOException;
 }

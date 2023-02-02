@@ -7,6 +7,7 @@ package com.gencode.issuetool.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,92 +86,152 @@ public class CacheMapManager {
 	Map<String, CommonCode> mapCommonCodeByCode = new HashMap<String, CommonCode>();
 	Map<String, PlantInfo> mapPlantInfoByCode = new HashMap<String, PlantInfo>();
 	Map<String, PlantPartInfo> mapPlantPartInfoByCode = new HashMap<String, PlantPartInfo>();
+	Map<Long, AreaInfo> mapAreaInfo = new HashMap<Long, AreaInfo>();
 	Map<String, AreaInfo> mapAreaInfoByCode = new HashMap<String, AreaInfo>();
-	Map<Integer, InteriorInfo> mapInteriorInfo = new HashMap<Integer, InteriorInfo>();
+	Map<Long, InteriorInfo> mapInteriorInfo = new HashMap<Long, InteriorInfo>();
 	Map<String, InteriorInfo> mapInteriorInfoByCode = new HashMap<String, InteriorInfo>();
 	Map<String, FacilityInfo> mapFacilityInfoByCode = new HashMap<String, FacilityInfo>();
 	Map<String, FacilTagInfo> mapFacilTagInfoByCode = new HashMap<String, FacilTagInfo>();
 	Map<String, IotDeviceInfo> mapIotDeviceInfoByCode = new HashMap<String, IotDeviceInfo>();
 	Map<String, EtcDeviceInfo> mapEtcDeviceInfoByCode = new HashMap<String, EtcDeviceInfo>();
+
+	List<CommonCode> commonCodes = new ArrayList<CommonCode>();
+	List<PlantInfo> plantInfos = new ArrayList<PlantInfo>();
+	List<PlantPartInfo> plantPartInfos = new ArrayList<PlantPartInfo>();
+	List<AreaInfo> areaInfos = new ArrayList<AreaInfo>();
+	List<InteriorInfo> interiorInfos = new ArrayList<InteriorInfo>();
+	List<FacilityInfo> facilityInfos = new ArrayList<FacilityInfo>();
+	List<FacilTagInfo> facilTagInfos = new ArrayList<FacilTagInfo>();
+	List<IotDeviceInfo> iotDeviceInfos = new ArrayList<IotDeviceInfo>();
+	List<EtcDeviceInfo> etcDeviceInfos = new ArrayList<EtcDeviceInfo>();
 	
+	String interiorsStr;//"ST4","ST3","SC3","SC2","SC1","SU1","SI2","SI1","SI0"
+	String plantTypeStr="BFP,TBN";
+	String plantNosStr="M1,M2,MC";
+	String plantPartsStr="FP,MAA,MAV,MAB,MAK,MKD";
+	String areaCodesStr="TURBIN,MCTRL,UNDERCBL,INVERTER";
+
 	@PostConstruct
 	public void loadAll() {
 		commonCodeDao.loadAll().get().forEach(e -> {
 			mapCommonCodeByCode.put(e.getGroupId()+":"+e.getItemKey(), e);
+			commonCodes.add(e);
 		});
 		plantInfoDao.loadAll().get().forEach(e -> {
 			mapPlantInfoByCode.put(e.getPlantNo(), e);
+			plantInfos.add(e);
 		});
+		
+		StringBuffer sbPlantPart = new StringBuffer();
 		plantPartInfoDao.loadAll().get().forEach(e -> {
 			PlantInfo plantInfo = mapPlantInfoByCode.values().stream().filter(pi -> ((PlantInfo)pi).getId()==((PlantPartInfo)e).getPlantId()).findFirst().get();
 			mapPlantPartInfoByCode.put(plantInfo.getPlantNo()+":"+e.getPlantPartCode(), e);
+			plantPartInfos.add(e);
+			sbPlantPart.append((sbPlantPart.length()==0)?e.getPlantPartCode():(","+e.getPlantPartCode()));
 		});
+		plantPartsStr = sbPlantPart.toString();
+		
+		StringBuffer sbArea = new StringBuffer();
 		areaInfoDao.loadAll().get().forEach(e -> {
 			mapAreaInfoByCode.put(e.getAreaCode(), e);
+			mapAreaInfo.put(new Long(e.getId()), e);
+			areaInfos.add(e);
+			sbArea.append((sbArea.length()==0)?e.getAreaCode():(","+e.getAreaCode()));
 		});
+		areaCodesStr = sbArea.toString();
+		
+		StringBuffer sbInterior = new StringBuffer();
 		interiorInfoDao.loadAll().get().forEach(e -> {
 			mapInteriorInfoByCode.put(e.getInteriorCode(), e);
-			mapInteriorInfo.put(new Integer((int)e.getId()), e);
+			mapInteriorInfo.put(new Long(e.getId()), e);
+			interiorInfos.add(e);
+			sbInterior.append((sbInterior.length() == 0 )?e.getInteriorCode():(","+e.getInteriorCode()));
 		});
+		interiorsStr = sbInterior.toString();
+		
 		facilityInfoDao.loadAll().get().forEach(e -> {
 			mapFacilityInfoByCode.put(e.getFacilCode(), e);
+			facilityInfos.add(e);			
 		});
 		facilTagInfoDao.loadAll().get().forEach(e -> {
 			mapFacilTagInfoByCode.put(e.getTagName(), e);
+			facilTagInfos.add(e);
 		});
 		iotDeviceInfoDao.loadAll().get().forEach(e -> {
 			mapIotDeviceInfoByCode.put(e.getDeviceId(), e);
+			iotDeviceInfos.add(e);
 		});
 		etcDeviceInfoDao.loadAll().get().forEach(e -> {
 			mapEtcDeviceInfoByCode.put(e.getDeviceId(), e);
+			etcDeviceInfos.add(e);
 		});
 	}
 	
 	public <T> void update(T t) {
 		if (t instanceof CommonCode) {
 			mapCommonCodeByCode.put(((CommonCode)t).getGroupId()+":"+((CommonCode)t).getItemKey(), (CommonCode)t);
+			commonCodes.set(commonCodes.indexOf((CommonCode)t), (CommonCode)t);
 		} else if (t instanceof PlantInfo) {
 			mapPlantInfoByCode.put(((PlantInfo)t).getPlantNo(), (PlantInfo)t);
+			plantInfos.set(plantInfos.indexOf((PlantInfo)t), (PlantInfo)t);
 		} else if (t instanceof PlantPartInfo) {
 			mapPlantPartInfoByCode.put(mapPlantInfoByCode.get(((PlantPartInfo)t).getPlantId()).getPlantNo()
 					+":"+((PlantPartInfo)t).getPlantPartCode(), (PlantPartInfo)t);
+			plantPartInfos.set(plantPartInfos.indexOf((PlantPartInfo)t), (PlantPartInfo)t);
 		} else if (t instanceof AreaInfo) {
 			mapAreaInfoByCode.put(((AreaInfo)t).getAreaCode(), (AreaInfo)t);
+			mapAreaInfo.put(new Long(((AreaInfo)t).getId()), (AreaInfo)t);
+			areaInfos.set(areaInfos.indexOf((AreaInfo)t), (AreaInfo)t);
 		} else if (t instanceof InteriorInfo) {
 			mapInteriorInfoByCode.put(((InteriorInfo)t).getInteriorCode(), (InteriorInfo)t);
-			mapInteriorInfo.put(new Integer((int)((InteriorInfo)t).getId()), (InteriorInfo)t);
+			mapInteriorInfo.put(new Long(((InteriorInfo)t).getId()), (InteriorInfo)t);
+			interiorInfos.set(interiorInfos.indexOf((InteriorInfo)t), (InteriorInfo)t);
 		} else if (t instanceof FacilityInfo) {
 			mapFacilityInfoByCode.put(((FacilityInfo)t).getFacilCode(), (FacilityInfo)t);
+			facilityInfos.set(facilityInfos.indexOf((FacilityInfo)t), (FacilityInfo)t);
 		} else if (t instanceof FacilTagInfo) {
 			mapFacilTagInfoByCode.put(((FacilTagInfo)t).getTagName(), (FacilTagInfo)t);
+			facilTagInfos.set(facilTagInfos.indexOf((FacilTagInfo)t), (FacilTagInfo)t);
 		} else if (t instanceof IotDeviceInfo) {
 			mapIotDeviceInfoByCode.put(((IotDeviceInfo)t).getDeviceId(), (IotDeviceInfo)t);
+			iotDeviceInfos.set(iotDeviceInfos.indexOf((IotDeviceInfo)t), (IotDeviceInfo)t);
 		} else if (t instanceof EtcDeviceInfo) {
 			mapEtcDeviceInfoByCode.put(((EtcDeviceInfo)t).getDeviceId(), (EtcDeviceInfo)t);
+			etcDeviceInfos.set(etcDeviceInfos.indexOf((EtcDeviceInfo)t), (EtcDeviceInfo)t);
 		}
 	}
 
 	public <T> void delete(T t) {
 		if (t instanceof CommonCode) {
 			mapCommonCodeByCode.remove(((CommonCode)t).getGroupId()+":"+((CommonCode)t).getItemKey());
+			commonCodes.remove((CommonCode)t);
 		} else if (t instanceof PlantInfo) {
 			mapPlantInfoByCode.remove(((PlantInfo)t).getPlantNo());
+			plantInfos.remove((PlantInfo)t);
 		} else if (t instanceof PlantPartInfo) {
 			mapPlantPartInfoByCode.remove(mapPlantInfoByCode.get(((PlantPartInfo)t).getPlantId()).getPlantNo()
 					+":"+((PlantPartInfo)t).getPlantPartCode());
+			plantPartInfos.remove((PlantPartInfo)t);
 		} else if (t instanceof AreaInfo) {
 			mapAreaInfoByCode.remove(((AreaInfo)t).getAreaCode());
+			mapAreaInfo.remove(((AreaInfo)t).getId());
+			areaInfos.remove((AreaInfo)t);
 		} else if (t instanceof InteriorInfo) {
 			mapInteriorInfoByCode.remove(((InteriorInfo)t).getInteriorCode());
 			mapInteriorInfo.remove(((InteriorInfo)t).getId());
+			interiorInfos.remove((InteriorInfo)t);
 		} else if (t instanceof FacilityInfo) {
 			mapFacilityInfoByCode.remove(((FacilityInfo)t).getFacilCode());
+			facilityInfos.remove((FacilityInfo)t);
 		} else if (t instanceof FacilTagInfo) {
 			mapFacilTagInfoByCode.remove(((FacilTagInfo)t).getTagName());
+			facilTagInfos.remove((FacilTagInfo)t);
 		} else if (t instanceof IotDeviceInfo) {
 			mapIotDeviceInfoByCode.remove(((IotDeviceInfo)t).getDeviceId());
+			iotDeviceInfos.remove((IotDeviceInfo)t);
 		} else if (t instanceof EtcDeviceInfo) {
 			mapEtcDeviceInfoByCode.remove(((EtcDeviceInfo)t).getDeviceId());
+			etcDeviceInfos.remove((EtcDeviceInfo)t);
 		}
 	}
 
@@ -207,6 +268,10 @@ public class CacheMapManager {
 	public void setMapPlantPartInfoByCode(Map<String, PlantPartInfo> mapPlantPartInfoByCode) {
 		this.mapPlantPartInfoByCode = mapPlantPartInfoByCode;
 	}
+	
+	public Map<Long, AreaInfo> getMapAreaInfo() {
+		return mapAreaInfo;
+	}
 
 	public Map<String, AreaInfo> getMapAreaInfoByCode() {
 		return mapAreaInfoByCode;
@@ -224,11 +289,11 @@ public class CacheMapManager {
 		this.mapInteriorInfoByCode = mapInteriorInfoByCode;
 	}
 
-	public Map<Integer, InteriorInfo> getMapInteriorInfo() {
+	public Map<Long, InteriorInfo> getMapInteriorInfo() {
 		return mapInteriorInfo;
 	}
 
-	public void setMapInteriorInfo(Map<Integer, InteriorInfo> mapInteriorInfo) {
+	public void setMapInteriorInfo(Map<Long, InteriorInfo> mapInteriorInfo) {
 		this.mapInteriorInfo = mapInteriorInfo;
 	}
 
@@ -265,5 +330,59 @@ public class CacheMapManager {
 	}
 
 	
+	
+	public List<CommonCode> getCommonCodes() {
+		return commonCodes;
+	}
+
+	public List<PlantInfo> getPlantInfos() {
+		return plantInfos;
+	}
+
+	public List<PlantPartInfo> getPlantPartInfos() {
+		return plantPartInfos;
+	}
+
+	public List<AreaInfo> getAreaInfos() {
+		return areaInfos;
+	}
+
+	public List<InteriorInfo> getInteriorInfos() {
+		return interiorInfos;
+	}
+
+	public List<FacilityInfo> getFacilityInfos() {
+		return facilityInfos;
+	}
+
+	public List<FacilTagInfo> getFacilTagInfos() {
+		return facilTagInfos;
+	}
+
+	public List<IotDeviceInfo> getIotDeviceInfos() {
+		return iotDeviceInfos;
+	}
+
+	public List<EtcDeviceInfo> getEtcDeviceInfos() {
+		return etcDeviceInfos;
+	}
+	public String getPlantTypeStr() {
+		return plantTypeStr;
+	}
+	public String getInteriorsStr() {
+		return interiorsStr;
+	}
+
+	public String getPlantNosStr() {
+		return plantNosStr;
+	}
+
+	public String getPlantPartsStr() {
+		return plantPartsStr;
+	}
+
+	public String getAreaCodesStr() {
+		return areaCodesStr;
+	}
 	
 }

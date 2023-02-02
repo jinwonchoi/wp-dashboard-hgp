@@ -1,28 +1,23 @@
-# java -jar -Dspring.profiles.active=dev 
-server.servlet.context-path=/hgpdashboard
-server.port=8083
+# java -jar -Dspring.profiles.active=prod
+server.servlet.context-path=/hdgdashboard
+server.port=8082
 
-#spring.autoconfigure.exclude=com.gencode.issuetool.ctrl.*
-dhdgExcludePackage=com.gencode.issuetool.ctrl,com.gencode.issuetool.dao,com.gencode.issuetool.service,com.gencode.issuetool.storage
-#spring.datasource.url=jdbc:mysql://localhost:3306/webtooldb?serverTimezone=UTC
-#spring.datasource.url=jdbc:mariadb://dt.rozetatech.com:3306/hdgdb
-spring.datasource.url=jdbc:mariadb://dt.rozetatech.com:3306/hdgdbdev20
-spring.datasource.username=hdgmondev
-spring.datasource.password=hdgmondev123*
+#spring.datasource.url=jdbc:mariadb://file.rozetatech.com:3306/plantmondb
+spring.datasource.url=jdbc:mariadb://192.168.0.93:33306/hdgdb
+spring.datasource.username=hdgmon
+spring.datasource.password=hdgmon123*
 spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQLDialect
-#spring.jpa.hibernate.ddl-auto=create-drop
 
 logging.config=classpath:logback-spring.xml
 #logging.level.com.gencode.issuetool=INFO
-#logging.level.org.springframework=INFO
 #logging.level.org.springframework.web=INFO
 #logging.level.org.hibernate=INFO
 #logging.file=hdgdashboard.log
 #logging.level.org.springframework.jdbc.core = TRACE
 
-server.servlet.session.timeout=10s
-#server.servlet.session.timeout=30m
+#server.servlet.session.timeout=60s
+server.servlet.session.timeout=30m
 
 password.encoding.use=no
 #
@@ -30,12 +25,9 @@ password.encoding.use=no
 #spring.servlet.multipart.max-request-size=5120KB
 #
 #cors
-#cors_url=http://localhost:8082,http://localhost:8083
-#cors_url=http://13.125.27.90:8082,http://13.125.27.90:8083,
-#cors_url=http://192.168.0.104:8082,
 cors_url=http://localhost:8097
 issuetool.home.url=http://localhost:8083
-issuetool.error.url=http://localhost:8083/hgpdashboard/error/basic/%s
+issuetool.error.url=http://localhost:8083/hdgdashboard/error/basic/%s
 
 ##mail
 #spring.mail.host=smtp.gmail.com
@@ -51,11 +43,8 @@ issuetool.error.url=http://localhost:8083/hgpdashboard/error/basic/%s
 #
 spring.servlet.multipart.maxFileSize=10MB
 spring.servlet.multipart.maxRequestSize=10MB
-#spring.servlet.multipart.resolve-lazily=true
-#spring.servlet.multipart.maxFileSize=-1
-#spring.servlet.multipart.maxRequestSize=-1
 files.maxFileSize=10485760
-
+#file 명
 files.profile.filename=prof_%d.png
 files.avatar.filename=avtr_%d.png
 files.profile.filename.org=prof_org_%d.%s
@@ -75,28 +64,29 @@ files.upload.board.embed.path=files/upload/board_embed
 #사용자 등록 첨부파일 /yyyymmdd
 files.upload.board.attach.path=files/upload/board_attch
 
-logpresso.api.url=http://dt.rozetatech.com:3000/hg/api
-logpresso.host=dt.rozetatech.com
+logpresso.host=localhost
 logpresso.port=8888
 logpresso.userid=root
 logpresso.password=rozeta5308!
+logpresso.polling-time=5000
+logpresso.api.url=http://192.168.0.91:8080/hg/api 
 logpresso.api.key=K8XWymm1dfTP3mh5KKheQ5acptMnOHt8LwYqRgTPMg66/MJTevbYlSwSnC/mOfa6
 logpresso.api.useFake=false
-logpresso.polling-time=5000
 
-vuejs.version=202205031008
-iframe.url=http://dt.rozetatech.com:8083/
+vuejs.version=202205231008
+iframe.url=http://localhost:8083/
 
 #파일생성명
 #=> {file_type}_{userid | post id}_{file id}.xxx
-# file_type:
+# file_type:j
 # - prof 프로파일 사진
 # - avtr 아바타 이미지
 # - embd 콘텐츠 내부파일
 # - attc 첨부파일
 # 
+
 #
-#security.jwt.token.expire-length=36000000
+#security.jwt.token.expire-length=3600000
 #
 #
 ##nexmo key

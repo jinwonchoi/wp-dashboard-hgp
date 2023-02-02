@@ -97,4 +97,14 @@ public interface IotMainHistStatDao extends Dao<IotMainHistStat> {
 	 * @return
 	 */
 	Optional<List<IotMain>> getRealtimeChartData(PageRequest req);
+	
+	/**
+	 * interior/area별 차트객체리스트 생성
+	 * 기간별 최근 30건 
+	 * @param map
+	 * @return
+	 */
+	Optional<List<IotMain>> getRealtimeChartDataByInteriorList(PageRequest req);
+	
+	
 }

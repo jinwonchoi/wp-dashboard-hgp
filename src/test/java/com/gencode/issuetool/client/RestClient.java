@@ -62,6 +62,31 @@ public class RestClient<T> {
 		this.token = token;
 	}
 
+	public void testCallJsonHttp(String url, Object jsonObj, Type type) {
+    	String body = JsonUtils.toJson(jsonObj);
+		logger.info("url:"+url);
+    	logger.info("body:"+body);
+    	String resultJson = post(url, body);
+    	logger.info("resultJson:"+resultJson);
+    }
+
+	public T callLogpresso(String url, Object jsonObj, Type type) {
+    	String body = JsonUtils.toJson(jsonObj);
+
+		logger.info("url:"+url);
+    	logger.info("body:"+body);
+    	String resultJson = post(url, body);
+    	logger.info("resultJson:"+resultJson);
+
+    	//JSONObject jsonResult = new JSONObject(resultJson);
+    	
+    	Gson gson = GsonUtils.GetGson();
+		T result = (T)gson.fromJson(resultJson, type);
+    	//ResultObj<T> result = (ResultObj<T>)JsonUtils.toObject(resultJson, type.getClass());
+		logger.info("result = "+result.toString());
+    	return result;
+    }
+    
 	public ResultObj<T> callJsonHttp(String url, Object jsonObj, Type type) {
     	String body = JsonUtils.toJson(jsonObj);
     	

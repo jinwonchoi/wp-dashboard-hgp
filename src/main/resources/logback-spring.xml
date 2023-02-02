@@ -17,8 +17,7 @@
         </root>
     </springProfile>
 
-    <springProfile name="prod">
-
+    <springProfile name="stage">
         <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>app.log</file>
 
@@ -37,7 +36,38 @@
                 <pattern>%d %p %c{1.} [%t] %m%n</pattern>
             </encoder>
         </appender>
+<!--         <logger name="org.springframework" level="INFO"/>
+        <logger name="com.gencode" level="DEBUG"/>
+        <logger name="org.hibernate" level="INFO"/>
+        <logger name="org.springframework.jdbc.core" level="TRACE"/>
+ -->
+        <root level="INFO">
+            <appender-ref ref="FILE-ROLLING"/>
+        </root>
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+    <springProfile name="prod">
+        <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>app.log</file>
 
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <!-- <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern> -->
+                <fileNamePattern>app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <!-- each archived file, size max 10MB -->
+                <maxFileSize>100MB</maxFileSize>
+                <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
+                <totalSizeCap>20GB</totalSizeCap>
+                <!-- 60 days to keep -->
+                <maxHistory>60</maxHistory>
+            </rollingPolicy>
+
+            <encoder>
+                <pattern>%d %p %c{1.} [%t] %m%n</pattern>
+            </encoder>
+        </appender>
 <!--         <logger name="org.springframework" level="INFO"/>
         <logger name="com.gencode" level="DEBUG"/>
         <logger name="org.hibernate" level="INFO"/>

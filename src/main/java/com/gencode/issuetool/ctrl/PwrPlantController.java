@@ -38,8 +38,6 @@ import com.gencode.issuetool.util.GsonUtils;
 import com.gencode.issuetool.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.logpresso.client.Cursor;
-import com.logpresso.client.Tuple;
 import com.gencode.issuetool.config.JwtTokenProvider;
 import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.exception.ApplicationException;
@@ -56,7 +54,6 @@ import com.gencode.issuetool.obj.FileInfo;
 import com.gencode.issuetool.obj.GroupSum;
 import com.gencode.issuetool.obj.IotData;
 import com.gencode.issuetool.obj.IotDeviceInfo;
-import com.gencode.issuetool.obj.IotSensorData;
 import com.gencode.issuetool.obj.NoticeBoardEx;
 import com.gencode.issuetool.obj.StatsGoal;
 import com.gencode.issuetool.obj.StatsPerDay;
@@ -264,12 +261,28 @@ public class PwrPlantController {
 		}
 	}
 	
-	@RequestMapping("/dashboard/iotmain") 
-	ResultObj<DashboardObj> getIotMain() {
+	@RequestMapping("/dashboard/iotmain/interior") 
+	ResultObj<DashboardObj> getIotMainInterior() {
 
 		try {
 			DashboardObj dashBoardObj = new DashboardObj();
 			dashBoardObj = dashBoardService.getIotMain();
+	        ResultObj<DashboardObj> resultObj = ResultObj.success();
+			resultObj.setItem(dashBoardObj);
+			return resultObj;
+		} catch (Exception e) {
+			logger.error("normal error",e);
+			return ResultObj.errorUnknown();
+		} finally {
+		}
+	}
+
+	@RequestMapping("/dashboard/iotmain/area") 
+	ResultObj<DashboardObj> getIotMainArea() {
+
+		try {
+			DashboardObj dashBoardObj = new DashboardObj();
+			dashBoardObj = dashBoardService.getIotMainArea();
 	        ResultObj<DashboardObj> resultObj = ResultObj.success();
 			resultObj.setItem(dashBoardObj);
 			return resultObj;
@@ -358,6 +371,7 @@ public class PwrPlantController {
 		}
 		
 	}
+	
 	@RequestMapping("/dashboard/iotmain/realtime") 
 	ResultObj<RealtimeChartObj> getIotMainRealtimeChart(@RequestBody PageRequest req) {
 
@@ -371,8 +385,27 @@ public class PwrPlantController {
 			logger.error("normal error",e);
 			return ResultObj.errorUnknown();
 		}
-		
 	}
+	
+	@RequestMapping("/dashboard/iotmain/realtime/bykey") 
+	ResultObj<Map<String, RealtimeChartObj>> getIotMainRealtimeChartByList(@RequestBody PageRequest req) {
+
+		try {
+			logger.info("/dashboard/iotmain/realtime/bykey");
+			logger.info(req.toString());
+			Map<String, RealtimeChartObj> columnChartObj = new HashMap<String, RealtimeChartObj>();
+			columnChartObj = dashBoardService.getIotMainRealtimeChartListByInteriorList(req);
+	        ResultObj<Map<String, RealtimeChartObj>> resultObj = ResultObj.success();
+			resultObj.setItem(columnChartObj);
+			//logger.info(columnChartObj.toString());
+			return resultObj;
+		} catch (Exception e) {
+			logger.info("getIotMainRealtimeChartListByInteriorList eorror");
+			logger.error("normal error",e);
+			return ResultObj.errorUnknown();
+		}
+	}
+
 
 	@RequestMapping("/dashboard/iotmain/summary") 
 	ResultObj<ColumnChartObj> getChartIotMainCntStats(@RequestBody PageRequest req) {

@@ -30,8 +30,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.logpresso.client.Cursor;
-import com.logpresso.client.Logpresso;
 import com.gencode.issuetool.config.JwtTokenProvider;
 import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.exception.ApplicationException;

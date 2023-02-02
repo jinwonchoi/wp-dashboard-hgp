@@ -8,3 +8,6 @@
 /files/upload
 /files/profile
 
+*.log
+*.log
+app.log

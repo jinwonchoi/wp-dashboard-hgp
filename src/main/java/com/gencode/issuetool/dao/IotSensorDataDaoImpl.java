@@ -31,17 +31,12 @@ import com.gencode.issuetool.io.SearchMapObj;
 import com.gencode.issuetool.obj.IotSensorData;
 import com.gencode.issuetool.obj.User;
 import com.gencode.issuetool.obj.UserInfo;
-import com.gencode.issuetool.service.LogpressoConnector;
+//import com.gencode.issuetool.service.LogpressoConnector;
 import com.gencode.issuetool.util.JsonUtils;
-import com.logpresso.client.Cursor;
-import com.logpresso.client.Logpresso;
-import com.logpresso.client.Tuple;
 
 @Component("IoTSensorDataDao")
 public class IotSensorDataDaoImpl extends AbstractLogpressoDaoImpl implements IotSensorDataDao {
 
-	@Autowired
-	LogpressoConnector conn;
 	public IotSensorDataDaoImpl() {
 		super();
 	}
@@ -99,54 +94,54 @@ public class IotSensorDataDaoImpl extends AbstractLogpressoDaoImpl implements Io
 	public Optional<List<IotSensorData>> search(Map<String, String> map) {
 		return null;
 	}
-	
-	@Override
-	public Optional<PageResultObj<List<IotSensorData>>> listByCategory(PageRequest req) throws IOException {
-		Cursor cursor = null;
-		Logpresso logpresso = null;
-
-		try {
-			List<IotSensorData> arResult  = new ArrayList<IotSensorData>();
-			
-			long offset = req.getOffset();
-			long pageSize = req.getPageSize();
-			
-			String categoryId = req.getParamMap().get("categoryId");
-			String deviceId = req.getSearchByOrMap().get("deviceId");
-			//conn = new LogpressoConnector();
-			//cursor = conn.executeQuery("proc sp_dsmain()");
-			logpresso = conn.getConnection();
-			cursor = conn.executeQuery(logpresso, String.format("proc sp_dsSubIoTList(\"%s\")", categoryId));
-			//cursor = conn.executeQuery("table if_wth_fcst");
-			int i = 0;
-	        while (cursor.hasNext()) {
-	        	Tuple tuple = cursor.next();
-	        	//logger.info(tuple.get("_return").toString());
-	        	if ( i >= offset && i < (offset+pageSize) ) {
-	        		IotSensorData ioTSensorData = toIoTSensorData(tuple.get("_return").toString());
-	        		if ( deviceId!=null&&!ioTSensorData.getDeviceId().contains(deviceId)) {
-	        			continue;
-	        		}
-	        		arResult.add(ioTSensorData);		        	
-	        	}
-	        	i++;
-	        }
-			
-	        PageResultObj<List<IotSensorData>> pageResultObj = new PageResultObj<List<IotSensorData>>();
-			pageResultObj.setSuccess();
-			pageResultObj.setItem(arResult);
-			pageResultObj.setTotalCnt(i);
-			pageResultObj.setPageNo(req.getPageNo());
-			pageResultObj.setPageSize(req.getPageSize());
-
-			return Optional.of(pageResultObj); 
-		} finally {
-	        if (cursor != null)
-			cursor.close();
-		    if (conn != null)
-		    	conn.close(logpresso);
-		}
-	}
+//	
+//	@Override
+//	public Optional<PageResultObj<List<IotSensorData>>> listByCategory(PageRequest req) throws IOException {
+//		Cursor cursor = null;
+//		Logpresso logpresso = null;
+//
+//		try {
+//			List<IotSensorData> arResult  = new ArrayList<IotSensorData>();
+//			
+//			long offset = req.getOffset();
+//			long pageSize = req.getPageSize();
+//			
+//			String categoryId = req.getParamMap().get("categoryId");
+//			String deviceId = req.getSearchByOrMap().get("deviceId");
+//			//conn = new LogpressoConnector();
+//			//cursor = conn.executeQuery("proc sp_dsmain()");
+//			logpresso = conn.getConnection();
+//			cursor = conn.executeQuery(logpresso, String.format("proc sp_dsSubIoTList(\"%s\")", categoryId));
+//			//cursor = conn.executeQuery("table if_wth_fcst");
+//			int i = 0;
+//	        while (cursor.hasNext()) {
+//	        	Tuple tuple = cursor.next();
+//	        	//logger.info(tuple.get("_return").toString());
+//	        	if ( i >= offset && i < (offset+pageSize) ) {
+//	        		IotSensorData ioTSensorData = toIoTSensorData(tuple.get("_return").toString());
+//	        		if ( deviceId!=null&&!ioTSensorData.getDeviceId().contains(deviceId)) {
+//	        			continue;
+//	        		}
+//	        		arResult.add(ioTSensorData);		        	
+//	        	}
+//	        	i++;
+//	        }
+//			
+//	        PageResultObj<List<IotSensorData>> pageResultObj = new PageResultObj<List<IotSensorData>>();
+//			pageResultObj.setSuccess();
+//			pageResultObj.setItem(arResult);
+//			pageResultObj.setTotalCnt(i);
+//			pageResultObj.setPageNo(req.getPageNo());
+//			pageResultObj.setPageSize(req.getPageSize());
+//
+//			return Optional.of(pageResultObj); 
+//		} finally {
+//	        if (cursor != null)
+//			cursor.close();
+//		    if (conn != null)
+//		    	conn.close(logpresso);
+//		}
+//	}
 
 
 	@Override

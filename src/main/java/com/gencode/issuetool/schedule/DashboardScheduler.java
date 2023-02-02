@@ -30,9 +30,13 @@ public class DashboardScheduler {
 	
 	private final static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 	
+	private boolean isJunitRunning = ("Windows_NT".equals(System.getenv("OS"))&&null==System.getProperty("spring.application.admin.enabled"));
+
+	
 	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
 	public void processDashboardDataHourly() {
-		logger.info("DASH BOARD SCHEDULER RUN HOURLY:");
+		if (isJunitRunning) return;
+		logger.info("DASH BOARD SCHEDULER RUN HOURLY ADD: Add TagFireIdx");
 		try {
 			dashboardService.addTagFireIdx();
 			dashboardService.cleanseTagFireIdx();
@@ -43,7 +47,8 @@ public class DashboardScheduler {
 
 	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
 	public void processDashboardDataHourly2() {
-		logger.info("DASH BOARD SCHEDULER RUN HOURLY:");
+		if (isJunitRunning) return;
+		logger.info("DASH BOARD SCHEDULER RUN HOURLY: Add IotFireIdx");
 		try {
 			dashboardService.addIotFireIdx();
 			dashboardService.cleanseIotFireIdx();
@@ -54,6 +59,7 @@ public class DashboardScheduler {
 
 	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
 	public void collectDashboardTagDataPeriodic() {
+		if (isJunitRunning) return;
 		logger.info("DASH BOARD SCHEDULER RUN PERIODIC:"+pollingTime+" ADD TAG DATA");
 		try {
 			//TagData
@@ -70,8 +76,12 @@ public class DashboardScheduler {
 		}
 	}
 
+	/**
+	 * 매 10분마다 실행
+	 */ 
 	@Scheduled(cron="0 */10 * * * *")
 	public void generateTagDvcPushEvent() {
+		if (isJunitRunning) return;
 		logger.info("DASH BOARD SCHEDULER RUN MINUTE: TAG DVC PUSH");
 		try {
 			dashboardService.addTagDvcPushEventHist();		
@@ -82,6 +92,7 @@ public class DashboardScheduler {
 	
 	@Scheduled(cron="0 * * * * *")
 	public void generateDashboardTagDataStats() {
+		if (isJunitRunning) return;
 		logger.info("DASH BOARD SCHEDULER RUN MINUTE: GEN TAG DATA STAT");
 		try {
 			dashboardService.genTagFireIdxHistStats();

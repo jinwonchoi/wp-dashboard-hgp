@@ -18,19 +18,19 @@
 		<profile>
 			<id>prod</id>
 			<properties>
-				<rp.build.filename>phdg-dashboard</rp.build.filename>
+				<rp.build.filename>phgp-dashboard</rp.build.filename>
 				<deployed.filename>war</deployed.filename>
 				<deployed.version>1.0.1</deployed.version>
-				<properties.dirname>/profile/prod</properties.dirname>
+				<activatedProperties>prod</activatedProperties>
 			</properties>
 		</profile>
 		<profile>
-			<id>phdg</id>
+			<id>stage</id>
 			<properties>
-				<rp.build.filename>phdg-dashboard</rp.build.filename>
+				<rp.build.filename>shgp-dashboard</rp.build.filename>
 				<deployed.filename>war</deployed.filename>
-				<deployed.version>1.0.1</deployed.version>
-				<properties.dirname>/profile/phdg</properties.dirname>
+				<deployed.version>9.11.1</deployed.version>
+				<activatedProperties>stage</activatedProperties>
 			</properties>
 		</profile>
 		<profile>
@@ -39,9 +39,10 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
+				<rp.build.filename>dhgp-dashboard</rp.build.filename>
 				<deployed.filename>war</deployed.filename>
-				<deployed.version>1.0.1.dev</deployed.version>
-				<properties.dirname>/profile/dev</properties.dirname>
+				<deployed.version>9.11.1</deployed.version>
+				<activatedProperties>dev</activatedProperties>
 			</properties>
 		</profile>
 		<profile>
@@ -49,14 +50,14 @@
 			<properties>
 				<deployed.filename>war</deployed.filename>
 				<deployed.version>1.0.1.dev</deployed.version>
-				<properties.dirname>/profile/local</properties.dirname>
+				<activatedProperties>local</activatedProperties>
 			</properties>
 		</profile>
 		<profile>
 			<id>test</id>
 			<properties>
 				<deployed.filename>jar</deployed.filename>
-				<properties.dirname>/profile/test</properties.dirname>
+				<activatedProperties>test</activatedProperties>
 			</properties>
 		</profile>
 	</profiles>
@@ -70,6 +71,7 @@
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
         <jstl-api.version>1.2</jstl-api.version>
         <javax.servlet.jsp-api.version>2.3.1</javax.servlet.jsp-api.version>
+        <skipTests>true</skipTests>
 	</properties>
 
 	<dependencies>
@@ -265,12 +267,12 @@
 		    <artifactId>jaxb-api</artifactId>
 		    <version>2.3.1</version>
 		</dependency>        
-		<dependency>
+<!-- 		<dependency>
 			<groupId>logpresso</groupId>
 			<artifactId>logpresso-sdk-java</artifactId>
 			<version>1.0.1</version>
 		</dependency>
-		<dependency>
+ -->		<dependency>
 		    <groupId>org.imgscalr</groupId>
 		    <artifactId>imgscalr-lib</artifactId>
 		    <version>4.2</version>
@@ -299,12 +301,18 @@
             </plugin>
 		</plugins>
 		<finalName>${rp.build.filename}_${deployed.version}</finalName>
-	</build>
-	<repositories>
+	    <resources>
+	        <resource>
+	            <directory>src/main/resources</directory>
+	            <filtering>true</filtering>
+	        </resource>
+	    </resources>
+    </build>
+<!-- 	<repositories>
 		<repository>
 			<id>logpresso-repository</id>
 			<name>Logpresso Repository for Maven</name>
 			<url>http://staging.araqne.org</url>
 		</repository>
-	</repositories>
+	</repositories> -->
 </project>

@@ -229,6 +229,11 @@ public enum Constant {
 	IOT_REALTIME_CHART_VAL_LEVEL_MAX("max"),
 	IOT_REALTIME_CHART_VAL_LEVEL_AVG("avg"),
 	IOT_REALTIME_CHART_VAL_LEVEL_MIN("min"),
+	
+	DASHBOARD_LOGPRESSO_REFRESH_TIME("5s"), //5초
+	
+	IOT_REALTIME_CHART_KEY_MODE_AREA("area"),
+	IOT_REALTIME_CHART_KEY_MODE_INTERIOR("interior"),
 
 	//humid_val,smoke_val,temp_val,co_val,flame
 	//max, avg, 

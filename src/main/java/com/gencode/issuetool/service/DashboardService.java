@@ -61,8 +61,16 @@ import com.gencode.issuetool.io.chart.RealtimeChartObj;
 import com.gencode.issuetool.io.chart.ColumnChartObj;
 import com.gencode.issuetool.io.chart.ColumnChartSeriesItem;
 import com.gencode.issuetool.io.chart.RealtimeChartSeriesItem;
+import com.gencode.issuetool.logpresso.io.DvcEventReqObj;
+import com.gencode.issuetool.logpresso.io.IotDataReqObj;
+import com.gencode.issuetool.logpresso.io.IotFireIdxReqObj;
+import com.gencode.issuetool.logpresso.io.IotMainReqObj;
+import com.gencode.issuetool.logpresso.io.TagDataReqObj;
+import com.gencode.issuetool.logpresso.io.TagFireIdxReqObj;
 import com.gencode.issuetool.logpresso.obj.DashboardObj;
+import com.gencode.issuetool.obj.AreaInfo;
 import com.gencode.issuetool.obj.FacilTagInfo;
+import com.gencode.issuetool.obj.InteriorInfo;
 import com.gencode.issuetool.obj.IotData;
 import com.gencode.issuetool.obj.IotFireIdx;
 import com.gencode.issuetool.obj.IotFireIdxHistStat;
@@ -71,6 +79,8 @@ import com.gencode.issuetool.obj.IotMainHistStat;
 import com.gencode.issuetool.obj.IotSensorData;
 import com.gencode.issuetool.obj.NoticeBoard;
 import com.gencode.issuetool.obj.NoticeBoardEx;
+import com.gencode.issuetool.obj.PlantInfo;
+import com.gencode.issuetool.obj.PlantPartInfo;
 import com.gencode.issuetool.obj.TagData;
 import com.gencode.issuetool.obj.TagDataHistStat;
 import com.gencode.issuetool.obj.TagDvcEventHist;
@@ -78,9 +88,9 @@ import com.gencode.issuetool.obj.TagDvcPushEvent;
 import com.gencode.issuetool.obj.TagFireIdx;
 import com.gencode.issuetool.obj.TagFireIdxHistStat;
 import com.gencode.issuetool.util.JsonUtils;
-import com.logpresso.client.Cursor;
-import com.logpresso.client.Logpresso;
-import com.logpresso.client.Tuple;
+//import com.logpresso.client.Cursor;
+//import com.logpresso.client.Logpresso;
+//import com.logpresso.client.Tuple;
 
 @Service
 public class DashboardService {
@@ -91,8 +101,10 @@ public class DashboardService {
 	@Value("${logpresso.userid}") String userid;
 	@Value("${logpresso.password}") String password;
 	@Value("${server.servlet.context-path}") String contextPath;
+	@Value("${logpresso.api.useFake}") boolean useFake;
+	
 
-	final String hdgPath = "/hdgdashboard";
+	final String hgpPath = "/hgpdashboard";
 	@Autowired
 	private IotSensorDataDao iotSensorDataDao;
 	
@@ -116,11 +128,18 @@ public class DashboardService {
 	private PushService pushService;
 	
 	@Autowired
-	private LogpressoConnector conn;
+	private CacheMapManager cacheMapManager;
+	
+//	@Autowired
+//	private LogpressoConnector conn;
 	
 	@Autowired
-	private CacheMapManager cacheMapManager; 
-	
+	private LogpressoAPIService logpressoAPIService;
+
+	public DashboardService() {
+		super();
+	}
+
 //	public DashboardObj getDashboardDataAll() throws IOException {
 //		DashboardObj arResult = new DashboardObj();
 //		
@@ -132,14 +151,46 @@ public class DashboardService {
 //		return arResult;
 //	}
 
+	
 	/**
 	 * 화재종합지표
 	 * @return
 	 * @throws IOException
 	 */
-	public DashboardObj getDashboardTotal() throws IOException {
+	public DashboardObj getDashboardTotal() throws Exception {
 		DashboardObj arResult = new DashboardObj();
-		arResult.setDefaultMain(FakeDataUtil.getMapTotalFireIdxData(FakeDataUtil.generateTotalFireIdxData())); //화재종합지표
+		
+		Map<String, Object> mapTagFireIdx = new HashMap<String, Object>();
+		Map<String, Object> mapIotFireIdx = new HashMap<String, Object>();
+		boolean _useFake=false;
+		if (_useFake) {
+			mapTagFireIdx =FakeDataUtil.getMapObjectTagFireIdx2(
+					FakeDataUtil.generateTagFireIdx()
+				);//설비별화재지수
+			mapIotFireIdx =FakeDataUtil.getMapObjectIotFireIdx(
+					FakeDataUtil.generateIotFireIdx()
+				);//공간별화재지수
+		} else {
+			mapTagFireIdx =FakeDataUtil.getMapObjectTagFireIdx2(
+					logpressoAPIService.getTagFireIdx(
+							new TagFireIdxReqObj(cacheMapManager.getPlantTypeStr(),cacheMapManager.getPlantNosStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get())
+							)
+				);//설비별화재지수
+			mapIotFireIdx =FakeDataUtil.getMapObjectIotFireIdx(
+					logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+				);//공간별화재지수
+		}
+		//화재종합지표
+		arResult.setDefaultMain(FakeDataUtil.getMapTotalFireIdxData(
+													mapIotFireIdx,//Map<String, Object> mapIotFireIdx, 
+													mapTagFireIdx,//Map<String, Object> mapTagFireIdx,
+													cacheMapManager.getPlantInfos(),//List<PlantInfo> plantInfos,
+													cacheMapManager.getPlantPartInfos(),//List<PlantPartInfo> plantPartInfos,
+													cacheMapManager.getInteriorInfos(),//List<InteriorInfo> interiorInfos,
+													cacheMapManager.getAreaInfos(),//List<AreaInfo> areaInfos,
+													cacheMapManager.getMapAreaInfo(),//Map<Long, AreaInfo> mapAreaInfo, 
+													cacheMapManager.getMapInteriorInfo()//Map<Long, InteriorInfo> mapInteriorInfo 
+				)); 
 		return arResult;
 	}
 	
@@ -160,10 +211,21 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */
-	public DashboardObj getTagFireIdx() throws IOException {
+	public DashboardObj getTagFireIdx() throws Exception {
 		DashboardObj arResult = new DashboardObj();
-		String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
-		arResult.setTagFireIdx(FakeDataUtil.getMapTagFireIdx(strTagFireIdx)); //설비별화재지수
+		boolean _useFake=false;
+		if (_useFake) {
+			String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
+			logger.debug(strTagFireIdx);
+			arResult.setTagFireIdx(FakeDataUtil.getMapTagFireIdx2(
+					strTagFireIdx
+				)); //설비별화재지수
+		} else {
+			//String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
+			arResult.setTagFireIdx(FakeDataUtil.getMapTagFireIdx2(
+					logpressoAPIService.getTagFireIdx(new TagFireIdxReqObj(cacheMapManager.getPlantTypeStr(),cacheMapManager.getPlantNosStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+				)); //설비별화재지수
+		}
 		//tagFireIdxHistDao.deleteOld();
 		//tagFireIdxHistDao.register(FakeDataUtil.getListTagFireIdx(strTagFireIdx));
 		return arResult;
@@ -241,9 +303,18 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */
-	public DashboardObj getIotFireIdx() throws IOException {
+	public DashboardObj getIotFireIdx() throws Exception {
+		boolean _useFake=false;
 		DashboardObj arResult = new DashboardObj();
-		arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(FakeDataUtil.generateIotFireIdx())); //공간별화재지수
+		if (_useFake) {
+			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(
+					FakeDataUtil.generateIotFireIdx()
+				)); //공간별화재지수
+		} else {
+			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(
+					logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+				)); //공간별화재지수
+		}
 		return arResult;
 	}
 	
@@ -345,13 +416,55 @@ public class DashboardService {
 	 */
 
 	/**
-	 * 공간별 위험현황
+	 * 공간별 위험현황 (Interior)
 	 * @return
 	 * @throws IOException
 	 */
-	public DashboardObj getIotMain() throws IOException {
+	public DashboardObj getIotMain() throws Exception {
 		DashboardObj arResult = new DashboardObj();
-		arResult.setIotMain(FakeDataUtil.getMapIotMain(FakeDataUtil.generateIotMain()));
+		boolean _useFake=false;
+		if (_useFake) {
+			arResult.setIotMain(FakeDataUtil.getMapIotMain(FakeDataUtil.generateIotMain()));
+		} else {
+			arResult.setIotMain(FakeDataUtil.getMapIotMain(logpressoAPIService.getIotMain(new IotMainReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))));
+		}
+		return arResult;
+	}
+	
+	/**
+	 * 구역별 위험현황 (Area)
+	 * @return
+	 * @throws IOException
+	 */
+	public DashboardObj getIotMainArea() throws Exception {
+		DashboardObj arResult = new DashboardObj();
+		boolean _useFake=false;
+		if (_useFake) {
+			String jsonStr = FakeDataUtil.generateIotMain();
+			arResult.setIotMain(FakeDataUtil.getMapIotMainArea(jsonStr, cacheMapManager.getMapAreaInfo(), cacheMapManager.getMapInteriorInfoByCode()));
+		} else {
+			arResult.setIotMain(FakeDataUtil.getMapIotMainArea(logpressoAPIService.getIotMain(new IotMainReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+																, cacheMapManager.getMapAreaInfo(), cacheMapManager.getMapInteriorInfoByCode()
+																)
+					);
+		}
+		return arResult;
+	}
+
+
+	/**
+	 * 센서별 수치현황
+	 * @return
+	 * @throws IOException
+	 */
+	public DashboardObj getIotData() throws Exception {
+		DashboardObj arResult = new DashboardObj();
+		boolean _useFake=false;
+		if (_useFake) {
+			arResult.setIotData(FakeDataUtil.getMapIotData(FakeDataUtil.generateIotData()));
+		} else {
+			arResult.setIotData(FakeDataUtil.getMapIotData(logpressoAPIService.getIotData(new IotDataReqObj(cacheMapManager.getInteriorsStr()))));
+		}
 		return arResult;
 	}
 
@@ -360,25 +473,32 @@ public class DashboardService {
 	 * @return
 	 * @throws IOException
 	 */
-	public DashboardObj getIotData() throws IOException {
-		DashboardObj arResult = new DashboardObj();
-		arResult.setIotData(FakeDataUtil.getMapIotData(FakeDataUtil.generateIotData())); 
-		return arResult;
+	public List<IotData> getIotDataList() throws Exception {
+		boolean _useFake=false;
+		if (_useFake) {
+			return FakeDataUtil.getListIotData(FakeDataUtil.generateIotData()); 
+		} else {
+			return FakeDataUtil.getListIotData(
+					logpressoAPIService.getIotData(new IotDataReqObj(cacheMapManager.getInteriorsStr()))
+				);
+		}
 	}
 
-	/**
-	 * 센서별 수치현황
-	 * @return
-	 * @throws IOException
-	 */
-	public List<IotData> getIotDataList() throws IOException {
+	public DashboardObj getTagMain() throws Exception {
 		DashboardObj arResult = new DashboardObj();
-		return FakeDataUtil.getListIotData(FakeDataUtil.generateIotData()); 
-	}
-
-	public DashboardObj getTagMain() throws IOException {
-		DashboardObj arResult = new DashboardObj();
-		arResult.setTagMain(FakeDataUtil.getMapTagData(FakeDataUtil.generateTagData())); //설비별위험현황
+		boolean _useFake=false;
+		if (_useFake) {
+			arResult.setTagMain(FakeDataUtil.getMapTagData(FakeDataUtil.generateTagData())); //설비별위험현황
+		} else {
+			arResult.setTagMain(FakeDataUtil.getMapTagData(
+					logpressoAPIService.getTagData(
+							new TagDataReqObj(cacheMapManager.getPlantTypeStr(),
+									cacheMapManager.getPlantNosStr(),
+									cacheMapManager.getPlantPartsStr(),
+									Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()
+									))
+					)); //설비별위험현황
+		}
 		return arResult;
 	}
 	/**
@@ -662,7 +782,6 @@ public class DashboardService {
 	 */	
 	public RealtimeChartObj getIotMainRealtimeChartByInterior(PageRequest req) throws Exception {
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
-		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<List<String>>> listData = new ArrayList<List<List<String>>>();
 		for(int i=0;i<5;i++) {
 			listData.add(new ArrayList<List<String>>());
@@ -705,6 +824,99 @@ public class DashboardService {
 			add(Constant.IOT_VALUE_NAME_CO.get());
 			add(Constant.IOT_VALUE_NAME_FLARE.get());
 		}}, listSeriesObj);
+	}
+
+	/**
+	 * 전체 인테리어별 차트객체 생성 배열로 전달
+	 *  - 최근 30건 조회
+	 *  - 키는 예>category : 온도/습도/열/....
+	 *          series data: 개별 수치 
+	 * @return
+	 * @throws IOException
+	 */	
+	public Map<String, RealtimeChartObj> getIotMainRealtimeChartListByInteriorList(PageRequest req) throws Exception {
+
+		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+				iotMainHistDao.getRealtimeChartDataByInteriorList(req):iotMainHistStatDao.getRealtimeChartDataByInteriorList(req);
+
+		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
+		Map<String, RealtimeChartObj> mapResult = new HashMap<String, RealtimeChartObj>();
+		List<List<List<String>>> listData = new ArrayList<List<List<String>>>();
+		for(int i=0;i<5;i++) {
+			listData.add(new ArrayList<List<String>>());
+		}
+
+		String[] prevKeyStr = {""};
+		daoList.get().forEach( e -> {
+			String keyStr = (String)e.getInteriorCode();
+			if (mapResult.get(keyStr)==null && listData.get(0).size()>0) {
+				
+				listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_TEMP.get(), listData.get(0)));
+				listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_HUMID.get(), listData.get(1)));
+				listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_SMOKE.get(), listData.get(2)));
+				listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_CO.get(), listData.get(3)));
+				listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_FLARE.get(), listData.get(4)));
+
+				mapResult.put(prevKeyStr[0], 
+								new RealtimeChartObj(new ArrayList<String>() {{
+														add(Constant.IOT_VALUE_NAME_TEMP.get());
+														add(Constant.IOT_VALUE_NAME_HUMID.get());
+														add(Constant.IOT_VALUE_NAME_SMOKE.get());
+														add(Constant.IOT_VALUE_NAME_CO.get());
+														add(Constant.IOT_VALUE_NAME_FLARE.get());
+													}}, 
+													(List<RealtimeChartSeriesItem>)((ArrayList<RealtimeChartSeriesItem>)listSeriesObj).clone()
+									)	
+								);
+				listData.get(0).clear();
+				listData.get(1).clear();
+				listData.get(2).clear();
+				listData.get(3).clear();
+				listData.get(4).clear();
+				listSeriesObj.clear();
+			}
+
+			listData.get(0).add(new ArrayList<String>(){{
+				add(e.getCreatedDtm());
+				add(Double.toString(e.getAvgTempVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+			}});
+			listData.get(1).add(new ArrayList<String>(){{
+				add(e.getCreatedDtm());
+				add(Double.toString(e.getAvgHumidVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+			}});
+			listData.get(2).add(new ArrayList<String>(){{
+				add(e.getCreatedDtm());
+				add(Double.toString(e.getAvgSmokeVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+			}});
+			listData.get(3).add(new ArrayList<String>(){{
+				add(e.getCreatedDtm());
+				add(Double.toString(e.getAvgCoVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+			}});
+			listData.get(4).add(new ArrayList<String>(){{
+				add(e.getCreatedDtm());
+				add(Double.toString(e.getAvgFlame()));
+			}});
+			prevKeyStr[0] = keyStr;
+		});
+		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_TEMP.get(), listData.get(0)));
+		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_HUMID.get(), listData.get(1)));
+		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_SMOKE.get(), listData.get(2)));
+		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_CO.get(), listData.get(3)));
+		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_FLARE.get(), listData.get(4)));
+
+		mapResult.put(prevKeyStr[0], 
+				new RealtimeChartObj(new ArrayList<String>() {{
+										add(Constant.IOT_VALUE_NAME_TEMP.get());
+										add(Constant.IOT_VALUE_NAME_HUMID.get());
+										add(Constant.IOT_VALUE_NAME_SMOKE.get());
+										add(Constant.IOT_VALUE_NAME_CO.get());
+										add(Constant.IOT_VALUE_NAME_FLARE.get());
+									}}, 
+									(List<RealtimeChartSeriesItem>)((ArrayList<RealtimeChartSeriesItem>)listSeriesObj).clone()
+					)	
+				);
+
+		return mapResult;
 	}
 
 	
@@ -797,9 +1009,19 @@ public class DashboardService {
 	 */
 	@Transactional
 	public void addIotMain() throws Exception {
-		String strIotMain = FakeDataUtil.generateIotMain();
-		int[] returnCntAr = iotMainHistDao.register(FakeDataUtil.getListIotMain(strIotMain));
-		logger.info("addIotMain:"+returnCntAr.length);
+		boolean _useFake=false;
+		if (_useFake) {
+			String strIotMain = FakeDataUtil.generateIotMain();
+			int[] returnCntAr = iotMainHistDao.register(FakeDataUtil.getListIotMain(
+					strIotMain
+				));
+			logger.info("addIotMain:"+returnCntAr.length);
+		} else {
+			int[] returnCntAr = iotMainHistDao.register(FakeDataUtil.getListIotMain(
+					logpressoAPIService.getIotMain(new IotMainReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+				));
+			logger.info("addIotMain:"+returnCntAr.length);
+		}
 	}
 
 	/**
@@ -808,9 +1030,17 @@ public class DashboardService {
 	 * @throws IOException
 	 */
 	@Transactional
-	public void addIotFireIdx() throws IOException {
-		String strIotFireIdx = FakeDataUtil.generateIotFireIdx();
-		iotFireIdxHistDao.register(FakeDataUtil.getListIotFireIdx(strIotFireIdx));
+	public void addIotFireIdx() throws Exception {
+		boolean _useFake=false;
+		if (_useFake) {
+			String strIotFireIdx = FakeDataUtil.generateIotFireIdx();
+			iotFireIdxHistDao.register(FakeDataUtil.getListIotFireIdx(strIotFireIdx));
+		} else {
+			//String strIotFireIdx = FakeDataUtil.generateIotFireIdx();
+			iotFireIdxHistDao.register(FakeDataUtil.getListIotFireIdx(
+					logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+				));
+		}
 	}
 
 	/**
@@ -820,9 +1050,17 @@ public class DashboardService {
 	 */
 	@Transactional
 	public void addIotData() throws Exception {
-		String strIotData = FakeDataUtil.generateIotData();
- 		int[] returnCntAr = iotDataHistDao.register(FakeDataUtil.getListIotData(strIotData));
-		logger.info("addIotData:"+returnCntAr.length);
+		boolean _useFake=false;
+		if (_useFake) {
+			String strIotData = FakeDataUtil.generateIotData();
+	 		int[] returnCntAr = iotDataHistDao.register(FakeDataUtil.getListIotData(strIotData));
+			logger.info("addIotData:"+returnCntAr.length);
+		} else {
+	 		int[] returnCntAr = iotDataHistDao.register(FakeDataUtil.getListIotData(
+					logpressoAPIService.getIotData(new IotDataReqObj(cacheMapManager.getInteriorsStr()))
+	 			));
+			logger.info("addIotData:"+returnCntAr.length);
+		}
 	}
 
 	/**
@@ -833,9 +1071,22 @@ public class DashboardService {
 	 */
 	@Transactional
 	public void addTagData() throws Exception {
-		String strTagData = FakeDataUtil.generateTagData();
-		int[] returnCntAr = tagDataHistDao.register(FakeDataUtil.getListTagData(strTagData));
-		logger.info("addTagData:"+returnCntAr.length);
+		boolean _useFake=false;
+		//logger.info("apiUrl="+apiUrl);
+
+		if (_useFake) {
+			String strTagData = FakeDataUtil.generateTagData();
+			int[] returnCntAr = tagDataHistDao.register(FakeDataUtil.getListTagData(strTagData));
+		} else {
+			int[] returnCntAr = tagDataHistDao.register(FakeDataUtil.getListTagData(
+					logpressoAPIService.getTagData(
+							new TagDataReqObj(cacheMapManager.getPlantTypeStr(),
+									cacheMapManager.getPlantNosStr(),
+									cacheMapManager.getPlantPartsStr(),
+									Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()
+									))
+					)); //설비별위험현황
+		}
 	}
 	
 	/**
@@ -844,9 +1095,19 @@ public class DashboardService {
 	 * @throws IOException
 	 */
 	@Transactional
-	public void addTagFireIdx() throws IOException {
-		String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
-		tagFireIdxHistDao.register(FakeDataUtil.getListTagFireIdx(strTagFireIdx));
+	public void addTagFireIdx() throws Exception {
+		boolean _useFake=false;
+		if (_useFake) {
+			String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
+			tagFireIdxHistDao.register(FakeDataUtil.getListTagFireIdx2(
+					strTagFireIdx
+				));
+		} else {
+			//String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
+			tagFireIdxHistDao.register(FakeDataUtil.getListTagFireIdx2(
+					logpressoAPIService.getTagFireIdx(new TagFireIdxReqObj(cacheMapManager.getPlantTypeStr(),cacheMapManager.getPlantNosStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+				));
+		}
 	}
 
 	/**
@@ -990,10 +1251,10 @@ public class DashboardService {
 				add(new ColumnChartSeriesItem("Critical건수", listData.get(4)));
 			}});
 	}
-
-	public Optional<PageResultObj<List<IotSensorData>>> getDashboardDataIotPilotDetailList(PageRequest req) throws IOException {
-		return iotSensorDataDao.listByCategory(req);
-	}
+//
+//	public Optional<PageResultObj<List<IotSensorData>>> getDashboardDataIotPilotDetailList(PageRequest req) throws IOException {
+//		return iotSensorDataDao.listByCategory(req);
+//	}
 	
 	/**
 	 * 설비 및 기기별 이벤트 현황 이력
@@ -1006,10 +1267,36 @@ public class DashboardService {
 	}
 
 	public  DashboardObj getTagDvcEventHistList(PageRequest req) throws Exception {
+		boolean _useFake=true;
 		DashboardObj arResult = new DashboardObj();
-		String deviceType = req.getParamMap().get("deviceType");
-		arResult.setItemList(JsonUtils.toJson(FakeDataUtil.getListTagDvcEvent(FakeDataUtil.generateTagDvcEvent())
-				.stream().filter(e-> e.getDeviceType().equals(deviceType)).collect(Collectors.toList()))); 
+		String deviceType = req.getParamMap().get("deviceType");//"I", "P", "C“ –I:센서, P:태그, C: cctv
+		String dateFrom = req.getParamMap().get("dateFrom");//- yyyy-MM-dd HH:mm:ss 
+															//- default : 현재일시 - 1h"
+		String dateTo = req.getParamMap().get("dateTo");//- yyyy-MM-dd HH:mm:ss 
+														//- default : 현재일시"
+		String eventLevel = req.getParamMap().get("eventLevel");//01: alarm, 02: critical, 03:fire, 00:발생 이벤트 데이터 전체
+		logger.info(req.toString());
+		if (_useFake) {
+			arResult.setItemList(JsonUtils.toJson(FakeDataUtil.getListTagDvcEvent(
+					FakeDataUtil.generateTagDvcEvent(deviceType)
+					)
+					.stream()
+					.filter(e->deviceType.contains(e.getDeviceType()))
+					.peek(e -> System.out.println(e))
+					.collect(Collectors.toList()))); 
+		} else {
+			arResult.setItemList(JsonUtils.toJson(FakeDataUtil.getListTagDvcEvent(
+					//FakeDataUtil.generateTagDvcEvent()
+					logpressoAPIService.getTagDvcEvent(
+							new DvcEventReqObj(deviceType, dateFrom, dateTo, eventLevel)
+//							new DvcEventReqObj("I,P,C",
+//								Utils.yyyyMMddHHmmssHypen(Utils.addHoursToDate(new Date(), -10)),
+//								Utils.yyyyMMddHHmmssHypen(),
+//								"00"
+//							)
+					))
+					.stream().filter(e-> deviceType.contains(e.getDeviceType())).collect(Collectors.toList()))); 
+		}
 		return arResult;
 	}
 	
@@ -1018,9 +1305,23 @@ public class DashboardService {
 	 * @throws Exception
 	 */
 	public  void addTagDvcPushEventHist() throws Exception {
+		boolean _useFake=false;
 		if (FakeDataUtil.randomVal(10)/7==1) return;
 		Thread.sleep(FakeDataUtil.randomVal(10)*1000);
-		TagDvcPushEvent tagDvcPushEvent = FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager, FakeDataUtil.generateTagDvcPushEvent(cacheMapManager));
+		TagDvcPushEvent tagDvcPushEvent = _useFake?
+				FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager,
+					FakeDataUtil.generateTagDvcPushEvent(cacheMapManager)
+				):
+				FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager, 
+					//FakeDataUtil.generateTagDvcPushEvent(cacheMapManager)
+					logpressoAPIService.getTagDvcEvent(
+							new DvcEventReqObj("I,P,C",
+									Utils.yyyyMMddHHmmssHypen(Utils.addMinutesToDate(new Date(), -10)),
+									Utils.yyyyMMddHHmmssHypen(),
+									"00"
+									))
+
+					);
 		tagDvcPushEventHistDao.register(tagDvcPushEvent);
 		pushService.sendMsgAll(Constant.PUSH_TAG_TAG_DVC_PUSH_EVENT_ADD.get(), tagDvcPushEvent);
 	}
@@ -1032,58 +1333,59 @@ public class DashboardService {
 		return tagDvcPushEventHistDao.search(req);
 	}
 	
-	
-	String queryLogpressoDashboardData(String strCmd) throws IOException {
-		
-		//LogpressoConnector conn = null;
-		Logpresso logpresso = null;
-		Cursor cursor = null;
-		try {
-			String strResult="";
-			//conn = new LogpressoConnector();
-			//cursor = conn.executeQuery("proc sp_dsmain()");
-			logpresso = conn.getConnection();
-			cursor = conn.executeQuery(logpresso, strCmd);
-			//cursor = conn.executeQuery("table if_wth_fcst");
-	        while (cursor.hasNext()) {
-	        	Tuple tuple = cursor.next();
-	        	//logger.info(tuple.toString());
-	        	strResult = tuple.get("_return").toString();
-	        	//logger.info(strResult);
-	        }
-	        //logger.info("[LOGPRESSO]"+strCmd+":"+strResult);
-	        return strResult; 
-		} finally {
-	        if (cursor != null)
-			cursor.close();
-		    if (conn != null)
-		    	conn.close(logpresso);
-		}
-	}
-	List<String> queryLogpressoDashboardDataList(String strCmd) throws IOException {
-		
-		//LogpressoConnector conn = null;
-		Logpresso logpresso = null;
-		Cursor cursor = null;
-		try {
-			List<String> arResult= new ArrayList<String>();
-			//conn = new LogpressoConnector();
-			//cursor = conn.executeQuery("proc sp_dsmain()");
-			logpresso = conn.getConnection();
-			cursor = conn.executeQuery(logpresso, strCmd);
-			//cursor = conn.executeQuery("table if_wth_fcst");
-	        while (cursor.hasNext()) {
-	        	Tuple tuple = cursor.next();
-	        	//logger.info(tuple.get("_return").toString());
-	        	arResult.add(tuple.get("_return").toString());
-	        }
-	        return arResult; 
-		} finally {
-	        if (cursor != null)
-			cursor.close();
-		    if (conn != null)
-		    	conn.close(logpresso);
-		}
-	}
+//	@Deprecated
+//	String queryLogpressoDashboardData(String strCmd) throws IOException {
+//		
+//		//LogpressoConnector conn = null;
+//		Logpresso logpresso = null;
+//		Cursor cursor = null;
+//		try {
+//			String strResult="";
+//			//conn = new LogpressoConnector();
+//			//cursor = conn.executeQuery("proc sp_dsmain()");
+//			logpresso = conn.getConnection();
+//			cursor = conn.executeQuery(logpresso, strCmd);
+//			//cursor = conn.executeQuery("table if_wth_fcst");
+//	        while (cursor.hasNext()) {
+//	        	Tuple tuple = cursor.next();
+//	        	//logger.info(tuple.toString());
+//	        	strResult = tuple.get("_return").toString();
+//	        	//logger.info(strResult);
+//	        }
+//	        //logger.info("[LOGPRESSO]"+strCmd+":"+strResult);
+//	        return strResult; 
+//		} finally {
+//	        if (cursor != null)
+//			cursor.close();
+//		    if (conn != null)
+//		    	conn.close(logpresso);
+//		}
+//	}
+//	@Deprecated
+//	List<String> queryLogpressoDashboardDataList(String strCmd) throws IOException {
+//		
+//		//LogpressoConnector conn = null;
+//		Logpresso logpresso = null;
+//		Cursor cursor = null;
+//		try {
+//			List<String> arResult= new ArrayList<String>();
+//			//conn = new LogpressoConnector();
+//			//cursor = conn.executeQuery("proc sp_dsmain()");
+//			logpresso = conn.getConnection();
+//			cursor = conn.executeQuery(logpresso, strCmd);
+//			//cursor = conn.executeQuery("table if_wth_fcst");
+//	        while (cursor.hasNext()) {
+//	        	Tuple tuple = cursor.next();
+//	        	//logger.info(tuple.get("_return").toString());
+//	        	arResult.add(tuple.get("_return").toString());
+//	        }
+//	        return arResult; 
+//		} finally {
+//	        if (cursor != null)
+//			cursor.close();
+//		    if (conn != null)
+//		    	conn.close(logpresso);
+//		}
+//	}
 
 }

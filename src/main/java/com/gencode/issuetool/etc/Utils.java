@@ -72,6 +72,10 @@ public class Utils {
     	return RandomStringUtils.randomNumeric(4);
     }
 
+	public static int getRandomNumber(int min, int max) {
+	    return (int) ((Math.random() * (max - min)) + min);
+	}
+	
 	public static <T> String getListToString(List<T> theList) {
 		StringBuffer  sb =  new StringBuffer();
 		for (T item : theList) {
@@ -85,6 +89,9 @@ public class Utils {
 	}
 	public static String yyyyMMddHHmmss(){
 		return new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+	}
+	public static String yyyyMMddHHmmssHypen(Date _date){
+		return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(_date);
 	}
 	public static String yyyyMMddHHmmssHypen(){
 		return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
@@ -120,6 +127,13 @@ public class Utils {
 		calendar.add(Calendar.HOUR_OF_DAY,  hours);
 		return calendar.getTime();
 	}
+	public static Date addMinutesToDate(Date date, int hours) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.MINUTE,  hours);
+		return calendar.getTime();
+	}
+
 	public static String fileNameByTimestamp() {
 		return Long.toString(System.currentTimeMillis());
 	}

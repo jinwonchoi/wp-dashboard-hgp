@@ -134,6 +134,27 @@ public class IotMainHistDaoImpl extends AbstractDaoImpl implements IotMainHistDa
 						, new BeanPropertyRowMapper<IotMain>(IotMain.class));
 		return Optional.of(t);
 	}
+	
+	@Override
+	public Optional<List<IotMain>> getRealtimeChartDataByInteriorList(PageRequest req) {
+		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		String fieldsStr;
+		boolean useArea=Constant.IOT_REALTIME_CHART_KEY_MODE_AREA.get().equals(req.getParamMap().get("mode"));
+		String valType = Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valType"))?Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get():Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get();
+		fieldsStr = "created_dtm,"+(useArea?"ai.area_code interior_code":"b.interior_code")+","+valType+"_humid_val avg_humid_val,"+valType+"_smoke_val avg_smoke_val,"+valType+"_co_val avg_co_val,"+valType+"_flame avg_flame_val,"+valType+"_temp_val avg_temp_val";
+		String sqlStr = 
+				"select "+fieldsStr+" from iot_main_hist b, area_info ai, interior_info ii, (select distinct created_dtm idx_dtm from iot_main_hist where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+				"	where created_dtm = a.idx_dtm and ai.id=ii.area_id and ii.interior_code=b.interior_code "+(useArea?"":"and ai.area_code=:areaCode") + 
+				" order by "+(useArea?"ai.area_code":"b.interior_code")+",created_dtm ";
+
+		List<IotMain> t = namedParameterJdbcTemplate.query
+				(sqlStr
+						, searchMapObj.params()
+						, new BeanPropertyRowMapper<IotMain>(IotMain.class));
+		return Optional.of(t);
+	}
+	
+	
 
 	@Override
 	public Optional<List<IotMain>> search(Map<String, String> map) {
