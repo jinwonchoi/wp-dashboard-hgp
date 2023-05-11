@@ -6,6 +6,7 @@ package com.gencode.issuetool.logpresso.obj;
 
 import java.util.List;
 
+import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.obj.Pojo;
 
 public class DashboardObj extends Pojo {
@@ -17,6 +18,7 @@ public class DashboardObj extends Pojo {
 	String iotData;
 	String iotFireIdx;
 	String itemList;
+	ReturnCode resultCode = ReturnCode.SUCCESS;
 	public String getDefaultMain() {
 		return defaultMain;
 	}
@@ -61,4 +63,11 @@ public class DashboardObj extends Pojo {
 	public void setItemList(String itemList) {
 		this.itemList = itemList;
 	}
+	public ReturnCode getResultCode() {
+		return resultCode;
+	}
+	public void setResultCode(ReturnCode resultCode) {
+		this.resultCode = resultCode;
+	}
+	
 }

@@ -30,6 +30,9 @@ public enum ReturnCode {
 	TODAY_NOT_FOUND("4301"),
 	DATA_NOT_FOUND("4999"),
 	ERROR_MAIL_SEND("5001"),
+	
+	LOGPRESSO_TAG_FIDX_ERROR("5101"),
+	LOGPRESSO_IOT_FIDX_ERROR("5102"),
 	ERROR_UNKNOWN("9999"),
 	/*
 	0001 Success
@@ -61,6 +64,10 @@ public enum ReturnCode {
 	STR_TODAY_NOT_FOUND("Today Not Found"),
 	STR_DATA_NOT_FOUND("Data Not Found"),
 	STR_ERROR_MAIL_SEND("Mail Send Error"),
+
+	STR_LOGPRESSO_TAG_FIDX_ERROR("설비별 화재지수 수신오류"),
+	STR_LOGPRESSO_IOT_FIDX_ERROR("공간별 화재지수 수신오류"),
+
 	STR_ERROR_UNKNOWN("Unknown Error"),
 	;
 	private ReturnCode(String str) {

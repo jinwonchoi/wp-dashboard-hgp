@@ -157,7 +157,7 @@ public class LogpressoRunner {
 //					strIotFireIdx
 //				)); //공간별화재지수
 			
-			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(
+			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(null,
 					logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(
 							//"ST4"
 							"ST3,SC3,SC2,SC1,SU1,SI2,SI1,SI0"
@@ -181,7 +181,7 @@ public class LogpressoRunner {
 //					strIotFireIdx
 //				)); //공간별화재지수
 			
-			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(
+			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(null,
 					logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(
 							//"ST4"
 							"ST3,SC3,SC2,SC1,SU1,SI2,SI1,SI0"

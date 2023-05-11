@@ -24,6 +24,7 @@ import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.logpresso.obj.AverageObj;
 import com.gencode.issuetool.obj.AreaInfo;
 import com.gencode.issuetool.obj.AuthUserInfo;
+import com.gencode.issuetool.obj.CommonCode;
 import com.gencode.issuetool.obj.EtcDeviceInfo;
 import com.gencode.issuetool.obj.FacilTagInfo;
 import com.gencode.issuetool.obj.InteriorInfo;
@@ -58,6 +59,12 @@ public class FakeDataUtil {
 	static public double alarmVal() {
 		return (new Long((new Random()).longs(600, 800).findFirst().getAsLong())).doubleValue()/10;
 	}
+	static public double fireIdxVal() {
+		return (new Long((new Random()).longs(60, 80).findFirst().getAsLong())).doubleValue()/10;
+	}
+	static public double fireIdxMaxVal() {
+		return (new Long((new Random()).longs(80, 100).findFirst().getAsLong())).doubleValue()/10;
+	}
 	
 	static public int randomVal(int max) {
 		return (new Random()).nextInt(max);
@@ -88,15 +95,15 @@ public class FakeDataUtil {
 
 	
 	
-	static String generateLogpressoVal(String[] dsList) {
-		List<Map<String, String>> arJsonObjList = new ArrayList<Map<String, String>>();
-		for ( String key: dsList) {
-			arJsonObjList.add(new HashMap<String, String>(){{put(key, Double.toString(FakeDataUtil.tempLowVal()));}});
-		}
-		arJsonObjList.add(new HashMap<String, String>(){{put("time", Utils.YYYYMMDDWithHypen());}});
-		//System.out.println();
-		return JsonUtils.toJson(arJsonObjList).toString();
-	}
+//	static String generateLogpressoVal(String[] dsList) {
+//		List<Map<String, String>> arJsonObjList = new ArrayList<Map<String, String>>();
+//		for ( String key: dsList) {
+//			arJsonObjList.add(new HashMap<String, String>(){{put(key, Double.toString(FakeDataUtil.tempLowVal()));}});
+//		}
+//		arJsonObjList.add(new HashMap<String, String>(){{put("time", Utils.YYYYMMDDWithHypen());}});
+//		//System.out.println();
+//		return JsonUtils.toJson(arJsonObjList).toString();
+//	}
 	
 	
 	public static String generateTotalFireIdxData() {
@@ -256,13 +263,14 @@ public class FakeDataUtil {
 
 		Map<String, Object> mapTagFireIdxOut =new HashMap<String,Object>();
 		Map<String, Object> mapTagPlantPartOut =new HashMap<String,Object>();
-
+		String time = "";
 		plantInfos.stream().filter(e-> mapTagFireIdx.get(e.getPlantNo())!=null/* not 'M1','M2' */)
 		.forEach( e -> {
 			Map<String, Object> mapPlantPartIn = (Map<String, Object>)mapTagFireIdx.get(e.getPlantNo());
 			plantPartInfos.forEach( ex -> {
 				if (ex.getPlantId()  == e.getId()) {
-					Map<String, String> mapItem = (Map<String, String>)mapPlantPartIn.get(ex.getPlantPartCode());
+					final Map<String, String> mapItem = (mapPlantPartIn.get(ex.getPlantPartCode())!=null)?(Map<String, String>)mapPlantPartIn.get(ex.getPlantPartCode()):
+						new HashMap<String, String>(){{ put("max_fire_idx","0");}};
 					mapTagPlantPartOut.put(ex.getPlantPartCode(), mapItem.get("max_fire_idx"));
 					
 					//좋합지수 
@@ -281,12 +289,14 @@ public class FakeDataUtil {
 				putAll(mapTagPlantPartOut);
 			}});
 		});
-		
+		mapTagFireIdxOut.put("time", mapTagFireIdx.get("time"));
+
 		Map<String, Object> mapIotFireIdxOut =new HashMap<String,Object>();
 		
-		interiorInfos.stream().filter(e-> mapIotFireIdx.get(e.getInteriorCode())!=null)
+		interiorInfos.stream()//.filter(e-> mapIotFireIdx.get(e.getInteriorCode())!=null)
 				.forEach( e -> {
-			Map<String, Object> mapInteriorIn = (Map<String, Object>)mapIotFireIdx.get(e.getInteriorCode());
+			final Map<String, Object> mapInteriorIn = (mapIotFireIdx.get(e.getInteriorCode())!=null)?(Map<String, Object>)mapIotFireIdx.get(e.getInteriorCode())
+					:new HashMap<String, Object>(){{ put("max_fire_idx","0");}};
 			String areaCode = mapAreaInfo.get(mapInteriorInfo.get(e.getId()).getAreaId()).getAreaCode();
 			if (mapIotFireIdxOut.get(areaCode)==null) {
 				mapIotFireIdxOut.put(areaCode, new ArrayList<Double>() {{
@@ -310,6 +320,7 @@ public class FakeDataUtil {
 			}
 
 		});
+		mapIotFireIdxOut.put("time", mapIotFireIdx.get("time"));
 		
 		areaInfos.forEach(e -> {
 			double avgFireIdx = ((List<Double>)mapIotFireIdxOut.get(e.getAreaCode())).stream().mapToDouble(d-> d.doubleValue()).average().getAsDouble();
@@ -329,6 +340,7 @@ public class FakeDataUtil {
 		mapTotalFireIdxOut.put("all", (new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP));
 		
 		Map<String, Object> mapMainOut=new HashMap<String,Object>();
+		mapMainOut.put("time", mapIotFireIdxOut.get("time"));
 		mapMainOut.put("totalfireidx", mapTotalFireIdxOut);
 		mapMainOut.put("tagfireidx", mapTagFireIdxOut);
 		mapMainOut.put("iotfireidx", mapIotFireIdxOut);
@@ -478,6 +490,9 @@ public class FakeDataUtil {
 		Map<String, Object> mapIotDataOut = new HashMap<String, Object>();
 		mapIotData.get("iotma").forEach(e -> {
 			mapIotDataOut.put(e.get("interior").toString(), e.get("data"));
+			if (mapIotDataOut.get("time")==null) {
+				mapIotDataOut.put("time", ((Map<String, String>)e.get("data")).get("time"));
+			}
 		});
 		return JsonUtils.toJson(mapIotDataOut);
 	}
@@ -527,7 +542,11 @@ public class FakeDataUtil {
 			} else {
 				mapIotDataOut.put(areaCode, data);
 			}
+			if (mapIotDataOut.get("time")==null) {
+				mapIotDataOut.put("time", ((Map<String, String>)e.get("data")).get("time"));
+			}
 		}
+		
 		return JsonUtils.toJson(mapIotDataOut);
 	}
 
@@ -647,34 +666,47 @@ public class FakeDataUtil {
 						put("interior",interior);
 						put("data",new HashMap<String, String>() {{
 							put("time", time);
-							put("max_fire_idx", Double.toString(FakeDataUtil.tempLowVal()));
-							put("fire_idx", Double.toString(FakeDataUtil.tempLowVal()));
+							put("max_fire_idx", "17.5");//Double.toString(FakeDataUtil.tempLowVal()));
+							put("fire_idx", "15.1");//Double.toString(FakeDataUtil.tempLowVal()));
 						}});
 			}});
 		}
 		return "{\"iotfireidx\":"+JsonUtils.toJson(arIotFireIdxList).toString()+"}";
+//		return "{\"iotfireidx\":[{\"data\":{\"max_fire_idx\":\"17.4\",\"time\":\""+Utils.yyyyMMddHHmmssSSSHypen()+"\",\"fire_idx\":\"15.2\"},\"interior\":\"SC1\"},{\"data\":{\"max_fire_idx\":\"17.4\",\"time\":\""+Utils.yyyyMMddHHmmssSSSHypen()+"\",\"fire_idx\":\"15.2\"},\"interior\":\"SC2\"},{\"data\":{\"max_fire_idx\":\"17.4\",\"time\":\""+Utils.yyyyMMddHHmmssSSSHypen()+"\",\"fire_idx\":\"15.2\"},\"interior\":\"SC3\"},{\"data\":{\"max_fire_idx\":\"17.4\",\"time\":\""+Utils.yyyyMMddHHmmssSSSHypen()+"\",\"fire_idx\":\"15.2\"},\"interior\":\"SI0\"},{\"data\":{\"max_fire_idx\":\"17.4\",\"time\":\""+Utils.yyyyMMddHHmmssSSSHypen()+"\",\"fire_idx\":\"15.2\"},\"interior\":\"SU1\"}]}";
 	}
-	public static String getMapIotFireIdx(String jsonStr) {
-		return getMapIotFireIdx(JsonUtils.toObject(jsonStr, Map.class));
-	}
-	
-	public static Map<String, Object> getMapObjectIotFireIdx(String jsonStr) {
-		return getMapObjectIotFireIdx(JsonUtils.toObject(jsonStr, Map.class));
+	public static String getMapIotFireIdx(List<InteriorInfo> interiorInfos, String jsonStr) {
+		return getMapIotFireIdx(interiorInfos, JsonUtils.toObject(jsonStr, Map.class));
 	}
 	
-	public static String getMapIotFireIdx(Map<String, List<Map<String, Object>>> mapIotFireIdx) {
-		return JsonUtils.toJson(getMapObjectIotFireIdx(mapIotFireIdx));
+	public static Map<String, Object> getMapObjectIotFireIdx(List<InteriorInfo> interiorInfos, String jsonStr) {
+		return getMapObjectIotFireIdx(interiorInfos, JsonUtils.toObject(jsonStr, Map.class));
 	}
 	
-	public static Map<String, Object> getMapObjectIotFireIdx(Map<String, List<Map<String, Object>>> mapIotFireIdx) {
+	public static String getMapIotFireIdx(List<InteriorInfo> interiorInfos, Map<String, List<Map<String, Object>>> mapIotFireIdx) {
+		return JsonUtils.toJson(getMapObjectIotFireIdx(interiorInfos, mapIotFireIdx));
+	}
+	
+	public static Map<String, Object> getMapObjectIotFireIdx(List<InteriorInfo> interiorInfos, Map<String, List<Map<String, Object>>> mapIotFireIdx) {
 		//Map<String, List<Map<String, Object>>> mapIotData = JsonUtils.toObject(jsonStr, Map.class);
 		Map<String, Object> mapIotDataOut = new HashMap<String, Object>();
 		AverageObj averageObj = new AverageObj();
 		mapIotFireIdx.get("iotfireidx").forEach(e -> {
 			Map<String, String> data = (Map<String, String>)e.get("data");
+			mapIotDataOut.put("time", data.get("time"));
 			mapIotDataOut.put(e.get("interior").toString(), e.get("data"));
 			averageObj.add("", data.get("time"), data.get("fire_idx"), data.get("max_fire_idx"));
 		});
+//		interiorInfos.forEach(e -> {
+//			if (mapIotDataOut.get(e.getInteriorCode())==null) {
+//				mapIotDataOut.put(e.getInteriorCode(), new HashMap<String, String>(){{
+//					put("time",averageObj.getTime());
+//					put("fire_idx","0");
+//					put("max_fire_idx","0");
+//				}});
+//				averageObj.add("", averageObj.getTime(), "0","0");
+//			}
+//		});
+		
 		mapIotDataOut.put("AVERAGE", new HashMap<String, String>(){{
 			put("time", averageObj.getTime());
 			put("max_fire_idx", averageObj.getMaxFireIdxStr());
@@ -895,6 +927,8 @@ public class FakeDataUtil {
 		Map<String, Object> mapTagPlantNo = new HashMap<String, Object>();
 		Map<String, Object> mapTagPlantPart = new HashMap<String, Object>();
 		Map<String, Object> mapTagFacilCode = new HashMap<String, Object>();
+		
+		String time = "";
 		//System.out.println(((List<Map<String, Object>>)mapTagData.get("tagdata")).stream().filter(e -> e.get("tagdata")!=null).findAny().get().get("tagdata"));
 		List<Map<String, Object>> listTagData = new ArrayList<Map<String, Object>>(); 
 		((List<Map<String, Object>>)mapTagData.get(tagName)).forEach(e -> {
@@ -918,6 +952,9 @@ public class FakeDataUtil {
 
 			Map<String, String> mapData = (Map<String, String>)e.get("data");
 			mapTagItem.put(mapData.get("tagname"), mapData);
+			if (time.equals("")) {
+				mapTagPlantNo.put("time", mapData.get("time"));
+			}
 			
 //			if (mapTagPlantPart.get((String)e.get("plant_part"))==null) {
 //				mapTagFacilCode.clear();
@@ -1129,8 +1166,8 @@ public class FakeDataUtil {
 								add(new HashMap<String, String>(){{
 									put("plant_part",plantPart);
 									put("time", time);
-									put("max_fire_idx", Double.toString(FakeDataUtil.tempLowVal()));
-									put("fire_idx", Double.toString(FakeDataUtil.tempLowVal()));
+									put("max_fire_idx", Double.toString(FakeDataUtil.fireIdxMaxVal()));
+									put("fire_idx", Double.toString(FakeDataUtil.fireIdxVal()));
 								}});
 							}
 						}});
@@ -1145,7 +1182,7 @@ public class FakeDataUtil {
 						}});
 					}});
 				}}).toString();
-				
+		//return "{\"tagfireidx\":[{\"tagfireidx\":[{\"data\":[{\"plant_part\":\"FP\",\"max_fire_idx\":\"9.4\",\"time\":\""+Utils.yyyyMMddHHmmssSSSHypen()+"\",\"fire_idx\":\"8.3\"},{\"plant_part\":\"MAA\",\"max_fire_idx\":\"8.9\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"8.9\"},{\"plant_part\":\"MAB\",\"max_fire_idx\":\"8.9\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"8.9\"},{\"plant_part\":\"MAK\",\"max_fire_idx\":\"9.0\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"9.0\"},{\"plant_part\":\"MAV\",\"max_fire_idx\":\"8.4\",\"time\":\"2023-03-01 10:29:45.000\",\"fire_idx\":\"8.4\"},{\"plant_part\":\"MKD\",\"max_fire_idx\":\"8.6\",\"time\":\"2023-03-01 10:29:45.000\",\"fire_idx\":\"8.6\"}],\"plant_no\":\"M1\"},{\"data\":[{\"plant_part\":\"FP\",\"max_fire_idx\":\"9.7\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"8.8\"},{\"plant_part\":\"MAA\",\"max_fire_idx\":\"10.2\",\"time\":\"2023-03-01 10:29:45.000\",\"fire_idx\":\"9.0\"},{\"plant_part\":\"MAB\",\"max_fire_idx\":\"9.9\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"9.8\"},{\"plant_part\":\"MAK\",\"max_fire_idx\":\"10.5\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"10.1\"},{\"plant_part\":\"MAV\",\"max_fire_idx\":\"9.1\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"9.1\"},{\"plant_part\":\"MKD\",\"max_fire_idx\":\"9.7\",\"time\":\"2023-03-01 10:29:46.000\",\"fire_idx\":\"9.7\"}],\"plant_no\":\"M2\"}],\"plant_type\":\"TBN\"}]}";
 //		"{
 //		   ""tagfireidx"":[
 //		      {
@@ -1181,11 +1218,12 @@ public class FakeDataUtil {
 		//List<Map<String, Object>> listTag = (List<Map<String, Object>>)mapTagFireIdx.get("tagfireidx");
 		((List<Map<String, Object>>)((List<Map<String, Object>>)mapTagFireIdx.get("tagfireidx")).stream()
 		.filter(e -> e.get("tagfireidx")!=null)
-		.peek(e -> System.out.println(e))
+		//.peek(e -> System.out.println(e))
 		.findFirst().get()
 		.get("tagfireidx")
 		)
-		.stream().peek(e -> System.out.println(e))
+		.stream()
+		//.peek(e -> System.out.println(e))
 		//((List<Map<String, Object>>)mapTagFireIdx.get("tagfireidx"))
 		.forEach(e -> {
 			Map<String, Object> mapTagItem = new HashMap<String, Object>();
@@ -1218,6 +1256,7 @@ public class FakeDataUtil {
 			put("max_fire_idx", averageObj.getMaxFireIdxStr());
 			put("fire_idx", averageObj.getFireIdxStr());
 		}});
+		mapTagPlantNo.put("time",averageObj.getTime());
 		mapTagPlantNo.put(averageObj.getFlag(), new HashMap<String, Object>(){{
 			putAll(mapTagPlantPart);
 			}});
@@ -1423,7 +1462,7 @@ public class FakeDataUtil {
 		if (deviceType.equals("I")) {
 			IotDeviceInfo iotDeviceInfo = cacheMapManager.getMapIotDeviceInfoByCode().get((String)mapJson.get("id"));
 			deviceId = iotDeviceInfo.getDeviceId();
-			interiorCode=cacheMapManager.getMapInteriorInfo().get((int)iotDeviceInfo.getInteriorId()).getInteriorCode();
+			interiorCode=cacheMapManager.getMapInteriorInfo().get((Long)iotDeviceInfo.getInteriorId()).getInteriorCode();
 		} else if (deviceType.equals("P")) {
 			FacilTagInfo facilTagInfo =  cacheMapManager.getMapFacilTagInfoByCode().get((String)mapJson.get("id"));
 			deviceId = facilTagInfo.getTagName();
@@ -1433,7 +1472,7 @@ public class FakeDataUtil {
 		} else {// C
 			EtcDeviceInfo etcDeviceInfo = cacheMapManager.getMapEtcDeviceInfoByCode().get((String)mapJson.get("id"));
 			deviceId = etcDeviceInfo.getDeviceId();
-			interiorCode=cacheMapManager.getMapInteriorInfo().get((int)etcDeviceInfo.getInteriorId()).getInteriorCode();
+			interiorCode=cacheMapManager.getMapInteriorInfo().get((Long)etcDeviceInfo.getInteriorId()).getInteriorCode();
 		}
 		return new TagDvcPushEvent(
 						(String)mapJson.get("time"), 
@@ -1579,6 +1618,43 @@ public class FakeDataUtil {
 		return result;
 	}
 	
+//
+//	public 
+//	static String generateKfslTotalResult(List<CommonCode> stepList, List<CommonCode> safetyGradeList) {
+//		String time =  Utils.YYYYMMDD();
+//		List<Map<String, Object>> arDataList = new ArrayList<Map<String, Object>>();
+//
+//		safetyGradeList.forEach(e-> {
+//			String grade = e.getItemKey();
+//			arDataList.add(
+//					new HashMap<String, Object>(){{
+//			            put("EVALUATION_DATE", time);
+//			            put("EVALUATION", "FSA-T");
+//			            put("SAFETY_GRADE", grade);
+//			            put("SAFETY_SCORE", FakeDataUtil.tempValStr());
+//			            put("SAFETY_TYPE1", FakeDataUtil.tempValStr());
+//			            put("SAFETY_TYPE2", FakeDataUtil.tempValStr());
+//			            put("REPORT_URL", "http://tool.kfsl.co.kr/report/writeReport/6/990/4");
+//			            put("STEP1_RESULT", 
+//			            	stepList.stream().map(e-> {
+//			            		String stepName = e.getItemValue();
+//			            		new HashMap<String, String>() {{
+//			            			put("STEP1_NAME",stepName);
+//			            			put("STEP1_JISU","0");
+//			            		}}
+//			            	}));
+//			            }});
+//					}});
+//		});
+//
+//		return JsonUtils.toJson(
+//				new HashMap<String, Object>(){{
+//					put("result", Boolean.TRUE);
+//					put("data", arDataList);
+//		}}).toString();
+//	}
+//	
+
 	
 	static final public String[] eventLevels = {"alarm","fire","critical"}; //A:알람, F:화재, C: critical
 	static final public String[] eventTypes = {"I","P","C"}; // I:센서, P:태그, C:CCTV

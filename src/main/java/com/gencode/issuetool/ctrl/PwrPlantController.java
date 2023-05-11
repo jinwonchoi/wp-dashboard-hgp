@@ -42,6 +42,7 @@ import com.gencode.issuetool.config.JwtTokenProvider;
 import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.exception.ApplicationException;
 import com.gencode.issuetool.exception.TooManyRowException;
+import com.gencode.issuetool.extsite.obj.KfslResultObj;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.ResultObj;
@@ -60,6 +61,7 @@ import com.gencode.issuetool.obj.StatsPerDay;
 import com.gencode.issuetool.obj.TagDvcPushEvent;
 import com.gencode.issuetool.obj.UserInfo;
 import com.gencode.issuetool.service.DashboardService;
+import com.gencode.issuetool.service.KfslAPIService;
 import com.gencode.issuetool.service.LogpressoConnector;
 import com.gencode.issuetool.service.MyUserDetailsService;
 
@@ -73,6 +75,9 @@ public class PwrPlantController {
 	@Autowired
 	private DashboardService dashBoardService;
 	
+	@Autowired
+	KfslAPIService kfslAPIService;
+
 //	@RequestMapping("/dashboard/all") 
 //	ResultObj<DashboardObj> getDashboardAll() {
 //		try {
@@ -95,8 +100,13 @@ public class PwrPlantController {
 		try {
 			DashboardObj dashBoardObj = new DashboardObj();
 			dashBoardObj = dashBoardService.getDashboardTotal();
-	        ResultObj<DashboardObj> resultObj = ResultObj.success();
-			resultObj.setItem(dashBoardObj);
+			ResultObj<DashboardObj> resultObj = new ResultObj<DashboardObj>();
+			if (dashBoardObj.getResultCode() != ReturnCode.SUCCESS) {
+				resultObj = new ResultObj<DashboardObj>(dashBoardObj.getResultCode(), dashBoardObj);
+			} else {
+				resultObj = ResultObj.success();	
+				resultObj.setItem(dashBoardObj);
+			}	        
 			return resultObj;
 		} catch (Exception e) {
 			logger.error("normal error",e);
@@ -110,8 +120,13 @@ public class PwrPlantController {
 		try {
 			DashboardObj dashBoardObj = new DashboardObj();
 			dashBoardObj = dashBoardService.getTagFireIdx();
-	        ResultObj<DashboardObj> resultObj = ResultObj.success();
-			resultObj.setItem(dashBoardObj);
+			ResultObj<DashboardObj> resultObj = new ResultObj<DashboardObj>();
+			if (dashBoardObj.getResultCode() != ReturnCode.SUCCESS) {
+				resultObj = new ResultObj<DashboardObj>(dashBoardObj.getResultCode(), dashBoardObj);
+			} else {
+				resultObj = ResultObj.success();	
+				resultObj.setItem(dashBoardObj);
+			}	        
 			return resultObj;
 		} catch (Exception e) {
 			logger.error("normal error",e);
@@ -156,8 +171,13 @@ public class PwrPlantController {
 		try {
 			DashboardObj dashBoardObj = new DashboardObj();
 			dashBoardObj = dashBoardService.getIotFireIdx();
-	        ResultObj<DashboardObj> resultObj = ResultObj.success();
-			resultObj.setItem(dashBoardObj);
+			ResultObj<DashboardObj> resultObj = new ResultObj<DashboardObj>();
+			if (dashBoardObj.getResultCode() != ReturnCode.SUCCESS) {
+				resultObj = new ResultObj<DashboardObj>(dashBoardObj.getResultCode(), dashBoardObj);
+			} else {
+				resultObj = ResultObj.success();	
+				resultObj.setItem(dashBoardObj);
+			}	        
 			return resultObj;
 		} catch (Exception e) {
 			logger.error("normal error",e);
@@ -407,13 +427,12 @@ public class PwrPlantController {
 	}
 
 
-	@RequestMapping("/dashboard/iotmain/summary") 
-	ResultObj<ColumnChartObj> getChartIotMainCntStats(@RequestBody PageRequest req) {
-
+	@RequestMapping("/kfsl/total") 
+	ResultObj<KfslResultObj> getKfslTotalResult(@RequestBody PageRequest req) {
 		try {
-			ColumnChartObj columnChartObj = dashBoardService.getIotMainCntStatsChart(req);
-	        ResultObj<ColumnChartObj> resultObj = ResultObj.success();
-			resultObj.setItem(columnChartObj);
+			KfslResultObj kfslResultObj = kfslAPIService.getTotalResultMap(req.getParamMap().get("evaluationDate"));
+	        ResultObj<KfslResultObj> resultObj = ResultObj.success();
+			resultObj.setItem(kfslResultObj);
 			return resultObj;
 		} catch (Exception e) {
 			logger.error("normal error",e);
@@ -421,4 +440,19 @@ public class PwrPlantController {
 		}
 		
 	}
+	
+	@RequestMapping("/kfsl/space") 
+	ResultObj<Map<String, KfslResultObj>> getKfslSpaceResult(@RequestBody PageRequest req) {
+		try {
+			Map<String, KfslResultObj> kfslResultMap = kfslAPIService.getSpaceResultMap(req.getParamMap().get("evaluationDate"));
+	        ResultObj<Map<String, KfslResultObj>> resultObj = ResultObj.success();
+			resultObj.setItem(kfslResultMap);
+			return resultObj;
+		} catch (Exception e) {
+			logger.error("normal error",e);
+			return ResultObj.errorUnknown();
+		}
+		
+	}
+
 }

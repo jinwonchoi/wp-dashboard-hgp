@@ -88,7 +88,6 @@ public class JwtTokenProvider {
 	    Claims claims = Jwts.claims().setSubject(username);
 	    return createRefreshToken(claims, role);
 	}
-
 	
 	public Authentication getAuthentication(String token) {
 	    UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token));

@@ -50,10 +50,14 @@ public class FacilityInfoService {
 	@Autowired
 	private PushService pushService;
 	
+	@Autowired
+	private CacheMapManager cacheMapManager; 
 	@Transactional
 	public Optional<FacilityInfo> register(FacilityInfo t) {
 		long facilityId = facilityInfoDao.register(t);
-		pushService.sendMsg("all", Constant.PUSH_TAG_FACILITY_INFO_ADD.get(), facilityInfoDao.load(facilityId).get());
+		FacilityInfo facilityInfo = facilityInfoDao.load(facilityId).get();
+		pushService.sendMsg("all", Constant.PUSH_TAG_FACILITY_INFO_ADD.get(), facilityInfo);
+		cacheMapManager.insert(facilityInfo);
 		return facilityInfoDao.load(facilityId);
 	}
 
@@ -62,7 +66,9 @@ public class FacilityInfoService {
 		if (facilityInfoDao.update(t) <=0) {
 			throw new NotFoundException();
 		}
-		pushService.sendMsgAll(Constant.PUSH_TAG_FACILITY_INFO_UPDATE.get(), facilityInfoDao.load(t.getId()).get());
+		FacilityInfo facilityInfo = facilityInfoDao.load(t.getId()).get();
+		pushService.sendMsgAll(Constant.PUSH_TAG_FACILITY_INFO_UPDATE.get(), facilityInfo);
+		cacheMapManager.update(facilityInfo);
 		return facilityInfoDao.load(t.getId());
 	}
 	
@@ -71,6 +77,7 @@ public class FacilityInfoService {
 		if (facilityInfoDao.delete(id) <=0) {
 			throw new NotFoundException();
 		}		
+		cacheMapManager.delete(facilityInfoDao.load(id).get());
 		pushService.sendMsgAll(Constant.PUSH_TAG_FACILITY_INFO_DELETE.get(), Long.toString(id));
 	}
 	

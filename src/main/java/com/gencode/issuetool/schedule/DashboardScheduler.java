@@ -14,13 +14,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.gencode.issuetool.logpresso.websocket.EventWebSocketClient;
+import com.gencode.issuetool.logpresso.websocket.LogpressoWebSocketProvider;
 import com.gencode.issuetool.service.DashboardService;
 
 @Component
 public class DashboardScheduler {
 	private final static Logger logger = LoggerFactory.getLogger(DashboardScheduler.class);
 
-	@Value("${logpresso.polling-time:3000}") 
+	@Value("${logpresso.polling-time:10000}") 
 	int pollingTime; //milliseconds
 
 	
@@ -33,7 +35,7 @@ public class DashboardScheduler {
 	private boolean isJunitRunning = ("Windows_NT".equals(System.getenv("OS"))&&null==System.getProperty("spring.application.admin.enabled"));
 
 	
-	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
+	@Scheduled(fixedRateString="${logpresso.polling-time:10000}")
 	public void processDashboardDataHourly() {
 		if (isJunitRunning) return;
 		logger.info("DASH BOARD SCHEDULER RUN HOURLY ADD: Add TagFireIdx");
@@ -45,7 +47,7 @@ public class DashboardScheduler {
 		}
 	}
 
-	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
+	@Scheduled(fixedRateString="${logpresso.polling-time:10000}")
 	public void processDashboardDataHourly2() {
 		if (isJunitRunning) return;
 		logger.info("DASH BOARD SCHEDULER RUN HOURLY: Add IotFireIdx");
@@ -57,7 +59,7 @@ public class DashboardScheduler {
 		}
 	}
 
-	@Scheduled(fixedRateString="${logpresso.polling-time:3000}")
+	@Scheduled(fixedRateString="${logpresso.polling-time:10000}")
 	public void collectDashboardTagDataPeriodic() {
 		if (isJunitRunning) return;
 		logger.info("DASH BOARD SCHEDULER RUN PERIODIC:"+pollingTime+" ADD TAG DATA");
@@ -76,20 +78,20 @@ public class DashboardScheduler {
 		}
 	}
 
-	/**
-	 * 매 10분마다 실행
-	 */ 
-	@Scheduled(cron="0 */10 * * * *")
-	public void generateTagDvcPushEvent() {
-		if (isJunitRunning) return;
-		logger.info("DASH BOARD SCHEDULER RUN MINUTE: TAG DVC PUSH");
-		try {
-			dashboardService.addTagDvcPushEventHist();		
-		} catch (Exception e) {
-			logger.error("Scheduler error", e);
-		}
-	}
-	
+//	/**
+//	 * 매 10분마다 실행
+//	 */ 
+//	@Scheduled(cron="0 */10 * * * *")
+//	public void generateTagDvcPushEvent() {
+//		if (isJunitRunning) return;
+//		logger.info("DASH BOARD SCHEDULER RUN MINUTE: TAG DVC PUSH");
+//		try {
+//			dashboardService.addTagDvcPushEventHist();		
+//		} catch (Exception e) {
+//			logger.error("Scheduler error", e);
+//		}
+//	}
+//	
 	@Scheduled(cron="0 * * * * *")
 	public void generateDashboardTagDataStats() {
 		if (isJunitRunning) return;
@@ -105,4 +107,13 @@ public class DashboardScheduler {
 		}
 	}
 
+	@Autowired LogpressoWebSocketProvider logpressoWebSocketProvider;
+	
+	
+	@Scheduled(cron="0 * * * * *")
+	public void healthCheckLogressoWebSocket() {
+		if (!logpressoWebSocketProvider.isConnected()) {
+			logpressoWebSocketProvider.openConnection();
+		}
+	}
 }

@@ -131,7 +131,7 @@ public class TagDvcPushEventHistDaoImpl extends AbstractDaoImpl implements TagDv
 
 	@Override
 	public Optional<PageResultObj<List<TagDvcPushEvent>>> search(PageRequest req) {
-		String queryStr = "select "+fields+" from tag_dvc_push_event_hist where created_dtm < :lastCreatedDtm";
+		String queryStr = "select "+fields+" from tag_dvc_push_event_hist where created_dtm < :lastCreatedDtm and created_dtm > DATE_SUB(:lastCreatedDtm, INTERVAL 3 day)";
 		
 		return internalSearch(queryStr, req, TagDvcPushEvent.class);
 	}

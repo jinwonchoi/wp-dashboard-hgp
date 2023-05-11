@@ -51,6 +51,7 @@ import com.gencode.issuetool.dao.TagFireIdxHistDao;
 import com.gencode.issuetool.dao.TagFireIdxHistStatDao;
 import com.gencode.issuetool.etc.Constant;
 import com.gencode.issuetool.etc.FakeDataUtil;
+import com.gencode.issuetool.etc.ReturnCode;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.exception.TooManyRowException;
 import com.gencode.issuetool.io.PageRequest;
@@ -139,18 +140,6 @@ public class DashboardService {
 	public DashboardService() {
 		super();
 	}
-
-//	public DashboardObj getDashboardDataAll() throws IOException {
-//		DashboardObj arResult = new DashboardObj();
-//		
-//		arResult.setDefaultMain(FakeDataUtil.getMapTotalFireIdxData(FakeDataUtil.generateTotalFireIdxData())); //화재종합지표
-//		arResult.setTagFireIdx(FakeDataUtil.getMapTagFireIdx(FakeDataUtil.generateTagFireIdx())); //설비별화재지수
-//		arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(FakeDataUtil.generateIotFireIdx())); //공간별화재지수
-//		arResult.setTagMain(FakeDataUtil.getMapTagData(FakeDataUtil.generateTagData())); //설비별위험현황
-//		arResult.setIotMain(FakeDataUtil.getMapIotData(FakeDataUtil.generateIotData())); //공간별위험현황
-//		return arResult;
-//	}
-
 	
 	/**
 	 * 화재종합지표
@@ -164,21 +153,35 @@ public class DashboardService {
 		Map<String, Object> mapIotFireIdx = new HashMap<String, Object>();
 		boolean _useFake=false;
 		if (_useFake) {
-			mapTagFireIdx =FakeDataUtil.getMapObjectTagFireIdx2(
+			mapTagFireIdx =FakeDataUtil.getMapObjectTagFireIdx2(//cacheMapManager.getInteriorInfos(),
 					FakeDataUtil.generateTagFireIdx()
 				);//설비별화재지수
-			mapIotFireIdx =FakeDataUtil.getMapObjectIotFireIdx(
+			mapIotFireIdx =FakeDataUtil.getMapObjectIotFireIdx(cacheMapManager.getInteriorInfosForIot(),
 					FakeDataUtil.generateIotFireIdx()
 				);//공간별화재지수
 		} else {
-			mapTagFireIdx =FakeDataUtil.getMapObjectTagFireIdx2(
-					logpressoAPIService.getTagFireIdx(
-							new TagFireIdxReqObj(cacheMapManager.getPlantTypeStr(),cacheMapManager.getPlantNosStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get())
-							)
-				);//설비별화재지수
-			mapIotFireIdx =FakeDataUtil.getMapObjectIotFireIdx(
-					logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
-				);//공간별화재지수
+			try {
+				mapTagFireIdx =FakeDataUtil.getMapObjectTagFireIdx2(
+						logpressoAPIService.getTagFireIdx(
+								new TagFireIdxReqObj(cacheMapManager.getPlantTypeStr(),cacheMapManager.getPlantNosStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get())
+								)
+					);//설비별화재지수
+			} catch (Exception e) {				
+				arResult.setResultCode(ReturnCode.LOGPRESSO_TAG_FIDX_ERROR);
+				mapTagFireIdx =FakeDataUtil.getMapObjectTagFireIdx2(//cacheMapManager.getInteriorInfos(),
+						FakeDataUtil.generateTagFireIdx()
+					);
+			}
+			try {
+				mapIotFireIdx =FakeDataUtil.getMapObjectIotFireIdx(cacheMapManager.getInteriorInfosForIot(),
+						logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+					);//공간별화재지수
+			} catch (Exception e) {				
+				arResult.setResultCode(ReturnCode.LOGPRESSO_IOT_FIDX_ERROR);
+				mapIotFireIdx =FakeDataUtil.getMapObjectIotFireIdx(cacheMapManager.getInteriorInfosForIot(),
+						FakeDataUtil.generateIotFireIdx()
+					);//공간별화재지수
+			}
 		}
 		//화재종합지표
 		arResult.setDefaultMain(FakeDataUtil.getMapTotalFireIdxData(
@@ -186,11 +189,12 @@ public class DashboardService {
 													mapTagFireIdx,//Map<String, Object> mapTagFireIdx,
 													cacheMapManager.getPlantInfos(),//List<PlantInfo> plantInfos,
 													cacheMapManager.getPlantPartInfos(),//List<PlantPartInfo> plantPartInfos,
-													cacheMapManager.getInteriorInfos(),//List<InteriorInfo> interiorInfos,
-													cacheMapManager.getAreaInfos(),//List<AreaInfo> areaInfos,
+													cacheMapManager.getInteriorInfosForIot(),//List<InteriorInfo> interiorInfos,
+													cacheMapManager.getAreaInfosForIot(),//List<AreaInfo> areaInfos,
 													cacheMapManager.getMapAreaInfo(),//Map<Long, AreaInfo> mapAreaInfo, 
 													cacheMapManager.getMapInteriorInfo()//Map<Long, InteriorInfo> mapInteriorInfo 
 				)); 
+		//throw new Exception();
 		return arResult;
 	}
 	
@@ -221,10 +225,19 @@ public class DashboardService {
 					strTagFireIdx
 				)); //설비별화재지수
 		} else {
-			//String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
-			arResult.setTagFireIdx(FakeDataUtil.getMapTagFireIdx2(
-					logpressoAPIService.getTagFireIdx(new TagFireIdxReqObj(cacheMapManager.getPlantTypeStr(),cacheMapManager.getPlantNosStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
-				)); //설비별화재지수
+			try {
+				//String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
+				arResult.setTagFireIdx(FakeDataUtil.getMapTagFireIdx2(
+						logpressoAPIService.getTagFireIdx(new TagFireIdxReqObj(cacheMapManager.getPlantTypeStr(),cacheMapManager.getPlantNosStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+					)); //설비별화재지수
+			} catch (Exception e) {				
+				arResult.setResultCode(ReturnCode.LOGPRESSO_TAG_FIDX_ERROR);
+				String strTagFireIdx = FakeDataUtil.generateTagFireIdx();
+				arResult.setTagFireIdx(FakeDataUtil.getMapTagFireIdx2(
+						strTagFireIdx
+					)); //설비별화재지수
+			}
+			
 		}
 		//tagFireIdxHistDao.deleteOld();
 		//tagFireIdxHistDao.register(FakeDataUtil.getListTagFireIdx(strTagFireIdx));
@@ -245,8 +258,9 @@ public class DashboardService {
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
 		Map<String, List<List<String>>> mapResult = new TreeMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
+		long[] maxValLimit= {0,0};
 		
-		Optional<List<TagFireIdx>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+		Optional<List<TagFireIdx>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
 									tagFireIdxHistDao.getRealtimeChartData(req):tagFireIdxHistStatDao.getRealtimeChartData(req);
 
 		String[] prevKeyStr = {""};
@@ -260,8 +274,10 @@ public class DashboardService {
 			listData.add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getFireIdx()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+				
 			}});
 			prevKeyStr[0] = keyStr;
+			maxValLimit[0]=(maxValLimit[0]>e.getFireIdx())?maxValLimit[0]:e.getFireIdx(); 
 		});
 		if (listData.size()>0) {
 			mapResult.put(prevKeyStr[0], listData);
@@ -272,7 +288,9 @@ public class DashboardService {
 					+"("+e.substring(0,2)+")", 
 					mapResult.get(e)));
 		});
-		return new RealtimeChartObj(new ArrayList<String>(mapResult.keySet()), listSeriesObj);
+		return new RealtimeChartObj(new ArrayList<String>(mapResult.keySet())
+				, listSeriesObj
+				, Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 
 	}
 	
@@ -307,13 +325,21 @@ public class DashboardService {
 		boolean _useFake=false;
 		DashboardObj arResult = new DashboardObj();
 		if (_useFake) {
-			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(
+			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(cacheMapManager.getInteriorInfos(),
 					FakeDataUtil.generateIotFireIdx()
 				)); //공간별화재지수
 		} else {
-			arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(
-					logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
-				)); //공간별화재지수
+			try {
+				arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(cacheMapManager.getInteriorInfos(),
+						logpressoAPIService.getIotFireIdx(new IotFireIdxReqObj(cacheMapManager.getInteriorsStr(),Constant.DASHBOARD_LOGPRESSO_REFRESH_TIME.get()))
+					)); //공간별화재지수
+			} catch (Exception e) {				
+				arResult.setResultCode(ReturnCode.LOGPRESSO_IOT_FIDX_ERROR);
+				arResult.setIotFireIdx(FakeDataUtil.getMapIotFireIdx(cacheMapManager.getInteriorInfos(),
+						FakeDataUtil.generateIotFireIdx()
+					)); //공간별화재지수
+			}
+
 		}
 		return arResult;
 	}
@@ -330,10 +356,12 @@ public class DashboardService {
 		Map<String, List<List<String>>> mapResult = new TreeMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		
-		Optional<List<IotFireIdx>> daoList = (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+		Optional<List<IotFireIdx>> daoList = (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
 											iotFireIdxHistDao.getRealtimeChartData(req):
 											iotFireIdxHistStatDao.getRealtimeChartData(req);
 		String[] prevKeyStr = {""};
+		long[] maxValLimit= {0,0};
+		
 		daoList.get().forEach( e -> {
 			String keyStr = (String)e.getInteriorCode();
 			if (mapResult.get(keyStr)==null && listData.size()>0) {
@@ -345,6 +373,7 @@ public class DashboardService {
 				add(Double.toString(e.getFireIdx()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
 			prevKeyStr[0] = keyStr;
+			maxValLimit[0]=(maxValLimit[0]>e.getFireIdx())?maxValLimit[0]:e.getFireIdx();
 		});
 		if (listData.size()>0) {
 			mapResult.put(prevKeyStr[0], listData);
@@ -353,7 +382,10 @@ public class DashboardService {
 			listSeriesObj.add(new RealtimeChartSeriesItem(e.contains("AVERAGE")?"평균"
 					:cacheMapManager.getMapInteriorInfoByCode().get(e).getInteriorName(), mapResult.get(e)));
 		});
-		return new RealtimeChartObj(new ArrayList<String>(mapResult.keySet()), listSeriesObj);
+		return new RealtimeChartObj(
+				new ArrayList<String>(mapResult.keySet()), 
+				listSeriesObj, 
+				Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 
 	}
 	
@@ -744,8 +776,9 @@ public class DashboardService {
 		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		String[] prevKeyStr = {""};
+		long[] maxValLimit= {0,0};
 		
-		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
 										iotMainHistDao.getRealtimeChartData(req):
 										iotMainHistStatDao.getRealtimeChartData(req);
 
@@ -760,6 +793,7 @@ public class DashboardService {
 				add(Double.toString(e.getAvgTempVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
 			prevKeyStr[0] = keyStr;
+			maxValLimit[0]=(maxValLimit[0]>e.getAvgTempVal())?maxValLimit[0]:e.getAvgTempVal();
 		});
 		if (listData.size()>0) {
 			mapResult.put(prevKeyStr[0], listData);
@@ -768,10 +802,52 @@ public class DashboardService {
 			listSeriesObj.add(new RealtimeChartSeriesItem(cacheMapManager.getMapInteriorInfoByCode().get(e).getInteriorName()+"("+e+")", mapResult.get(e)));
 		});
 
-		return new RealtimeChartObj(new ArrayList<String>(mapResult.keySet().stream().map(e-> 
+		return new RealtimeChartObj(
+				new ArrayList<String>(mapResult.keySet().stream().map(e-> 
 					cacheMapManager.getMapInteriorInfoByCode().get(e).getInteriorName()+"("+e+")"
-				).collect(Collectors.toList())), listSeriesObj);
+				).collect(Collectors.toList())), 
+				listSeriesObj, 
+				Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 	}
+	
+//	public RealtimeChartObj getIotMainRealtimeChartByAreaGroup(PageRequest req) throws Exception {
+//		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
+//		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
+//		List<List<String>> listData = new ArrayList<List<String>>();
+//		String[] prevKeyStr = {""};
+//		long[] maxValLimit= {0,0};
+//		
+//		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
+//										iotMainHistDao.getRealtimeChartData(req):
+//										iotMainHistStatDao.getRealtimeChartData(req);
+//
+//		daoList.get().forEach( e -> {
+//			String keyStr = (String)e.getInteriorCode();
+//			if (mapResult.get(keyStr)==null && listData.size()>0) {
+//				mapResult.put(prevKeyStr[0], (List<List<String>>)((ArrayList<List<String>>)listData).clone());
+//				listData.clear();
+//			}
+//			listData.add(new ArrayList<String>(){{
+//				add(e.getCreatedDtm());
+//				add(Double.toString(e.getAvgTempVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+//			}});
+//			prevKeyStr[0] = keyStr;
+//			maxValLimit[0]=(maxValLimit[0]>e.getAvgTempVal())?maxValLimit[0]:e.getAvgTempVal();
+//		});
+//		if (listData.size()>0) {
+//			mapResult.put(prevKeyStr[0], listData);
+//		}
+//		mapResult.keySet().forEach(e -> {
+//			listSeriesObj.add(new RealtimeChartSeriesItem(cacheMapManager.getMapInteriorInfoByCode().get(e).getInteriorName()+"("+e+")", mapResult.get(e)));
+//		});
+//
+//		return new RealtimeChartObj(
+//				new ArrayList<String>(mapResult.keySet().stream().map(e-> 
+//					cacheMapManager.getMapInteriorInfoByCode().get(e).getInteriorName()+"("+e+")"
+//				).collect(Collectors.toList())), 
+//				listSeriesObj, 
+//				Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+//	}
 	/**
 	 * 센서 각 공간 데이터별 추이
 	 *  - 최근 30건 조회
@@ -783,10 +859,12 @@ public class DashboardService {
 	public RealtimeChartObj getIotMainRealtimeChartByInterior(PageRequest req) throws Exception {
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
 		List<List<List<String>>> listData = new ArrayList<List<List<String>>>();
+		long[] maxValLimit= {0,0,0,0,0};
+
 		for(int i=0;i<5;i++) {
 			listData.add(new ArrayList<List<String>>());
 		}
-		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
 				iotMainHistDao.getRealtimeChartData(req):iotMainHistStatDao.getRealtimeChartData(req);
 
 		daoList.get().forEach( e -> {
@@ -794,22 +872,31 @@ public class DashboardService {
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgTempVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[0]=(maxValLimit[0]>e.getAvgTempVal())?maxValLimit[0]:e.getAvgTempVal();
+
 			listData.get(1).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgHumidVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[1]=(maxValLimit[1]>e.getAvgHumidVal())?maxValLimit[1]:e.getAvgHumidVal();
+
 			listData.get(2).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgSmokeVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[2]=(maxValLimit[2]>e.getAvgSmokeVal())?maxValLimit[2]:e.getAvgSmokeVal();
+
 			listData.get(3).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgCoVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[3]=(maxValLimit[3]>e.getAvgCoVal())?maxValLimit[3]:e.getAvgCoVal();
+
 			listData.get(4).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgFlame()));
 			}});
+			maxValLimit[4]=(maxValLimit[4]>e.getAvgFlame())?maxValLimit[4]:e.getAvgFlame();
 		});
 		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_TEMP.get(), listData.get(0)));
 		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_HUMID.get(), listData.get(1)));
@@ -817,13 +904,22 @@ public class DashboardService {
 		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_CO.get(), listData.get(3)));
 		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_FLARE.get(), listData.get(4)));
 
+		
 		return new RealtimeChartObj(new ArrayList<String>() {{
-			add(Constant.IOT_VALUE_NAME_TEMP.get());
-			add(Constant.IOT_VALUE_NAME_HUMID.get());
-			add(Constant.IOT_VALUE_NAME_SMOKE.get());
-			add(Constant.IOT_VALUE_NAME_CO.get());
-			add(Constant.IOT_VALUE_NAME_FLARE.get());
-		}}, listSeriesObj);
+					add(Constant.IOT_VALUE_NAME_TEMP.get());
+					add(Constant.IOT_VALUE_NAME_HUMID.get());
+					add(Constant.IOT_VALUE_NAME_SMOKE.get());
+					add(Constant.IOT_VALUE_NAME_CO.get());
+					add(Constant.IOT_VALUE_NAME_FLARE.get());
+				}}, 
+				listSeriesObj,
+				new HashMap<String, String>() {{
+					put(Constant.IOT_VALUE_NAME_TEMP.get(), Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+					put(Constant.IOT_VALUE_NAME_HUMID.get(), Double.toString(maxValLimit[1]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+					put(Constant.IOT_VALUE_NAME_SMOKE.get(), Double.toString(maxValLimit[2]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+					put(Constant.IOT_VALUE_NAME_CO.get(), Double.toString(maxValLimit[3]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+					put(Constant.IOT_VALUE_NAME_FLARE.get(), Double.toString(maxValLimit[4]));
+				}});
 	}
 
 	/**
@@ -836,7 +932,7 @@ public class DashboardService {
 	 */	
 	public Map<String, RealtimeChartObj> getIotMainRealtimeChartListByInteriorList(PageRequest req) throws Exception {
 
-		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+		Optional<List<IotMain>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
 				iotMainHistDao.getRealtimeChartDataByInteriorList(req):iotMainHistStatDao.getRealtimeChartDataByInteriorList(req);
 
 		List<RealtimeChartSeriesItem> listSeriesObj = new ArrayList<RealtimeChartSeriesItem>();
@@ -847,6 +943,8 @@ public class DashboardService {
 		}
 
 		String[] prevKeyStr = {""};
+		long[] maxValLimit= {0,0,0,0,0};
+
 		daoList.get().forEach( e -> {
 			String keyStr = (String)e.getInteriorCode();
 			if (mapResult.get(keyStr)==null && listData.get(0).size()>0) {
@@ -865,7 +963,14 @@ public class DashboardService {
 														add(Constant.IOT_VALUE_NAME_CO.get());
 														add(Constant.IOT_VALUE_NAME_FLARE.get());
 													}}, 
-													(List<RealtimeChartSeriesItem>)((ArrayList<RealtimeChartSeriesItem>)listSeriesObj).clone()
+													(List<RealtimeChartSeriesItem>)((ArrayList<RealtimeChartSeriesItem>)listSeriesObj).clone(),
+													new HashMap<String, String>() {{
+														put(Constant.IOT_VALUE_NAME_TEMP.get(), Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+														put(Constant.IOT_VALUE_NAME_HUMID.get(), Double.toString(maxValLimit[1]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+														put(Constant.IOT_VALUE_NAME_SMOKE.get(), Double.toString(maxValLimit[2]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+														put(Constant.IOT_VALUE_NAME_CO.get(), Double.toString(maxValLimit[3]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+														put(Constant.IOT_VALUE_NAME_FLARE.get(), Double.toString(maxValLimit[4]));
+													}}
 									)	
 								);
 				listData.get(0).clear();
@@ -880,22 +985,27 @@ public class DashboardService {
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgTempVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[0]=(maxValLimit[0]>e.getAvgTempVal())?maxValLimit[0]:e.getAvgTempVal();
 			listData.get(1).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgHumidVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[1]=(maxValLimit[1]>e.getAvgHumidVal())?maxValLimit[1]:e.getAvgHumidVal();
 			listData.get(2).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgSmokeVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[2]=(maxValLimit[2]>e.getAvgSmokeVal())?maxValLimit[2]:e.getAvgSmokeVal();
 			listData.get(3).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgCoVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[3]=(maxValLimit[3]>e.getAvgCoVal())?maxValLimit[3]:e.getAvgCoVal();
 			listData.get(4).add(new ArrayList<String>(){{
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getAvgFlame()));
 			}});
+			maxValLimit[4]=(maxValLimit[4]>e.getAvgFlame())?maxValLimit[4]:e.getAvgFlame();
 			prevKeyStr[0] = keyStr;
 		});
 		listSeriesObj.add(new RealtimeChartSeriesItem(Constant.IOT_VALUE_NAME_TEMP.get(), listData.get(0)));
@@ -912,7 +1022,14 @@ public class DashboardService {
 										add(Constant.IOT_VALUE_NAME_CO.get());
 										add(Constant.IOT_VALUE_NAME_FLARE.get());
 									}}, 
-									(List<RealtimeChartSeriesItem>)((ArrayList<RealtimeChartSeriesItem>)listSeriesObj).clone()
+									(List<RealtimeChartSeriesItem>)((ArrayList<RealtimeChartSeriesItem>)listSeriesObj).clone(),
+									new HashMap<String, String>() {{
+										put(Constant.IOT_VALUE_NAME_TEMP.get(), Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+										put(Constant.IOT_VALUE_NAME_HUMID.get(), Double.toString(maxValLimit[1]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+										put(Constant.IOT_VALUE_NAME_SMOKE.get(), Double.toString(maxValLimit[2]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+										put(Constant.IOT_VALUE_NAME_CO.get(), Double.toString(maxValLimit[3]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
+										put(Constant.IOT_VALUE_NAME_FLARE.get(), Double.toString(maxValLimit[4]));
+									}}
 					)	
 				);
 
@@ -933,10 +1050,12 @@ public class DashboardService {
 		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		
-		Optional<List<IotData>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+		Optional<List<IotData>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
 				iotDataHistDao.getRealtimeChartData(req):iotDataHistStatDao.getRealtimeChartData(req);
 
 		String[] prevKeyStr = {""};
+		long[] maxValLimit= {0,0};
+
 		daoList.get().forEach( e -> {
 			String keyStr = //(String)e.getPlantNo()+":"+(String)e.getPlantPartCode()+":"+(String)e.getFacilCode()+":"+
 							(String)e.getDeviceId();
@@ -950,6 +1069,8 @@ public class DashboardService {
 				add(Double.toString(e.getTempVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
 			prevKeyStr[0] = keyStr;
+			maxValLimit[0]=(maxValLimit[0]>e.getTempVal())?maxValLimit[0]:e.getTempVal();
+
 		});
 		if (listData.size()>0) {
 			mapResult.put(prevKeyStr[0], listData);
@@ -957,7 +1078,11 @@ public class DashboardService {
 		mapResult.keySet().forEach(e -> {
 			listSeriesObj.add(new RealtimeChartSeriesItem(e, mapResult.get(e)));
 		});
-		return new RealtimeChartObj(new ArrayList<String>(mapResult.keySet()), listSeriesObj);
+		return new RealtimeChartObj(
+				new ArrayList<String>(mapResult.keySet()), 
+				listSeriesObj, 
+				Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val())
+			);
 	}
 	
 	/**
@@ -973,10 +1098,12 @@ public class DashboardService {
 		Map<String, List<List<String>>> mapResult = new HashMap<String, List<List<String>>>();
 		List<List<String>> listData = new ArrayList<List<String>>();
 		
-		Optional<List<TagData>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_5SEC.get()))?
+		Optional<List<TagData>> daoList= (req.getParamMap().get("timeMode").equals(Constant.DASHBOARD_STATS_TIME_MODE_10SEC.get()))?
 				tagDataHistDao.getRealtimeChartData(req):tagDataHistStatDao.getRealtimeChartData(req);
 
 		String[] prevKeyStr = {""};
+		long[] maxValLimit= {0,0};
+
 		daoList.get().forEach( e -> {
 			String keyStr = //(String)e.getPlantNo()+":"+(String)e.getPlantPartCode()+":"+(String)e.getFacilCode()+":"+
 							(String)e.getTagName();
@@ -989,6 +1116,7 @@ public class DashboardService {
 				add(e.getCreatedDtm());
 				add(Double.toString(e.getTagVal()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()));
 			}});
+			maxValLimit[0]=(maxValLimit[0]>e.getTagVal())?maxValLimit[0]:e.getTagVal();
 			prevKeyStr[0] = keyStr;
 		});
 		if (listData.size()>0) {
@@ -997,7 +1125,11 @@ public class DashboardService {
 		mapResult.keySet().forEach(e -> {
 			listSeriesObj.add(new RealtimeChartSeriesItem(e, mapResult.get(e)));
 		});
-		return new RealtimeChartObj(new ArrayList<String>(mapResult.keySet()), listSeriesObj);
+		return new RealtimeChartObj(
+				new ArrayList<String>(mapResult.keySet()), 
+				listSeriesObj, 
+				Double.toString(maxValLimit[0]/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val())
+			);
 	}
 	
 
@@ -1300,32 +1432,45 @@ public class DashboardService {
 		return arResult;
 	}
 	
-	/**
-	 * 이벤트수신시 클라이언트 push하고 디비insert처리
-	 * @throws Exception
-	 */
-	public  void addTagDvcPushEventHist() throws Exception {
-		boolean _useFake=false;
-		if (FakeDataUtil.randomVal(10)/7==1) return;
-		Thread.sleep(FakeDataUtil.randomVal(10)*1000);
-		TagDvcPushEvent tagDvcPushEvent = _useFake?
-				FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager,
-					FakeDataUtil.generateTagDvcPushEvent(cacheMapManager)
-				):
-				FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager, 
-					//FakeDataUtil.generateTagDvcPushEvent(cacheMapManager)
-					logpressoAPIService.getTagDvcEvent(
-							new DvcEventReqObj("I,P,C",
-									Utils.yyyyMMddHHmmssHypen(Utils.addMinutesToDate(new Date(), -10)),
-									Utils.yyyyMMddHHmmssHypen(),
-									"00"
-									))
-
-					);
-		tagDvcPushEventHistDao.register(tagDvcPushEvent);
-		pushService.sendMsgAll(Constant.PUSH_TAG_TAG_DVC_PUSH_EVENT_ADD.get(), tagDvcPushEvent);
-	}
+//	/**
+//	 * 이벤트수신시 클라이언트 push하고 디비insert처리
+//	 * @throws Exception
+//	 */
+//	public  void addTagDvcPushEventHist() throws Exception {
+//		boolean _useFake=false;
+//		if (FakeDataUtil.randomVal(10)/7==1) return;
+//		Thread.sleep(FakeDataUtil.randomVal(10)*1000);
+//		TagDvcPushEvent tagDvcPushEvent = _useFake?
+//				FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager,
+//					FakeDataUtil.generateTagDvcPushEvent(cacheMapManager)
+//				):
+//				FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager, 
+//					//FakeDataUtil.generateTagDvcPushEvent(cacheMapManager)
+//					logpressoAPIService.getTagDvcEvent(
+//							new DvcEventReqObj("I,P,C",
+//									Utils.yyyyMMddHHmmssHypen(Utils.addMinutesToDate(new Date(), -10)),
+//									Utils.yyyyMMddHHmmssHypen(),
+//									"00"
+//									))
+//
+//					);
+//		tagDvcPushEventHistDao.register(tagDvcPushEvent);
+//		pushService.sendMsgAll(Constant.PUSH_TAG_TAG_DVC_PUSH_EVENT_ADD.get(), tagDvcPushEvent);
+//	}
 	
+	
+	public void testPushEvent() {
+		try {
+			String message = "{\"level\":\"A\",\"kind\":\"TMP\",\"id\":\"ST30101N01\",\"time\":\"2023-04-06 22:33:37\",\"type\":\"I\",\"value\":\"70\",\"desc\":\"ST30101N01\"}";
+			logger.info("LOGPRESSO WEBSOCKET MESSAGE RECEIVED:"+message);
+			TagDvcPushEvent tagDvcPushEvent = 
+					FakeDataUtil.getObjTabDvcPushEvent(cacheMapManager, message);
+			tagDvcPushEventHistDao.register(tagDvcPushEvent);
+			pushService.sendMsgAll(Constant.PUSH_TAG_TAG_DVC_PUSH_EVENT_ADD.get(), tagDvcPushEvent);
+		} catch (Exception e) {
+			logger.error("LOGPRESSO WEBSOCKET HANDLE FAILED",e);
+		}
+	}
 
 	public Optional<PageResultObj<List<TagDvcPushEvent>>> getTagDvcPushEventHistList(PageRequest req) throws Exception {
 		DashboardObj arResult = new DashboardObj();

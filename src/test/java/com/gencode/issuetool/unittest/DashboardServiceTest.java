@@ -11,12 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.gencode.issuetool.client.LogWrapper;
+import com.gencode.issuetool.client.RestClient;
 import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.PageRequest;
+import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.io.SortDirection;
 import com.gencode.issuetool.io.chart.RealtimeChartObj;
 import com.gencode.issuetool.logpresso.obj.DashboardObj;
+import com.gencode.issuetool.obj.AuthUserInfo;
 import com.gencode.issuetool.service.DashboardService;
+import com.gencode.issuetool.util.JsonUtils;
 
 @SpringBootTest
 public class DashboardServiceTest {
@@ -47,6 +51,7 @@ public class DashboardServiceTest {
 		dashboardService.addTagFireIdx();
 		//assertNotNull(chatService.l);
 	}
+	
 	@DisplayName("TEST addIotFireIdx")
 	@Test
 	void testAddIotFireIdx() throws Exception {
@@ -86,6 +91,22 @@ public class DashboardServiceTest {
 		dashboardService.addTagData();
 		//assertNotNull(chatService.l);
 	}
+
+	@DisplayName("TEST getIotMain")
+	@Test
+	void testGetIotMain() throws Exception {
+		DashboardObj dashboardObj = dashboardService.getIotMain();
+		logger.info(dashboardObj.toString());
+		//assertNotNull(chatService.l);
+	}
+	
+	@DisplayName("TEST getIotMainArea")
+	@Test
+	void testGetIotMainArea() throws Exception {
+		DashboardObj dashboardObj = dashboardService.getIotMainArea();
+		logger.info(dashboardObj.toString());
+		//assertNotNull(chatService.l);
+	}
 	
 	@DisplayName("TEST getTagDvcEventHistList")
 	@Test
@@ -102,5 +123,14 @@ public class DashboardServiceTest {
 		logger.info(arResult.getItemList());
 		//assertNotNull(chatService.l);
 	}
+	
+	@DisplayName("TEST testPushEvent")
+	@Test
+	void testPushEvent() throws Exception {
+		dashboardService.testPushEvent();
+	}
+	
+	
+	
 	
 }

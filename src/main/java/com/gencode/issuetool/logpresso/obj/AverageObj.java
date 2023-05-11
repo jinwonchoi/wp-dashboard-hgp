@@ -4,6 +4,8 @@
 ==========================================================================================*/
 package com.gencode.issuetool.logpresso.obj;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import com.gencode.issuetool.etc.Constant;
@@ -50,9 +52,13 @@ public class AverageObj extends Pojo {
 		return (maxFireIdx/nCount);
 	}
 	public String getFireIdxStr() {
-		return Double.toString(((double)(fireIdx/nCount))/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val());
+		return new BigDecimal(
+				(((double)(fireIdx/nCount))
+				/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val())).setScale(1, RoundingMode.HALF_UP).toString();
 	}
 	public String getMaxFireIdxStr() {
-		return Double.toString(((double)(maxFireIdx/nCount))/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val());
+		return new BigDecimal(
+				(((double)(maxFireIdx/nCount))
+				/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val())).setScale(1, RoundingMode.HALF_UP).toString();
 	}
 }

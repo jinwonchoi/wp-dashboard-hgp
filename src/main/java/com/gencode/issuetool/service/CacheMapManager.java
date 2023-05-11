@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -88,8 +90,16 @@ public class CacheMapManager {
 	Map<String, PlantPartInfo> mapPlantPartInfoByCode = new HashMap<String, PlantPartInfo>();
 	Map<Long, AreaInfo> mapAreaInfo = new HashMap<Long, AreaInfo>();
 	Map<String, AreaInfo> mapAreaInfoByCode = new HashMap<String, AreaInfo>();
+	Map<Long, AreaInfo> mapAreaInfoForIot = new HashMap<Long, AreaInfo>();
+	Map<String, AreaInfo> mapAreaInfoByCodeForIot = new HashMap<String, AreaInfo>();
+	Map<Long, AreaInfo> mapAreaInfoForCctv = new HashMap<Long, AreaInfo>();
+	Map<String, AreaInfo> mapAreaInfoByCodeForCctv = new HashMap<String, AreaInfo>();
 	Map<Long, InteriorInfo> mapInteriorInfo = new HashMap<Long, InteriorInfo>();
 	Map<String, InteriorInfo> mapInteriorInfoByCode = new HashMap<String, InteriorInfo>();
+	Map<Long, InteriorInfo> mapInteriorInfoForIot = new HashMap<Long, InteriorInfo>();
+	Map<String, InteriorInfo> mapInteriorInfoByCodeForIot = new HashMap<String, InteriorInfo>();
+	Map<Long, InteriorInfo> mapInteriorInfoForCctv = new HashMap<Long, InteriorInfo>();
+	Map<String, InteriorInfo> mapInteriorInfoByCodeForCctv = new HashMap<String, InteriorInfo>();
 	Map<String, FacilityInfo> mapFacilityInfoByCode = new HashMap<String, FacilityInfo>();
 	Map<String, FacilTagInfo> mapFacilTagInfoByCode = new HashMap<String, FacilTagInfo>();
 	Map<String, IotDeviceInfo> mapIotDeviceInfoByCode = new HashMap<String, IotDeviceInfo>();
@@ -99,7 +109,11 @@ public class CacheMapManager {
 	List<PlantInfo> plantInfos = new ArrayList<PlantInfo>();
 	List<PlantPartInfo> plantPartInfos = new ArrayList<PlantPartInfo>();
 	List<AreaInfo> areaInfos = new ArrayList<AreaInfo>();
+	List<AreaInfo> areaInfosForIot = new ArrayList<AreaInfo>();
+	List<AreaInfo> areaInfosForCctv = new ArrayList<AreaInfo>();
 	List<InteriorInfo> interiorInfos = new ArrayList<InteriorInfo>();
+	List<InteriorInfo> interiorInfosForIot = new ArrayList<InteriorInfo>();
+	List<InteriorInfo> interiorInfosForCctv = new ArrayList<InteriorInfo>();
 	List<FacilityInfo> facilityInfos = new ArrayList<FacilityInfo>();
 	List<FacilTagInfo> facilTagInfos = new ArrayList<FacilTagInfo>();
 	List<IotDeviceInfo> iotDeviceInfos = new ArrayList<IotDeviceInfo>();
@@ -165,6 +179,68 @@ public class CacheMapManager {
 			mapEtcDeviceInfoByCode.put(e.getDeviceId(), e);
 			etcDeviceInfos.add(e);
 		});
+		TreeSet<Long> areaIdsForIot = new TreeSet<Long>();
+		TreeSet<Long> interiorIdsForIot = new TreeSet<Long>();
+		TreeSet<Long> areaIdsForCctv = new TreeSet<Long>();
+		TreeSet<Long> interiorIdsForCctv = new TreeSet<Long>();
+		iotDeviceInfos.stream().forEach(e -> {
+			interiorIdsForIot.add(new Long(e.getInteriorId()));
+		});
+		interiorIdsForIot.forEach(e -> {
+			areaIdsForIot.add(new Long(mapInteriorInfo.get(e).getAreaId()));
+			interiorInfosForIot.add(mapInteriorInfo.get(e));
+		});
+		areaIdsForIot.forEach(e -> {
+			areaInfosForIot.add(mapAreaInfo.get(e));
+		});
+		etcDeviceInfos.stream().forEach(e -> {
+			interiorIdsForCctv.add(new Long(e.getInteriorId()));
+		});
+		interiorIdsForCctv.forEach(e -> {
+			areaIdsForCctv.add(new Long(mapInteriorInfo.get(e).getAreaId()));
+			interiorInfosForCctv.add(mapInteriorInfo.get(e));
+		});
+		areaIdsForCctv.forEach(e -> {
+			areaInfosForCctv.add(mapAreaInfo.get(e));
+		});
+	}
+
+	public <T> void insert(T t) {
+		if (t instanceof CommonCode) {
+			mapCommonCodeByCode.put(((CommonCode)t).getGroupId()+":"+((CommonCode)t).getItemKey(), (CommonCode)t);
+			commonCodes.add((CommonCode)t);
+		} else if (t instanceof PlantInfo) {
+			mapPlantInfoByCode.put(((PlantInfo)t).getPlantNo(), (PlantInfo)t);
+			plantInfos.add((PlantInfo)t);
+		} else if (t instanceof PlantPartInfo) {
+			mapPlantPartInfoByCode.put(mapPlantInfoByCode.get(((PlantPartInfo)t).getPlantId()).getPlantNo()
+					+":"+((PlantPartInfo)t).getPlantPartCode(), (PlantPartInfo)t);
+			plantPartInfos.add((PlantPartInfo)t);
+		} else if (t instanceof AreaInfo) {
+			mapAreaInfoByCode.put(((AreaInfo)t).getAreaCode(), (AreaInfo)t);
+			mapAreaInfo.put(new Long(((AreaInfo)t).getId()), (AreaInfo)t);
+			areaInfos.add((AreaInfo)t);
+			areaInfosForIot.add((AreaInfo)t);
+			areaInfosForCctv.add((AreaInfo)t);
+		} else if (t instanceof InteriorInfo) {
+			mapInteriorInfoByCode.put(((InteriorInfo)t).getInteriorCode(), (InteriorInfo)t);
+			mapInteriorInfo.put(new Long(((InteriorInfo)t).getId()), (InteriorInfo)t);
+			interiorInfos.add((InteriorInfo)t);
+			interiorInfosForIot.add((InteriorInfo)t);
+			interiorInfosForCctv.add((InteriorInfo)t);
+		} else if (t instanceof FacilityInfo) {
+			mapFacilityInfoByCode.put(((FacilityInfo)t).getFacilCode(), (FacilityInfo)t);
+			facilityInfos.add((FacilityInfo)t);
+		} else if (t instanceof FacilTagInfo) {
+			mapFacilTagInfoByCode.put(((FacilTagInfo)t).getTagName(), (FacilTagInfo)t);
+			facilTagInfos.add((FacilTagInfo)t);
+		} else if (t instanceof IotDeviceInfo) {
+			mapIotDeviceInfoByCode.put(((IotDeviceInfo)t).getDeviceId(), (IotDeviceInfo)t);
+			iotDeviceInfos.add((IotDeviceInfo)t);
+		} else if (t instanceof EtcDeviceInfo) {
+			mapEtcDeviceInfoByCode.put(((EtcDeviceInfo)t).getDeviceId(), (EtcDeviceInfo)t);
+			etcDeviceInfos.add((EtcDeviceInfo)t);
+		}
 	}
 	
 	public <T> void update(T t) {
@@ -182,10 +258,22 @@ public class CacheMapManager {
 			mapAreaInfoByCode.put(((AreaInfo)t).getAreaCode(), (AreaInfo)t);
 			mapAreaInfo.put(new Long(((AreaInfo)t).getId()), (AreaInfo)t);
 			areaInfos.set(areaInfos.indexOf((AreaInfo)t), (AreaInfo)t);
+			if (areaInfosForIot.indexOf((AreaInfo)t) >= 0) {
+				areaInfosForIot.set(areaInfosForIot.indexOf((AreaInfo)t), (AreaInfo)t);
+			}
+			if (areaInfosForCctv.indexOf((AreaInfo)t) >= 0) {
+				areaInfosForCctv.set(areaInfosForCctv.indexOf((AreaInfo)t), (AreaInfo)t);
+			}
 		} else if (t instanceof InteriorInfo) {
 			mapInteriorInfoByCode.put(((InteriorInfo)t).getInteriorCode(), (InteriorInfo)t);
 			mapInteriorInfo.put(new Long(((InteriorInfo)t).getId()), (InteriorInfo)t);
 			interiorInfos.set(interiorInfos.indexOf((InteriorInfo)t), (InteriorInfo)t);
+			if (interiorInfosForIot.indexOf((InteriorInfo)t) >= 0) {
+				interiorInfosForIot.set(interiorInfosForIot.indexOf((InteriorInfo)t), (InteriorInfo)t);
+			}
+			if (interiorInfosForCctv.indexOf((InteriorInfo)t) >= 0) {
+				interiorInfosForCctv.set(interiorInfosForCctv.indexOf((InteriorInfo)t), (InteriorInfo)t);
+			}
 		} else if (t instanceof FacilityInfo) {
 			mapFacilityInfoByCode.put(((FacilityInfo)t).getFacilCode(), (FacilityInfo)t);
 			facilityInfos.set(facilityInfos.indexOf((FacilityInfo)t), (FacilityInfo)t);
@@ -216,10 +304,14 @@ public class CacheMapManager {
 			mapAreaInfoByCode.remove(((AreaInfo)t).getAreaCode());
 			mapAreaInfo.remove(((AreaInfo)t).getId());
 			areaInfos.remove((AreaInfo)t);
+			areaInfosForIot.remove((AreaInfo)t);
+			areaInfosForCctv.remove((AreaInfo)t);
 		} else if (t instanceof InteriorInfo) {
 			mapInteriorInfoByCode.remove(((InteriorInfo)t).getInteriorCode());
 			mapInteriorInfo.remove(((InteriorInfo)t).getId());
 			interiorInfos.remove((InteriorInfo)t);
+			interiorInfosForIot.remove((InteriorInfo)t);
+			interiorInfosForCctv.remove((InteriorInfo)t);
 		} else if (t instanceof FacilityInfo) {
 			mapFacilityInfoByCode.remove(((FacilityInfo)t).getFacilCode());
 			facilityInfos.remove((FacilityInfo)t);
@@ -328,11 +420,12 @@ public class CacheMapManager {
 	public void setMapEtcDeviceInfoByCode(Map<String, EtcDeviceInfo> mapEtcDeviceInfoByCode) {
 		this.mapEtcDeviceInfoByCode = mapEtcDeviceInfoByCode;
 	}
-
-	
-	
 	public List<CommonCode> getCommonCodes() {
 		return commonCodes;
+	}
+	
+	public List<CommonCode> getCommonCodes(String groupId) {
+		return commonCodes.stream().filter(e-> e.getGroupId().equals(groupId)).collect(Collectors.toList());
 	}
 
 	public List<PlantInfo> getPlantInfos() {
@@ -345,6 +438,22 @@ public class CacheMapManager {
 
 	public List<AreaInfo> getAreaInfos() {
 		return areaInfos;
+	}
+
+	public List<AreaInfo> getAreaInfosForIot() {
+		return areaInfosForIot;
+	}
+
+	public List<AreaInfo> getAreaInfosForCctv() {
+		return areaInfosForCctv;
+	}
+
+	public List<InteriorInfo> getInteriorInfosForIot() {
+		return interiorInfosForIot;
+	}
+
+	public List<InteriorInfo> getInteriorInfosForCctv() {
+		return interiorInfosForCctv;
 	}
 
 	public List<InteriorInfo> getInteriorInfos() {

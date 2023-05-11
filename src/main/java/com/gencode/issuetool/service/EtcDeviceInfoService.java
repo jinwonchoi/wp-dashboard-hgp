@@ -50,6 +50,9 @@ public class EtcDeviceInfoService {
 	@Autowired
 	private PushService pushService;
 	
+	@Autowired
+	private CacheMapManager cacheMapManager; 
+	
 	@Transactional
 	public Optional<EtcDeviceInfo> register(EtcDeviceInfo t) {
 		long etcDeviceId = etcDeviceInfoDao.register(t);

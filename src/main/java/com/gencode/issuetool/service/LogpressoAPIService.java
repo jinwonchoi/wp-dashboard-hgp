@@ -1,6 +1,7 @@
 package com.gencode.issuetool.service;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +20,9 @@ import com.gencode.issuetool.logpresso.io.IotMainReqObj;
 import com.gencode.issuetool.logpresso.io.TagDataByTagReqObj;
 import com.gencode.issuetool.logpresso.io.TagDataReqObj;
 import com.gencode.issuetool.logpresso.io.TagFireIdxReqObj;
+import com.gencode.issuetool.util.GsonUtils;
 import com.gencode.issuetool.util.JsonUtils;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @Service
@@ -71,7 +74,9 @@ public class LogpressoAPIService {
 		req.setApikey(apiKey);
 		Map<String, List<Map<String, Object>>> result = restClient.callLogpresso(urlPath,
 				req, type);
+		//logger.info(GsonUtils.GetGson().toJson(result));
 		logger.debug(result.toString());
+		//return new HashMap<String, List<Map<String, Object>>>();
 		return result;
 	}
 
@@ -104,8 +109,10 @@ public class LogpressoAPIService {
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
 				req, type);
+		//logger.info(GsonUtils.GetGson().toJson(result));
 		logger.debug(result.toString());
 		return result;
+		//return new HashMap<String, Object>();
 	}
 	
 	public Map<String, Object> getTagDvcEvent(DvcEventReqObj req) throws Exception{

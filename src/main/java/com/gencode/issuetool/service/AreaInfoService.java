@@ -49,11 +49,15 @@ public class AreaInfoService {
 	
 	@Autowired
 	private PushService pushService;
-	
+	@Autowired
+	private CacheMapManager cacheMapManager; 
+
 	@Transactional
 	public Optional<AreaInfo> register(AreaInfo t) {
 		long areaId = areaInfoDao.register(t);
-		pushService.sendMsg("all", Constant.PUSH_TAG_AREA_INFO_ADD.get(), areaInfoDao.load(areaId).get());
+		AreaInfo areaInfo = areaInfoDao.load(areaId).get();
+		pushService.sendMsg("all", Constant.PUSH_TAG_AREA_INFO_ADD.get(), areaInfo);
+		cacheMapManager.insert(areaInfo);
 		return areaInfoDao.load(areaId);
 	}
 
@@ -62,7 +66,9 @@ public class AreaInfoService {
 		if (areaInfoDao.update(t)<=0) {
 			throw new NotFoundException();
 		}
-		pushService.sendMsgAll(Constant.PUSH_TAG_AREA_INFO_UPDATE.get(), areaInfoDao.load(t.getId()).get());
+		AreaInfo areaInfo = areaInfoDao.load(t.getId()).get();
+		pushService.sendMsgAll(Constant.PUSH_TAG_AREA_INFO_UPDATE.get(), areaInfo);
+		cacheMapManager.update(areaInfo);
 		return areaInfoDao.load(t.getId());
 	}
 	
@@ -72,6 +78,7 @@ public class AreaInfoService {
 			throw new NotFoundException();
 		}
 		pushService.sendMsgAll(Constant.PUSH_TAG_AREA_INFO_DELETE.get(), Long.toString(id));
+		cacheMapManager.delete(areaInfoDao.load(id).get());
 	}
 	
 	public Optional<AreaInfo> load(long id) {
