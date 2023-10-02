@@ -65,6 +65,7 @@ import com.gencode.issuetool.io.chart.RealtimeChartSeriesItem;
 import com.gencode.issuetool.logpresso.io.DvcEventReqObj;
 import com.gencode.issuetool.logpresso.io.IotDataReqObj;
 import com.gencode.issuetool.logpresso.io.IotFireIdxReqObj;
+import com.gencode.issuetool.logpresso.io.IotInfoReqObj;
 import com.gencode.issuetool.logpresso.io.IotMainReqObj;
 import com.gencode.issuetool.logpresso.io.TagDataReqObj;
 import com.gencode.issuetool.logpresso.io.TagFireIdxReqObj;
@@ -1399,7 +1400,7 @@ public class DashboardService {
 	}
 
 	public  DashboardObj getTagDvcEventHistList(PageRequest req) throws Exception {
-		boolean _useFake=true;
+		boolean _useFake=false;
 		DashboardObj arResult = new DashboardObj();
 		String deviceType = req.getParamMap().get("deviceType");//"I", "P", "C“ –I:센서, P:태그, C: cctv
 		String dateFrom = req.getParamMap().get("dateFrom");//- yyyy-MM-dd HH:mm:ss 
@@ -1428,6 +1429,27 @@ public class DashboardService {
 //							)
 					))
 					.stream().filter(e-> deviceType.contains(e.getDeviceType())).collect(Collectors.toList()))); 
+		}
+		return arResult;
+	}
+	
+	public  DashboardObj getIotInfo() throws Exception {
+		boolean _useFake=false;
+		DashboardObj arResult = new DashboardObj();
+		if (_useFake) {
+//			arResult.setItemList(JsonUtils.toJson(FakeDataUtil.getListTagDvcEvent(
+//					FakeDataUtil.generateTagDvcEvent(deviceType)
+//					)
+//					.stream()
+//					.filter(e->deviceType.contains(e.getDeviceType()))
+//					.peek(e -> System.out.println(e))
+//					.collect(Collectors.toList()))); 
+		} else {
+			arResult.setItemList(
+					JsonUtils.toJson(
+					logpressoAPIService.getIotInfo(
+							new IotInfoReqObj()
+					))); 
 		}
 		return arResult;
 	}
@@ -1478,6 +1500,7 @@ public class DashboardService {
 		return tagDvcPushEventHistDao.search(req);
 	}
 	
+
 //	@Deprecated
 //	String queryLogpressoDashboardData(String strCmd) throws IOException {
 //		

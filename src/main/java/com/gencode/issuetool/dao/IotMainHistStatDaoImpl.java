@@ -406,6 +406,7 @@ public class IotMainHistStatDaoImpl extends AbstractDaoImpl implements IotMainHi
 		return Optional.of(t);
 	}
 
+	@Deprecated
 	@Override
 	public Optional<List<IotMain>> getRealtimeChartData(PageRequest req) {
 		TimeMode timeMode = new TimeMode(req.getParamMap());

@@ -16,6 +16,7 @@ import com.gencode.issuetool.logpresso.io.DvcEventReqObj;
 import com.gencode.issuetool.logpresso.io.IotDataByDeviceReqObj;
 import com.gencode.issuetool.logpresso.io.IotDataReqObj;
 import com.gencode.issuetool.logpresso.io.IotFireIdxReqObj;
+import com.gencode.issuetool.logpresso.io.IotInfoReqObj;
 import com.gencode.issuetool.logpresso.io.IotMainReqObj;
 import com.gencode.issuetool.logpresso.io.TagDataByTagReqObj;
 import com.gencode.issuetool.logpresso.io.TagDataReqObj;
@@ -125,4 +126,16 @@ public class LogpressoAPIService {
 		logger.info(result.toString());
 		return result;
 	}
+	
+	public Map<String, Object> getIotInfo(IotInfoReqObj req) throws Exception{
+		String urlPath =apiUrl+"/iot/iotinfo";
+		LogpressoClient<Map<String, Object>> restClient = new LogpressoClient<Map<String, Object>>();
+		Type type = new TypeToken<Map<String, Object>>() {}.getType();
+		req.setApikey(apiKey);
+		Map<String, Object> result = restClient.callLogpresso(urlPath,
+				req, type);
+		logger.info(result.toString());
+		return result;
+	}
+
 }

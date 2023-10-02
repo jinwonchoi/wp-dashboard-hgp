@@ -426,6 +426,21 @@ public class PwrPlantController {
 		}
 	}
 
+	@RequestMapping("/dashboard/iotinfo") 
+	ResultObj<DashboardObj> getIotInfo() {
+
+		try {
+			DashboardObj dashBoardObj = new DashboardObj();
+			dashBoardObj = dashBoardService.getIotInfo();
+	        ResultObj<DashboardObj> resultObj = ResultObj.success();
+			resultObj.setItem(dashBoardObj);
+			return resultObj;
+		} catch (Exception e) {
+			logger.error("normal error",e);
+			return ResultObj.errorUnknown();
+		} finally {
+		}
+	}
 
 	@RequestMapping("/kfsl/total") 
 	ResultObj<KfslResultObj> getKfslTotalResult(@RequestBody PageRequest req) {

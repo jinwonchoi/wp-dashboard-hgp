@@ -76,6 +76,26 @@ public class DashboardServiceTest {
 		RealtimeChartObj realtimeChartObj= dashboardService.getTagFireIdxRealtimeChart(req);
 		//assertNotNull(chatService.l);
 	}
+	@DisplayName("TEST getIotMainRealtimeChartByInterior")
+	@Test
+	void getIotMainRealtimeChartByInterior() throws Exception {
+		PageRequest req = new PageRequest();
+		req.setPageNo(1);
+		req.setPageSize(1);
+		req.setLastOffset(0);
+		req.setSortDir(SortDirection.DESC);
+		req.setParamMap(new HashMap<String,String>(){{
+			put("timeMode","5H");
+			put("valType","max");
+			put("fieldType","co");			
+			put("realtimeCount","50");
+		}});
+		req.setSearchMap(new HashMap<String,String>(){{
+			put("interiorCode","S09T04");			
+		}});
+		RealtimeChartObj realtimeChartObj= dashboardService.getIotMainRealtimeChartByInterior(req);
+		logger.info(realtimeChartObj.toString());
+	}
 	
 	@DisplayName("TEST getTagMain")
 	@Test
@@ -130,6 +150,12 @@ public class DashboardServiceTest {
 		dashboardService.testPushEvent();
 	}
 	
+	
+	@DisplayName("TEST getIotInfo")
+	@Test
+	void testGetIotInfo() throws Exception {
+		dashboardService.getIotInfo();
+	}
 	
 	
 	

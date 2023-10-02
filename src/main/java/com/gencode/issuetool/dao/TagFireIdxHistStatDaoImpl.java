@@ -30,6 +30,7 @@ import com.gencode.issuetool.etc.Utils;
 import com.gencode.issuetool.io.ColumnChartTimeMode;
 import com.gencode.issuetool.io.PageRequest;
 import com.gencode.issuetool.io.PageResultObj;
+import com.gencode.issuetool.io.SearchMapByOrObj;
 import com.gencode.issuetool.io.SearchMapObj;
 import com.gencode.issuetool.io.StatsGenTimeMode;
 import com.gencode.issuetool.io.TimeMode;
@@ -335,6 +336,7 @@ public class TagFireIdxHistStatDaoImpl extends AbstractDaoImpl implements TagFir
 	public Optional<List<TagFireIdx>> getRealtimeChartData(PageRequest req) {
 		TimeMode timeMode = new TimeMode(req.getParamMap());
 		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
+		
 		String fieldList;
 		if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valLevel"))) {
 			fieldList = " max_fire_idx fire_idx";
