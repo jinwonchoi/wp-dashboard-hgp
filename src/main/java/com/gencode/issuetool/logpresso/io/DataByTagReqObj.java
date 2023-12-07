@@ -1,11 +1,10 @@
 package com.gencode.issuetool.logpresso.io;
 
-public class DataByTagReqObj {
+public class DataByTagReqObj extends ReqObj {
 	String plantType;
 	String plantNo;
 	String plantPart;
 	String duration;
-	String apikey;
 	
 	public DataByTagReqObj() {
 		
@@ -59,14 +58,5 @@ public class DataByTagReqObj {
 	public void setDuration(String duration) {
 		this.duration = duration;
 	}
-
-	public String getApikey() {
-		return apikey;
-	}
-
-	public void setApikey(String apikey) {
-		this.apikey = apikey;
-	}
-
 
 }

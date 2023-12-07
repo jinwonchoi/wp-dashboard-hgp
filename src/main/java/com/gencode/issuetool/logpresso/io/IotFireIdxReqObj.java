@@ -1,9 +1,8 @@
 package com.gencode.issuetool.logpresso.io;
 
-public class IotFireIdxReqObj {
+public class IotFireIdxReqObj extends ReqObj {
 	String interior;
 	String duration;
-	String apikey;
 	
 	public IotFireIdxReqObj() {
 		
@@ -35,13 +34,5 @@ public class IotFireIdxReqObj {
 
 	public void setDuration(String duration) {
 		this.duration = duration;
-	}
-
-	public String getApikey() {
-		return apikey;
-	}
-
-	public void setApikey(String apikey) {
-		this.apikey = apikey;
 	}
 }

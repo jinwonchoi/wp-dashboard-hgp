@@ -1,9 +1,8 @@
 package com.gencode.issuetool.logpresso.io;
 
-public class IotMainReqObj {
+public class IotMainReqObj extends ReqObj {
 	String interior;
 	String duration;
-	String apikey;
 	
 	public IotMainReqObj() {
 		
@@ -36,14 +35,4 @@ public class IotMainReqObj {
 	public void setDuration(String duration) {
 		this.duration = duration;
 	}
-
-	public String getApikey() {
-		return apikey;
-	}
-
-	public void setApikey(String apikey) {
-		this.apikey = apikey;
-	}
-	
-	
 }

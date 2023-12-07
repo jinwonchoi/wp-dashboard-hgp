@@ -26,12 +26,10 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Key;
 import com.google.gson.Gson;
 
-@Service
 public class LogpressoClient<T> {
 	private final static Logger logger = LoggerFactory.getLogger(LogpressoClient.class);
 
 	String token = null;
-	
     public LogpressoClient() {
 		super();
 	}
@@ -41,7 +39,7 @@ public class LogpressoClient<T> {
 		this.token = token;
 	}
 	
-	public T callLogpresso(String url, Object jsonObj, Type type) {
+	public T callLogpresso(String url, Object jsonObj, Type type, String printLog) {
 
 		try {
 			ObjectMapper objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE); 
@@ -50,7 +48,11 @@ public class LogpressoClient<T> {
 			logger.info("url:"+url);
 	    	logger.info("body:"+body);
 	    	String resultJson = post(url, body);
-	    	logger.debug("resultJson:"+resultJson);
+	    	logger.info("printLog="+printLog);
+	    	if ("true".equals(printLog))
+	    		logger.info("resultJson:"+resultJson);
+	    	else
+	    		logger.debug("resultJson:"+resultJson);
 
 	    	//JSONObject jsonResult = new JSONObject(resultJson);
 	    	
@@ -64,10 +66,8 @@ public class LogpressoClient<T> {
 			e.printStackTrace();
 			return null;
 		}
-		
-
     }
-    	
+	
     static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     static final JsonFactory JSON_FACTORY = new JacksonFactory();
 

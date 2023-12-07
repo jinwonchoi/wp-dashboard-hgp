@@ -1,7 +1,6 @@
 package com.gencode.issuetool.logpresso.io;
 
-public class IotInfoReqObj {
-	String apikey;
+public class IotInfoReqObj extends ReqObj {
 	
 	public IotInfoReqObj() {
 		
@@ -11,13 +10,4 @@ public class IotInfoReqObj {
 		super();
 		this.apikey = apikey;
 	}
-	
-	public String getApikey() {
-		return apikey;
-	}
-
-	public void setApikey(String apikey) {
-		this.apikey = apikey;
-	}
-
 }

@@ -1,8 +1,7 @@
 package com.gencode.issuetool.logpresso.io;
 
-public class IotDataByDeviceReqObj {
+public class IotDataByDeviceReqObj extends ReqObj {
 	String deviceId;
-	String apikey;
 	
 	public IotDataByDeviceReqObj() {
 		
@@ -24,13 +23,5 @@ public class IotDataByDeviceReqObj {
 
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
-	}
-
-	public String getApikey() {
-		return apikey;
-	}
-
-	public void setApikey(String apikey) {
-		this.apikey = apikey;
 	}
 }

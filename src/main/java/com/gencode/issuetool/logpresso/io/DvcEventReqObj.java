@@ -1,11 +1,10 @@
 package com.gencode.issuetool.logpresso.io;
 
-public class DvcEventReqObj {
+public class DvcEventReqObj extends ReqObj {
 	String dvcType;
 	String frData;
 	String toDate;
 	String evtLevel;
-	String apikey;
 	
 	public DvcEventReqObj() {
 		
@@ -58,14 +57,6 @@ public class DvcEventReqObj {
 
 	public void setEvtLevel(String evtLevel) {
 		this.evtLevel = evtLevel;
-	}
-
-	public String getApikey() {
-		return apikey;
-	}
-
-	public void setApikey(String apikey) {
-		this.apikey = apikey;
 	}
 
 }

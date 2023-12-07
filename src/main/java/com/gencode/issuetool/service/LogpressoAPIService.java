@@ -34,6 +34,8 @@ public class LogpressoAPIService {
 	String apiKey;//="K8XWymm1dfTP3mh5KKheQ5acptMnOHt8LwYqRgTPMg66/MJTevbYlSwSnC/mOfa6";
 	@Value("${logpresso.api.url:http://dt.rozetatech.com:3000/hg/api}")
 	String apiUrl;//="http://dt.rozetatech.com:3000/hg/api";
+	@Value("${logpresso.api.printLog:false}")
+	String printLog;
 
 	public Map<String, List<Map<String, Object>>> getIotData(IotDataReqObj req) throws Exception{
 		String urlPath =apiUrl+"/iot/iotdata";
@@ -41,7 +43,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, List<Map<String, Object>>>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, List<Map<String, Object>>> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		logger.debug(result.toString());
 		return result;
 	}
@@ -52,7 +54,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, List<Map<String, Object>>>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, List<Map<String, Object>>> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		logger.debug(result.toString());
 		return result;
 	}
@@ -63,7 +65,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, List<Map<String, Object>>>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, List<Map<String, Object>>> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		logger.debug(result.toString());
 		return result;
 	}
@@ -74,7 +76,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, List<Map<String, Object>>>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, List<Map<String, Object>>> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		//logger.info(GsonUtils.GetGson().toJson(result));
 		logger.debug(result.toString());
 		//return new HashMap<String, List<Map<String, Object>>>();
@@ -88,7 +90,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, Object>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		logger.debug(JsonUtils.toJson(result));
 		return result;
 	}
@@ -98,7 +100,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, Object>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		logger.debug(result.toString());
 		return result;
 	}
@@ -109,7 +111,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, Object>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		//logger.info(GsonUtils.GetGson().toJson(result));
 		logger.debug(result.toString());
 		return result;
@@ -122,7 +124,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, Object>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		logger.info(result.toString());
 		return result;
 	}
@@ -133,7 +135,7 @@ public class LogpressoAPIService {
 		Type type = new TypeToken<Map<String, Object>>() {}.getType();
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
-				req, type);
+				req, type,printLog);
 		logger.info(result.toString());
 		return result;
 	}
