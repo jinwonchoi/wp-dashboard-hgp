@@ -217,5 +217,8 @@ public class Utils {
 		}
 		return arResult;
 	}
-	
+	public static String dbToIotVal(long longVal) {
+		return Double.toString((new Long(longVal)).doubleValue()/Constant.DASHBOARD_VALUE_DECIAML_SIZE.val());
+	}
+
 }

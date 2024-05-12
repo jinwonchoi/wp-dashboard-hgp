@@ -10,9 +10,36 @@
         </root>
     </springProfile>
     <springProfile name="dev">
+
+        <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>TTapp.log</file>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <!-- <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern> -->
+                <fileNamePattern>appTT.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <!-- each archived file, size max 10MB -->
+                <maxFileSize>1MB</maxFileSize>
+                <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
+                <totalSizeCap>3MB</totalSizeCap>
+                <!-- 60 days to keep -->
+                <maxHistory>3</maxHistory>
+            </rollingPolicy>
+
+            <encoder>
+                <pattern>%d %p %c{1.} [%t] %m%n</pattern>
+            </encoder>
+        </appender>
+<!--         <logger name="org.springframework" level="INFO"/>
+        <logger name="com.gencode" level="DEBUG"/>
+        <logger name="org.hibernate" level="INFO"/>
+        <logger name="org.springframework.jdbc.core" level="TRACE"/>
+ -->
+        <root level="INFO">
+            <appender-ref ref="FILE-ROLLING"/>
+        </root>
         <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-        <root level="INFO">
+        <root level="DEBUG">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>

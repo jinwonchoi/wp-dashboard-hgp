@@ -40,6 +40,7 @@ import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.ResultObj;
 import com.gencode.issuetool.obj.BizInfo;
 import com.gencode.issuetool.obj.CommonCode;
+import com.gencode.issuetool.obj.ConfigInfo;
 import com.gencode.issuetool.obj.FileInfo;
 import com.gencode.issuetool.obj.NoticeBoardEx;
 import com.gencode.issuetool.obj.UserInfo;
@@ -82,6 +83,16 @@ public class CommonInfoController {
 			} else {
 				return new ResultObj<List<CommonCode>>(ReturnCode.SUCCESS, list.get());
 			}
+		} catch (Exception e) {
+			logger.error("normal error", e);
+			return ResultObj.errorUnknown();
+		}
+	}
+	
+	@RequestMapping(method=RequestMethod.POST, value="/config")
+	public ResultObj<ConfigInfo> getConfigInfo() {
+		try {
+			return new ResultObj<ConfigInfo>(ReturnCode.SUCCESS, commonInfoService.getConfig());
 		} catch (Exception e) {
 			logger.error("normal error", e);
 			return ResultObj.errorUnknown();

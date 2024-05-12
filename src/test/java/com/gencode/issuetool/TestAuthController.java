@@ -22,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gencode.issuetool.obj.PasswdChange;
 import com.gencode.issuetool.obj.UserInfo;
 import com.jayway.jsonpath.JsonPath;
 
@@ -86,6 +87,32 @@ public class TestAuthController {
 	            .andExpect(status().isOk())
 	            .andExpect(jsonPath("$.resultCode", is("302")));
     }
+
+	/*
+	 * 로그인후 비번변경
+	 */
+    @Test
+    public void loginWithValidUserThenChangePassword() throws Exception {
+    	mockMvc.perform( post("/auth/login")
+    				.content(om.writeValueAsString(new UserInfo("admin","passwd")))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+    				.andDo(mvcResult -> { System.out.println("RETURN BY LOGIN: "+mvcResult.toString()); })
+    				.andDo(mvcResult -> { token = JsonPath.read(mvcResult.getResponse().getContentAsString(), "$.item.token"); })
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode", is("0001")));
+    	//로그인후 admin권한으로 user패스 조회
+    	mockMvc.perform( post("/user/changepwd")
+				.content(om.writeValueAsString(new PasswdChange(1,"newpasswd","passwd1")))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+				.andDo(mvcResult -> { System.out.println("RETURN BY USER ID: "+mvcResult.getResponse().getContentAsString()); })
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode", is("0001")));
+	}
+
+    
     
     public static String asJsonString(final Object obj) {
         try {

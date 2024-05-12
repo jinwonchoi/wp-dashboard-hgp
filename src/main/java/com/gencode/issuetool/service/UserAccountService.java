@@ -109,7 +109,7 @@ public class UserAccountService {
 		try { 
 			logger.info(passwdChange.toString());
 			userInfo = userInfoDao.load(passwdChange.getUserId()).get();
-			if (userInfo.getPasswd().equals(passwdChange.getOldPassword())) {
+			if (!userInfo.getPasswd().equals(passwdChange.getOldPassword())) {
 				throw new ApplicationException(ReturnCode.PASSWORD_NOT_MATCH);
 			}
 			if (passwordEncodingUse.equals("yes")) {

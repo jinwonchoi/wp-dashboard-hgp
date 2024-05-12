@@ -270,6 +270,9 @@ public class UserController {
 		try {			
 			userAccountService.evaluatePassword(passwdChange);
 			return new ResultObj<String>(ReturnCode.SUCCESS);
+		} catch( ApplicationException ae) {
+			logger.error("normal error", ae.getMessage());
+			return ResultObj.error(ae.getReturnCode());
 		} catch (Exception e) {
 			logger.error("normal error", e);
 			return ResultObj.errorUnknown();

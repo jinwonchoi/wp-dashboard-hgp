@@ -40,6 +40,7 @@ import com.gencode.issuetool.io.PageResultObj;
 import com.gencode.issuetool.io.SortDirection;
 import com.gencode.issuetool.obj.BizInfo;
 import com.gencode.issuetool.obj.CommonCode;
+import com.gencode.issuetool.obj.ConfigInfo;
 
 @Service
 public class CommonInfoService {
@@ -49,6 +50,17 @@ public class CommonInfoService {
 	private CommonCodeDao commonCodeDao;
 	@Autowired
 	private BizInfoDao bizInfoDao;
+	
+	@Value("${logpresso.api.key:K8XWymm1dfTP3mh5KKheQ5acptMnOHt8LwYqRgTPMg66/MJTevbYlSwSnC/mOfa6}")
+	String logpressoApiKey;
+	@Value("${logpresso.websocket.url:ws://dt.rozetatech.com:3000/wp/ws/event}")
+	String logpressoWebsocketUrl;
+	@Value("${cctv.media.server.url:ws://192.168.0.11:8088/ws/}")
+	String cctvMediaServerUrl;
+	@Value("${keti.server.port:18080}")
+	String ketiServerPort;
+	@Value("${dashboard.port.for.keti:18080}")
+	String dashboardPortForKeti;
 	
 	public Optional<List<CommonCode>> loadAll(String langFlag) {
 		return commonCodeDao.loadAll(langFlag);
@@ -64,6 +76,16 @@ public class CommonInfoService {
 
 	public Optional<List<CommonCode>> search(Map<String, String> req) {
 		return commonCodeDao.search(req);
+	}
+	
+	public ConfigInfo getConfig() {
+		return new ConfigInfo(
+						logpressoApiKey,
+						logpressoWebsocketUrl,
+						cctvMediaServerUrl,
+						ketiServerPort,
+						dashboardPortForKeti
+					); 
 	}
 	
 }

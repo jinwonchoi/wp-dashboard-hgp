@@ -125,7 +125,7 @@ public class LogpressoAPIService {
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
 				req, type,printLog);
-		logger.info(result.toString());
+		logger.debug(result.toString());
 		return result;
 	}
 	
@@ -136,7 +136,7 @@ public class LogpressoAPIService {
 		req.setApikey(apiKey);
 		Map<String, Object> result = restClient.callLogpresso(urlPath,
 				req, type,printLog);
-		logger.info(result.toString());
+		logger.debug(result.toString());
 		return result;
 	}
 

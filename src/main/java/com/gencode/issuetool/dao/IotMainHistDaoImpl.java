@@ -139,14 +139,40 @@ public class IotMainHistDaoImpl extends AbstractDaoImpl implements IotMainHistDa
 	public Optional<List<IotMain>> getRealtimeChartDataByInteriorList(PageRequest req) {
 		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
 		String fieldsStr;
+		String sqlStr; 
 		boolean useArea=Constant.IOT_REALTIME_CHART_KEY_MODE_AREA.get().equals(req.getParamMap().get("mode"));
 		String valType = Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valType"))?Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get():Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get();
-		fieldsStr = "created_dtm,"+(useArea?"ai.area_code interior_code":"b.interior_code")+","+valType+"_humid_val avg_humid_val,"+valType+"_smoke_val avg_smoke_val,"+valType+"_co_val avg_co_val,"+valType+"_flame avg_flame_val,"+valType+"_temp_val avg_temp_val";
-		String sqlStr = 
-				"select "+fieldsStr+" from iot_main_hist b, area_info ai, interior_info ii, (select distinct created_dtm idx_dtm from iot_main_hist where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
-				"	where created_dtm = a.idx_dtm and ai.id=ii.area_id and ii.interior_code=b.interior_code "+(useArea?"":"and ai.area_code=:areaCode") + 
-				" order by "+(useArea?"ai.area_code":"b.interior_code")+",created_dtm ";
-
+		if (useArea) {
+			if ("max".equals(valType)) {
+				fieldsStr = "created_dtm, ai.area_code interior_code,"
+						+"max(max_humid_val) avg_humid_val,"
+								+"max(max_smoke_val) avg_smoke_val,"
+								+"max(max_co_val) avg_co_val,"
+								+"max(max_flame) avg_flame_val,"
+								+"max(max_temp_val) avg_temp_val";
+			} else {
+				fieldsStr = "created_dtm, ai.area_code interior_code,"
+						+"avg(avg_humid_val) avg_humid_val,"
+						+"avg(avg_smoke_val) avg_smoke_val,"
+						+"avg(avg_co_val) avg_co_val,"
+						+"avg(avg_flame) avg_flame_val,"
+						+"avg(avg_temp_val) avg_temp_val";
+			}
+			sqlStr = 
+					"select "+fieldsStr+" from iot_main_hist b, area_info ai, interior_info ii, (select distinct created_dtm idx_dtm from iot_main_hist where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+					"	where created_dtm = a.idx_dtm and ai.id=ii.area_id and ii.interior_code=b.interior_code "+(useArea?"":"and ai.area_code=:areaCode") + 
+					" group by ai.area_code,created_dtm "+
+					" order by ai.area_code,created_dtm ";
+			
+		} else {
+			fieldsStr = "created_dtm,"+(useArea?"ai.area_code interior_code":"b.interior_code")+","+valType+"_humid_val avg_humid_val,"+valType+"_smoke_val avg_smoke_val,"+valType+"_co_val avg_co_val,"+valType+"_flame avg_flame_val,"+valType+"_temp_val avg_temp_val";
+			sqlStr = 
+					"select "+fieldsStr+" from iot_main_hist b, area_info ai, interior_info ii, (select distinct created_dtm idx_dtm from iot_main_hist where  created_dtm >= DATE_SUB(NOW(), INTERVAL 10 minute) order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+					"	where created_dtm = a.idx_dtm and ai.id=ii.area_id and ii.interior_code=b.interior_code "+(useArea?"":"and ai.area_code=:areaCode") + 
+					" order by "+(useArea?"ai.area_code":"b.interior_code")+",created_dtm ";
+			
+		}
+		logger.info(sqlStr);
 		List<IotMain> t = namedParameterJdbcTemplate.query
 				(sqlStr
 						, searchMapObj.params()

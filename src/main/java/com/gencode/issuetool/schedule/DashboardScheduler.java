@@ -32,7 +32,8 @@ public class DashboardScheduler {
 	
 	private final static SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 	
-	private boolean isJunitRunning = ("Windows_NT".equals(System.getenv("OS"))&&null==System.getProperty("spring.application.admin.enabled"));
+	private boolean isJunitRunning = //true;
+			("Windows_NT".equals(System.getenv("OS"))&&null==System.getProperty("spring.application.admin.enabled"));
 
 	
 	@Scheduled(fixedRateString="${logpresso.polling-time:10000}")

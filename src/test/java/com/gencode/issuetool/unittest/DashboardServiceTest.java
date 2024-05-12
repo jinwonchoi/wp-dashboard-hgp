@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -87,7 +88,7 @@ public class DashboardServiceTest {
 		req.setParamMap(new HashMap<String,String>(){{
 			put("timeMode","5H");
 			put("valType","max");
-			put("fieldType","co");			
+			put("fieldType","temp");			
 			put("realtimeCount","50");
 		}});
 		req.setSearchMap(new HashMap<String,String>(){{
@@ -97,6 +98,27 @@ public class DashboardServiceTest {
 		logger.info(realtimeChartObj.toString());
 	}
 	
+	
+	//{"pageNo":1,"pageSize":1,"offset":0,"limit":1,"lastOffset":0,"sortDir":"DESC","sortField":"","searchMap":{},"searchByOrMap":{},"paramMap":{"timeMode":"10S","valType":"max","mode":"area","realtimeCount":"50"},"paramValMap":null}
+	@DisplayName("TEST getIotMainRealtimeChartListByInteriorList")
+	@Test
+	void getIotMainRealtimeChartListByInteriorList() throws Exception {
+		PageRequest req = new PageRequest();
+		req.setPageNo(1);
+		req.setPageSize(1);
+		req.setLastOffset(0);
+		req.setLimit(1);
+		req.setSortDir(SortDirection.DESC);
+		req.setParamMap(new HashMap<String,String>(){{
+			put("timeMode","10S");
+			put("valType","max");
+			put("mode","area");
+			put("realtimeCount","50");
+		}});
+		 Map<String, RealtimeChartObj> realtimeChartObj= dashboardService.getIotMainRealtimeChartListByInteriorList(req);
+		logger.info(realtimeChartObj.toString());
+	}
+
 	@DisplayName("TEST getTagMain")
 	@Test
 	void testGetTagMain() throws Exception {

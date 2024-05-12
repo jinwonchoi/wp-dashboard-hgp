@@ -454,32 +454,47 @@ public class IotMainHistStatDaoImpl extends AbstractDaoImpl implements IotMainHi
 	public Optional<List<IotMain>> getRealtimeChartDataByInteriorList(PageRequest req) {
 		TimeMode timeMode = new TimeMode(req.getParamMap());
 		SearchMapObj searchMapObj = new SearchMapObj(req.getSearchMap(), false);
-//		String fieldList;
-//		if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valLevel"))) {
-//			fieldList = fieldsRealChartMax;
-//		} else if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_MIN.get().equals(req.getParamMap().get("valLevel"))) {
-//			fieldList = fieldsRealChartMin;
-//		} else {//if (Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get().equals(req.getParamMap().get("valLevel"))) {
-//			fieldList = fieldsRealChartAvg;
-//		}
-		
-		//final String fieldsRealChartAvg= "created_dtm,time_mode,interior_code,avg_humid_val avg_humid_val,avg_smoke_val avg_smoke_val,avg_temp_val avg_temp_val,avg_co_val avg_co_val,flame_cnt avg_flame";
-		
-		boolean useArea = Constant.IOT_REALTIME_CHART_KEY_MODE_AREA.get().equals(req.getParamMap().get("mode"));
-		String valType = req.getParamMap().get("valType")!=null?req.getParamMap().get("valType"):Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get();
-				
-		String fieldsStr = "created_dtm,time_mode,"+(useArea?"ai.area_code interior_code":"b.interior_code")+","+valType+"_humid_val avg_temp_val,"+valType+"_smoke_val avg_smoke_val,"+valType+"_co_val avg_co_val,flame_cnt avg_flame_val,"+valType+"_temp_val avg_temp_val";
-
-		String queryStr = "select "+fieldsStr+" from iot_main_hist_stat b, area_info ai, interior_info ii," +
-				"(select distinct created_dtm idx_dtm from iot_main_hist_stat " +
-				" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') and time_mode='"+timeMode.getTimeMode()+"' " + 
-				" order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a"+ 
-				"	where created_dtm = a.idx_dtm and ai.id =ii.area_id and ii.interior_code=b.interior_code " + (useArea?"":"ai.area_code=:areaCode")+  
-				searchMapObj.andQuery() +
-				" order by "+(useArea?"ai.area_code":"b.interior_code")+",created_dtm ";
-		
-		List<IotMain> t = namedParameterJdbcTemplate.query(
-						queryStr
+		String fieldsStr;
+		String sqlStr; 
+		boolean useArea=Constant.IOT_REALTIME_CHART_KEY_MODE_AREA.get().equals(req.getParamMap().get("mode"));
+		String valType = Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get().equals(req.getParamMap().get("valType"))?Constant.IOT_REALTIME_CHART_VAL_LEVEL_MAX.get():Constant.IOT_REALTIME_CHART_VAL_LEVEL_AVG.get();
+		if (useArea) {
+			if ("max".equals(valType)) {
+				fieldsStr = "created_dtm, ai.area_code interior_code,"
+						+"max(max_humid_val) avg_humid_val,"
+								+"max(max_smoke_val) avg_smoke_val,"
+								+"max(max_co_val) avg_co_val,"
+								+"max(max_flame) avg_flame_val,"
+								+"max(max_temp_val) avg_temp_val";
+			} else {
+				fieldsStr = "created_dtm, ai.area_code interior_code,"
+						+"avg(avg_humid_val) avg_humid_val,"
+						+"avg(avg_smoke_val) avg_smoke_val,"
+						+"avg(avg_co_val) avg_co_val,"
+						+"avg(avg_flame) avg_flame_val,"
+						+"avg(avg_temp_val) avg_temp_val";
+			}
+			sqlStr = 
+					"select "+fieldsStr+" from iot_main_hist_stat b, area_info ai, interior_info ii, (select distinct created_dtm idx_dtm from iot_main_hist_stat " +
+							" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') and time_mode='"+timeMode.getTimeMode()+"' " + 
+							" order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+					"	where created_dtm = a.idx_dtm and ai.id=ii.area_id and ii.interior_code=b.interior_code "+(useArea?"":"and ai.area_code=:areaCode") + 
+					" group by ai.area_code,created_dtm "+
+					" order by ai.area_code,created_dtm ";
+			
+		} else {
+			fieldsStr = "created_dtm,"+(useArea?"ai.area_code interior_code":"b.interior_code")+","+valType+"_humid_val avg_humid_val,"+valType+"_smoke_val avg_smoke_val,"+valType+"_co_val avg_co_val,"+valType+"_flame avg_flame_val,"+valType+"_temp_val avg_temp_val";
+			sqlStr = 
+					"select "+fieldsStr+" from iot_main_hist_stat b, area_info ai, interior_info ii, (select distinct created_dtm idx_dtm from iot_main_hist_stat " +
+							" where created_dtm >= date_format(DATE_SUB(NOW(), INTERVAL "+timeMode.getStrTime()+"),'%Y-%m-%d "+timeMode.getStrDateFrmt()+"') and time_mode='"+timeMode.getTimeMode()+"' " +
+							" order by created_dtm desc limit "+req.getParamMap().get("realtimeCount")+" ) a" +
+					"	where created_dtm = a.idx_dtm and ai.id=ii.area_id and ii.interior_code=b.interior_code "+(useArea?"":"and ai.area_code=:areaCode") + 
+					" order by "+(useArea?"ai.area_code":"b.interior_code")+",created_dtm ";
+			
+		}
+		logger.info(sqlStr);
+		List<IotMain> t = namedParameterJdbcTemplate.query
+				(sqlStr
 						, searchMapObj.params()
 						, new BeanPropertyRowMapper<IotMain>(IotMain.class));
 		return Optional.of(t);

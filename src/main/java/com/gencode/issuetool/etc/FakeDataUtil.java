@@ -436,7 +436,7 @@ public class FakeDataUtil {
 	}
 	
 	
-	public static String generateIotMain() {
+	public static String generateIotMain(List<InteriorInfo> interiorList) {
 /*		
 		{
 			   "iotma":[
@@ -460,10 +460,10 @@ public class FakeDataUtil {
 		String time =  Utils.yyyyMMddHHmmssSSSHypen();
 		List<Map<String, Object>> arIotMaList = new ArrayList<Map<String, Object>>();
 		
-		for (String interior : interiorList) {
+		for (InteriorInfo interior : interiorList) {
 			arIotMaList.add(
 					new HashMap<String, Object>(){{
-						put("interior",interior);
+						put("interior",interior.getInteriorCode());
 						put("data",new HashMap<String, String>() {{
 							put("time", time);
 							put("max_flame", "정상");
@@ -496,11 +496,19 @@ public class FakeDataUtil {
 		});
 		return JsonUtils.toJson(mapIotDataOut);
 	}
-	public static String getMapIotMainArea(String jsonStr, Map<Long, AreaInfo> mapAreaInfo, Map<String, InteriorInfo> mapInteriorInfoByCode) {
+	
+	public static Map<String, Object> getMapIotMainArea(String jsonStr, Map<Long, AreaInfo> mapAreaInfo, Map<String, InteriorInfo> mapInteriorInfoByCode) {
 		return getMapIotMainArea(JsonUtils.toObject(jsonStr, Map.class), mapAreaInfo, mapInteriorInfoByCode);
 	}
+	public static String getMapIotMainAreaStr(String jsonStr, Map<Long, AreaInfo> mapAreaInfo, Map<String, InteriorInfo> mapInteriorInfoByCode) {
+		return getMapIotMainAreaStr(JsonUtils.toObject(jsonStr, Map.class), mapAreaInfo, mapInteriorInfoByCode);
+	}
 
-	public static String getMapIotMainArea(Map<String, List<Map<String, Object>>> mapIotData, Map<Long, AreaInfo> mapAreaInfo, Map<String, InteriorInfo> mapInteriorInfoByCode) {
+	public static String getMapIotMainAreaStr(Map<String, List<Map<String, Object>>> mapIotData, Map<Long, AreaInfo> mapAreaInfo, Map<String, InteriorInfo> mapInteriorInfoByCode) {
+		return JsonUtils.toJson(getMapIotMainArea(mapIotData, mapAreaInfo, mapInteriorInfoByCode));
+	}
+
+	public static Map<String, Object> getMapIotMainArea(Map<String, List<Map<String, Object>>> mapIotData, Map<Long, AreaInfo> mapAreaInfo, Map<String, InteriorInfo> mapInteriorInfoByCode) {
 		//Map<String, List<Map<String, Object>>> mapIotData = JsonUtils.toObject(jsonStr, Map.class);
 		Map<String, Object> mapIotDataOut = new HashMap<String, Object>();
 		for (Map<String, Object> e: mapIotData.get("iotma")) {
@@ -517,29 +525,85 @@ public class FakeDataUtil {
 					dataItem.put("max_humid", Double.toString(maxHumid));
 				}
 
-				float prevMaxSmoke= Float.parseFloat((String)dataItem.get("max_smoke"));
-				float maxSmoke= Float.parseFloat((String)data.get("max_smoke"));
-				if (maxSmoke > prevMaxSmoke) {
-					dataItem.put("max_smoke", Float.toString(maxSmoke));
-				}
-
 				float prevMaxTemp= Float.parseFloat((String)dataItem.get("max_temp"));
 				float maxTemp= Float.parseFloat((String)data.get("max_temp"));
+				//maxTemp=67;
+				boolean tempCritical = (maxTemp>Constant.IOT_CRITICAL_TEMP.val());
+				
 				if (maxTemp > prevMaxTemp) {
 					dataItem.put("max_temp", Float.toString(maxTemp));
+					dataItem.put("temp_critical", tempCritical?"true":"false");
 				}
 				
 				float prevMaxCo= Float.parseFloat((String)dataItem.get("max_co"));
 				float maxCo= Float.parseFloat((String)data.get("max_co"));
+				//maxCo=21;
+				boolean coCritical = (maxCo>Constant.IOT_CRITICAL_CO.val());
 				if (maxCo > prevMaxCo) {
 					dataItem.put("max_co", Float.toString(maxCo));
+					dataItem.put("co_critical", coCritical?"true":"false");
 				}
 				
-				if (!"정상".equals((String)dataItem.get("max_flame"))) {
-					dataItem.put("max_flame", "불꽃");
+				float prevMaxSmoke= Float.parseFloat((String)dataItem.get("max_smoke"));
+				float maxSmoke= Float.parseFloat((String)data.get("max_smoke"));
+				//maxSmoke=1111;
+				boolean smokeCritical = (maxSmoke>Constant.IOT_CRITICAL_SMOKE.val());
+				if (maxSmoke > prevMaxSmoke) {
+					dataItem.put("max_smoke", Float.toString(maxSmoke));
+					dataItem.put("smoke_critical", (smokeCritical&(tempCritical||coCritical))?"true":"false");
 				}
+
+				String flame = (String)data.get("max_flame");
+				String prevFlame = (String)dataItem.get("max_flame");
+				if ("정상".equals(flame)) {
+					if ("없음".equals(prevFlame)) {
+						dataItem.put("max_flame", flame);	
+					}
+				} else if ("없음".equals(flame)) {
+					if (!"정상".equals(prevFlame)
+							&&!"불꽃".equals(prevFlame)) {
+						dataItem.put("max_flame", flame);
+					}
+				} else {
+					dataItem.put("max_flame", flame);
+				}
+				
+				flame = (String)data.get("avg_flame");
+				prevFlame = (String)dataItem.get("avg_flame");
+				if ("정상".equals(flame)) {
+					if ("없음".equals(prevFlame)) {
+						dataItem.put("avg_flame", flame);	
+					}
+				} else if ("없음".equals(flame)) {
+					if (!"정상".equals(prevFlame)
+							&&!"불꽃".equals(prevFlame)) {
+						dataItem.put("avg_flame", flame);
+					}
+				} else {
+					dataItem.put("avg_flame", flame);
+				}
+				
 				mapIotDataOut.put(areaCode, dataItem);
 			} else {
+				
+				float maxTemp= Float.parseFloat((String)data.get("max_temp"));
+				//maxTemp=(float) 67.7;
+				//data.put("max_temp", Float.toString(maxTemp));
+				boolean tempCritical = (maxTemp>Constant.IOT_CRITICAL_TEMP.val());
+				data.put("temp_critical", tempCritical?"true":"false");
+				
+				float maxCo= Float.parseFloat((String)data.get("max_co"));
+//				maxCo=23;
+//				data.put("max_co", Float.toString(maxCo));
+				boolean coCritical = (maxCo>Constant.IOT_CRITICAL_CO.val());
+				data.put("co_critical", coCritical?"true":"false");
+				
+				float maxSmoke= Float.parseFloat((String)data.get("max_smoke"));
+//				maxSmoke=1111;
+//				data.put("max_smoke", Float.toString(maxSmoke));
+				boolean smokeCritical = (maxSmoke>Constant.IOT_CRITICAL_SMOKE.val());
+				data.put("smoke_critical", (smokeCritical&(tempCritical||coCritical))?"true":"false");
+
 				mapIotDataOut.put(areaCode, data);
 			}
 			if (mapIotDataOut.get("time")==null) {
@@ -547,15 +611,13 @@ public class FakeDataUtil {
 			}
 		}
 		
-		return JsonUtils.toJson(mapIotDataOut);
+		return mapIotDataOut;
 	}
-
 	public static List<IotMain> getListIotMain(String jsonStr) {
 		return getListIotMain(JsonUtils.toObject(jsonStr, Map.class));
 	}
 	public static List<IotMain> getListIotMain(Map<String, List<Map<String, Object>>> mapIotMain) {
 		//Map<String, Object> mapIotMain = JsonUtils.toObject(jsonStr, Map.class);
-
 		List<IotMain> result = new ArrayList<IotMain>();
 		//((List<Map<String, Object>>)
 		mapIotMain.get("iotma").forEach(e -> {
@@ -564,21 +626,21 @@ public class FakeDataUtil {
 			result.add(new IotMain(
 					(String)data.get("time"),
 					(String)e.get("interior"),
-					(int)(Float.parseFloat((String)data.get("max_humid"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
-					(int)(Float.parseFloat((String)data.get("max_smoke"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
-					(int)(Float.parseFloat((String)data.get("max_temp"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
-					(int)(Float.parseFloat((String)data.get("max_co"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
-					((String)data.get("max_flame")).equals("정상")?0:1,
 					(int)(Float.parseFloat((String)data.get("avg_humid"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
 					(int)(Float.parseFloat((String)data.get("avg_smoke"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
 					(int)(Float.parseFloat((String)data.get("avg_temp"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
 					(int)(Float.parseFloat((String)data.get("avg_co"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
-					((String)data.get("avg_flame")).equals("정상")?0:1
+					((String)data.get("avg_flame")).equals("없음")?-1:(((String)data.get("avg_flame")).equals("정상")?0:1),
+					(int)(Float.parseFloat((String)data.get("max_humid"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
+					(int)(Float.parseFloat((String)data.get("max_smoke"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
+					(int)(Float.parseFloat((String)data.get("max_temp"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
+					(int)(Float.parseFloat((String)data.get("max_co"))*Constant.DASHBOARD_VALUE_DECIAML_SIZE.val()),
+					((String)data.get("max_flame")).equals("없음")?-1:(((String)data.get("max_flame")).equals("정상")?0:1)
 				));
 		});
 		return result;
 	}
-	
+		
 	/**
 	 * 
 	 * @return
