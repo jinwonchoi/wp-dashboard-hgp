@@ -259,6 +259,7 @@ public class FakeDataUtil {
 												Map<Long, AreaInfo> mapAreaInfo, 
 												Map<Long, InteriorInfo> mapInteriorInfo ) {
 		
+		boolean useMax=true;
 		Map<String, Object> mapTotalFireIdxOut =new HashMap<String,Object>();
 
 		Map<String, Object> mapTagFireIdxOut =new HashMap<String,Object>();
@@ -323,21 +324,37 @@ public class FakeDataUtil {
 		mapIotFireIdxOut.put("time", mapIotFireIdx.get("time"));
 		
 		areaInfos.forEach(e -> {
-			double avgFireIdx = ((List<Double>)mapIotFireIdxOut.get(e.getAreaCode())).stream().mapToDouble(d-> d.doubleValue()).average().getAsDouble();
-			mapIotFireIdxOut.put(e.getAreaCode(), (new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP));
+			if (useMax) {
+				double maxFireIdx = ((List<Double>)mapIotFireIdxOut.get(e.getAreaCode())).stream().mapToDouble(d-> d.doubleValue()).max().getAsDouble();
+				mapIotFireIdxOut.put(e.getAreaCode(), (new BigDecimal(maxFireIdx)).setScale(1, RoundingMode.HALF_UP));
+			} else {
+				double avgFireIdx = ((List<Double>)mapIotFireIdxOut.get(e.getAreaCode())).stream().mapToDouble(d-> d.doubleValue()).average().getAsDouble();
+				mapIotFireIdxOut.put(e.getAreaCode(), (new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP));
+			}
 		});
 		
 		// 전체 화재지수
 		List<Double> fireIdxAlls = new ArrayList<Double>(); 
 		plantInfos.forEach(e -> {
 			//fireIdxAlls.addAll((List<Double>)mapTotalFireIdxOut.get(e.getPlantNo()));
-			double avgFireIdx = ((List<Double>)mapTotalFireIdxOut.get(e.getPlantNo())).stream().mapToDouble(d-> d.doubleValue()).average().getAsDouble();
-			mapTotalFireIdxOut.put(e.getPlantNo(),(new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP));
-			fireIdxAlls.add((new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP).doubleValue());
+			if (useMax) {
+				double maxFireIdx = ((List<Double>)mapTotalFireIdxOut.get(e.getPlantNo())).stream().mapToDouble(d-> d.doubleValue()).max().getAsDouble();
+				mapTotalFireIdxOut.put(e.getPlantNo(),(new BigDecimal(maxFireIdx)).setScale(1, RoundingMode.HALF_UP));
+				fireIdxAlls.add((new BigDecimal(maxFireIdx)).setScale(1, RoundingMode.HALF_UP).doubleValue());
+			} else {
+				double avgFireIdx = ((List<Double>)mapTotalFireIdxOut.get(e.getPlantNo())).stream().mapToDouble(d-> d.doubleValue()).average().getAsDouble();
+				mapTotalFireIdxOut.put(e.getPlantNo(),(new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP));
+				fireIdxAlls.add((new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP).doubleValue());
+			}
 
 		});
-		double avgFireIdx = ((List<Double>)fireIdxAlls).stream().mapToDouble(d-> d.doubleValue()).average().getAsDouble();
-		mapTotalFireIdxOut.put("all", (new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP));
+		if (useMax) {
+			double maxFireIdx = ((List<Double>)fireIdxAlls).stream().mapToDouble(d-> d.doubleValue()).max().getAsDouble();
+			mapTotalFireIdxOut.put("all", (new BigDecimal(maxFireIdx)).setScale(1, RoundingMode.HALF_UP));
+		} else {
+			double avgFireIdx = ((List<Double>)fireIdxAlls).stream().mapToDouble(d-> d.doubleValue()).average().getAsDouble();
+			mapTotalFireIdxOut.put("all", (new BigDecimal(avgFireIdx)).setScale(1, RoundingMode.HALF_UP));
+		}
 		
 		Map<String, Object> mapMainOut=new HashMap<String,Object>();
 		mapMainOut.put("time", mapIotFireIdxOut.get("time"));

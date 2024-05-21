@@ -53,7 +53,7 @@ public class CommonInfoService {
 	
 	@Value("${logpresso.api.key:K8XWymm1dfTP3mh5KKheQ5acptMnOHt8LwYqRgTPMg66/MJTevbYlSwSnC/mOfa6}")
 	String logpressoApiKey;
-	@Value("${logpresso.websocket.url:ws://dt.rozetatech.com:3000/wp/ws/event}")
+	@Value("${logpresso.websocket.url.for.client:ws://dt.rozetatech.com:3000/wp/ws/event}")
 	String logpressoWebsocketUrl;
 	@Value("${cctv.media.server.url:ws://192.168.0.11:8088/ws/}")
 	String cctvMediaServerUrl;
