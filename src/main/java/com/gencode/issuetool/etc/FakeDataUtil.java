@@ -1530,6 +1530,14 @@ public class FakeDataUtil {
 	public static TagDvcPushEvent getObjTabDvcPushEvent(CacheMapManager cacheMapManager, String jsonStr) {
 		return getObjTabDvcPushEvent(cacheMapManager, JsonUtils.toObject(jsonStr, Map.class));
 	}
+	
+	/**
+	 * 
+{"level":"F","kind":"SMK","id":"SC30101N01","time":"2024-06-17 14:32:00","type":"I","value":"SMOKE","desc":"SC30101N01"}
+{"level":"F","kind":"TMP","id":"SC30101N01","time":"2024-06-17 14:43:35","type":"I","value":"HEAT","desc":"SC30101N01"}
+“SMK”,”TMP”, “VIB”, “POS”, “HUM”, “CO”, “SPD” , “FDBK”, “EXPS”, “FLM”, “FIRE”, “EXT”– 연기, 온도, 진동, 위치, 습도, CO, 속도, 상태, 팽창, 불꽃, 화재, 화재복구
+
+	 */
 	public static TagDvcPushEvent getObjTabDvcPushEvent(CacheMapManager cacheMapManager, Map<String, Object> mapJson) {
 		//Map<String, Object> mapJson = JsonUtils.toObject(jsonStr, Map.class);
 		String deviceType = (String)mapJson.get("type");
@@ -1557,9 +1565,9 @@ public class FakeDataUtil {
 						(String)mapJson.get("time"), 
 						deviceType, 
 						deviceId, 
-						(String)mapJson.get("kind"), 
-						(String)mapJson.get("level"),
-						(String)mapJson.get("value"), 
+						(String)mapJson.get("kind"), //valType
+						(String)mapJson.get("level"),//eventLevel
+						(String)mapJson.get("value"), //eventVal
 						(String)mapJson.get("desc"), 
 						interiorCode, 
 						plantNo, 

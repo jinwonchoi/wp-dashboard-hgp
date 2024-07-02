@@ -231,6 +231,7 @@ public class ObjMapper {
 		obj.setPlantNo(resultSet.getString("PLANT_NO"));
 		obj.setPlantPartCode(resultSet.getString("PLANT_PART_CODE"));
 		obj.setFacilCode(resultSet.getString("FACIL_CODE"));
+		obj.setFacilName(resultSet.getString("FACIL_NAME"));
 		obj.setScrSeq(resultSet.getLong("SCR_SEQ"));
 		obj.setValType(resultSet.getString("VAL_TYPE"));
 		obj.setFuncCd(resultSet.getLong("FUNC_CD"));

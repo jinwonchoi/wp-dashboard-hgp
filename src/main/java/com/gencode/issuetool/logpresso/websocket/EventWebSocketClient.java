@@ -54,7 +54,7 @@ public class EventWebSocketClient extends WebSocketClient {
 		isOpened = false;
 
 		logger.info(
-				"Connection closed by " + (remote ? "remote peer" : "us") + " Code: " + code + " Reason: " + reason);
+				"LOGPRESSO WEBSOCKET Connection closed by " + (remote ? "remote peer" : "us") + " Code: " + code + " Reason: " + reason);
 		if (this.messageHandler != null) {
 			this.messageHandler.handleSessionClose();
 		}
@@ -68,7 +68,7 @@ public class EventWebSocketClient extends WebSocketClient {
 	}
 
 	public void healthCheck() {
-		logger.info("I'M ALIVE!!");
+		logger.info("LOGPRESSO WEBSOCKET  healthCheck");
 	}
 	
 	public boolean getOpenStatus() {

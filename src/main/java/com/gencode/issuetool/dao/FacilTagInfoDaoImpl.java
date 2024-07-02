@@ -30,7 +30,7 @@ import com.gencode.issuetool.obj.FacilTagInfo;
 @Component("FacilTagInfoDao")
 public class FacilTagInfoDaoImpl extends AbstractDaoImpl implements FacilTagInfoDao {
 
-	final String fields= "id,tag_name,tag_desc,plant_type,facility_id,alrm_type,alrm_val1,alrm_val2,trip_type,trip_val1,trip_val2,plant_no,plant_part_code,facil_code,scr_seq,val_type,func_cd,start_register,address,data_len,tag_desc2, tag_print_name, redundancy, updated_dtm,created_dtm";
+	final String fields= "id,tag_name,tag_desc,plant_type,facility_id,alrm_type,alrm_val1,alrm_val2,trip_type,trip_val1,trip_val2,plant_no,plant_part_code,facil_code,facil_name,scr_seq,val_type,func_cd,start_register,address,data_len,tag_desc2, tag_print_name, redundancy, updated_dtm,created_dtm";
 	
 	public FacilTagInfoDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		super(jdbcTemplate, namedParameterJdbcTemplate);
@@ -39,8 +39,8 @@ public class FacilTagInfoDaoImpl extends AbstractDaoImpl implements FacilTagInfo
 	@Override
 	public long register(FacilTagInfo t) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		namedParameterJdbcTemplate.update("INSERT INTO facil_tag_info (tag_name,tag_desc,plant_type,facility_id,alrm_type,alrm_val1,alrm_val2,trip_type,trip_val1,trip_val2,plant_no,plant_part_code,facil_code,scr_seq,val_type,func_cd,start_register,end_register,data_len,tag_desc2, tag_print_name, redundancy,updated_dtm,created_dtm) " + 
-				"VALUES(:tagName,:tagDesc,:plantType,:facilityId,:alrmType,:alrmVal1,:alrmVal2,:tripType,:tripVal1,:tripVal2,:plantNo,:plantPartCode,:facilCode,:scrSeq,:valType,:funcCd,:startRegister,:address,:dataLen,:tagDesc2, :tagPrintName, :redundancy, now(), now())"
+		namedParameterJdbcTemplate.update("INSERT INTO facil_tag_info (tag_name,tag_desc,plant_type,facility_id,alrm_type,alrm_val1,alrm_val2,trip_type,trip_val1,trip_val2,plant_no,plant_part_code,facil_code,facil_name,scr_seq,val_type,func_cd,start_register,end_register,data_len,tag_desc2, tag_print_name, redundancy,updated_dtm,created_dtm) " + 
+				"VALUES(:tagName,:tagDesc,:plantType,:facilityId,:alrmType,:alrmVal1,:alrmVal2,:tripType,:tripVal1,:tripVal2,:plantNo,:plantPartCode,:facilCode,:facilName,:scrSeq,:valType,:funcCd,:startRegister,:address,:dataLen,:tagDesc2, :tagPrintName, :redundancy, now(), now())"
 				,new BeanPropertySqlParameterSource(t), keyHolder);
 		return (long) keyHolder.getKey().longValue();
 	}
@@ -78,6 +78,7 @@ public class FacilTagInfoDaoImpl extends AbstractDaoImpl implements FacilTagInfo
 				"plant_no       =:plantNo,"+
 				"plant_part_code=:plantPartCode,"+
 				"facil_code     =:facilCode,"+
+				"facil_name     =:facilName,"+
 				"scr_seq        =:scrSeq,"+
 				"val_type       =:valType,"+
 				"func_cd        =:funcCd,"+

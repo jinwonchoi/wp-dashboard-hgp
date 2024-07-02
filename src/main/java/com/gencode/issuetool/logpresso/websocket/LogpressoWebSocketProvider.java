@@ -31,7 +31,7 @@ public class LogpressoWebSocketProvider {
 	@Value("${logpresso.websocket.url:ws://dt.rozetatech.com:3000/hg/ws/event}")
 	String apiUrl;
 
-	boolean isConnencted=false;
+	boolean isConnected=false;
 
 	@Autowired private TagDvcPushEventHistDao tagDvcPushEventHistDao;
 	@Autowired
@@ -55,6 +55,8 @@ public class LogpressoWebSocketProvider {
 					logger.info("LOGPRESSO WEBSOCKET SESSION CLOSED");
 					// TODO Auto-generated method stub
 					//handleClose();
+					closeConnection();
+					openConnection();
 				}
 				
 				public void handleMessage(String message) {
@@ -70,7 +72,7 @@ public class LogpressoWebSocketProvider {
 					
 				}
 			});			
-			isConnencted = wsc.connectBlocking();
+			isConnected = wsc.connectBlocking();
 			logger.info("LOGPRESSO WEBSOCKET CONNECTED");
 		} catch (Exception e) {
 			logger.error("LOGPRESSO WEBSOCKET FAILED",e);
@@ -79,11 +81,19 @@ public class LogpressoWebSocketProvider {
 	}
 	
 	public boolean isConnected() {
-		return this.isConnencted;
+		return this.isConnected;
 	}
 	
 	public void closeConnection() {
-		logger.info("LOGPRESSO WEBSOCKET CLOSED");
-		wsc.close();
+		this.isConnected=false;
+		if (wsc!=null && !wsc.isClosed()) {
+			try {
+				wsc.closeBlocking();
+				logger.info("LOGPRESSO WEBSOCKET CLOSED");
+			} catch (InterruptedException e) {
+				logger.info("LOGPRESSO WEBSOCKET CLOSING FAILED");
+			}
+			wsc=null;
+		}
 	}
 }

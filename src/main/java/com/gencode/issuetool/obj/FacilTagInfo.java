@@ -21,6 +21,7 @@ public class FacilTagInfo extends Pojo {
 	protected String plantNo;
 	protected String plantPartCode;
 	protected String facilCode;
+	protected String facilName;
 	protected long scrSeq;
 	protected String valType;
 	protected long funcCd;
@@ -132,6 +133,13 @@ public class FacilTagInfo extends Pojo {
 	}
 	public void setFacilCode(String facilCode) {
 		this.facilCode = facilCode;
+	}
+	
+	public String getFacilName() {
+		return facilName;
+	}
+	public void setFacilName(String facilName) {
+		this.facilName = facilName;
 	}
 	public long getScrSeq() {
 		return scrSeq;
